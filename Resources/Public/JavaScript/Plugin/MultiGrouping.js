@@ -313,6 +313,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 				fieldName = groupField[j];
 				fieldLabel = this.get_column_by_id(fieldName).header;
 				v = r.data[fieldName];
+
 				if (v) {
 					if (i == 0) {
 						// First record always starts a new group
@@ -331,8 +332,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 							grpFieldNames.push(fieldName);
 							grpFieldLabels.push(fieldLabel + ': ' + v);
 						} else {
-							if (gfLen-1 == j && changed != 1)
-							{
+							if (gfLen-1 == j && changed != 1) {
 								// This row is in all the same groups to the previous group
 								curGroup.rs.push(r);
 								member_of_groups.push(curGroup);
@@ -342,20 +342,17 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 								gvalue.push(v);
 								grpFieldNames.push(fieldName);
 								grpFieldLabels.push(fieldLabel + ': ' + v);
-							} 
-							else if(j<gfLen-1) {
+							} else if(j<gfLen-1) {
 								var parent_group = currGroups[fieldName];
 								// This is a parent group, and this record is part of this parent so add it
-								if (parent_group)
-								{
+								if (parent_group) {
 									parent_group.rs.push(r);
 									member_of_groups.push(parent_group);
 								}
 							}
 						}
 					}
-				} 
-				else { 
+				} else {
 					if (this.displayEmptyFields) {
 						addGroup.push({idx:j,dataIndex:fieldName,header:fieldLabel,value:this.emptyGroupText||'(none)'});
 						grpFieldNames.push(fieldName);
