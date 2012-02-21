@@ -405,7 +405,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 				this.groups.push(curGroup);
 			} // end of "for k"
 		} // end of "for i"
-
+console.log(groups);
 		var buf = [];
 		var parents_queued = [];
 		var queue_count = 0;
@@ -414,25 +414,29 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 			var next_group = groups[ilen + 1];
 			var cur_level = g.group_level;
 			var next_level = next_group == null ? -1 : next_group.group_level;
-			var leaf = g.group == groupField[gfLen - 1] 
+			var leaf = g.group == groupField[gfLen - 1]
+
 			this.doGroupStart(buf, g, cs, ds, colCount);
-			if (g.rs.length != 0 && leaf)
-			{
+
+			if (g.rs.length != 0 && leaf) {
 				buf[buf.length] = Ext.grid.GroupingView.superclass.doRender.call(
 					this, cs, g.rs, ds, g.startRow, colCount, stripe);
 			}
+
 			if (leaf) {
 				// do summaries on all grouping levels for this group
 				this.doGroupEnd(buf, g, cs, ds, colCount);
-			}
-			else
+			} else {
 				parents_queued.push(g);
-			if (next_level >= cur_level)
+			}
+
+			if (next_level >= cur_level) {
 				continue;
+			}
+
 			// going back from leaf - pop parents from queue
 			// and call doGroupEnd for each
-			while (cur_level > next_level && cur_level > 0)
-			{
+			while (cur_level > next_level && cur_level > 0) {
 				g = parents_queued.pop();
 				this.doGroupEnd(buf, g, cs, ds, colCount);
 				cur_level--;
