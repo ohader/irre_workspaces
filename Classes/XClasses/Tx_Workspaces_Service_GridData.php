@@ -40,6 +40,8 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function generateDataArray(array $versions, $filterTxt) {
 		parent::generateDataArray($versions, $filterTxt);
+
+		$this->extendDataArray();
 		$this->resolveDataDependencies();
 	}
 
@@ -66,7 +68,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		$outerMostParents = $dependency->getOuterMostParents();
 
 		if ($outerMostParents) {
-			$dataArray = $this->getExtendedDataArray();
+			$dataArray = $this->getDataArrayWithIdentifier();
 			$nestedDataArray = array();
 			$collectionIdentifier = 0;
 
@@ -114,23 +116,31 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	/**
 	 * @return array
 	 */
-	protected function getExtendedDataArray() {
+	protected function getDataArrayWithIdentifier() {
 		$dataArray = array();
 
 		foreach ($this->dataArray as $dataElement) {
 			$dataIdentifier = $dataElement['table'] . ':' . $dataElement['uid'];
 			$dataArray[$dataIdentifier] = $dataElement;
-			$this->setCollectionIdentifier($dataArray[$dataIdentifier]);
 		}
 
 		return $dataArray;
 	}
 
 	/**
+	 * @return array
+	 */
+	protected function extendDataArray() {
+		foreach ($this->dataArray as &$dataElement) {
+			$this->setCollectionIdentifier($dataElement);
+		}
+	}
+
+	/**
 	 * @param array $element
 	 * @param string $value
 	 */
-	protected function setCollectionIdentifier(array &$element, $value = 'plain') {
+	protected function setCollectionIdentifier(array &$element, $value = 0) {
 		$element[self::GridColumn_Collection] = $value;
 	}
 }
