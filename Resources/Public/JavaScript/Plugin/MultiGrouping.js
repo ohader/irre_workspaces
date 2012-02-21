@@ -380,6 +380,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 					!this.state[gid] : this.startCollapsed;
 
 				var gcls = isCollapsed ? 'x-grid-group-collapsed' : '';
+
 				curGroup = {
 					group: gp.dataIndex,
 					gvalue: V,
@@ -396,8 +397,11 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 				groups.push(curGroup);
 				r._groupId = gid; // Associate this row to a group
 				member_of_groups.push(curGroup);
-				if (typeof this.groups == "undefined")
+
+				if (typeof this.groups == "undefined") {
 					this.groups = new Array();
+				}
+
 				this.groups.push(curGroup);
 			} // end of "for k"
 		} // end of "for i"
