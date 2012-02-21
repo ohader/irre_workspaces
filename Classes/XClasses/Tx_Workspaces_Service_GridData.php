@@ -16,7 +16,6 @@
  * A copy is found in the textfile GPL.txt and important notices to the license
  * from the author is found in LICENSE.txt distributed with these scripts.
  *
- *
  * This script is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -42,6 +41,10 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	protected function generateDataArray(array $versions, $filterTxt) {
 		parent::generateDataArray($versions, $filterTxt);
 		$this->resolveDataDependencies();
+	}
+
+	protected function getDataArrayFromCache() {
+		return FALSE;
 	}
 
 	/**
@@ -125,9 +128,9 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 	/**
 	 * @param array $element
-	 * @param NULL|integer $value
+	 * @param string $value
 	 */
-	protected function setCollectionIdentifier(array &$element, $value = NULL) {
+	protected function setCollectionIdentifier(array &$element, $value = 'plain') {
 		$element[self::GridColumn_Collection] = $value;
 	}
 }
