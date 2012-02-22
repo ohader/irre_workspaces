@@ -46,8 +46,7 @@ class Ux_Tx_Workspaces_Controller_ReviewController extends Tx_Workspaces_Control
 		$jsFiles = $this->pageRenderer->getJsFiles();
 		$this->pageRenderer->setJsFiles(array());
 
-		#$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/NestedGroupingStore.js');
-		#$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/NestedGroupingView.js');
+		$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
 		$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/MultiGrouping.js');
 
 		foreach ($jsFiles as $filePath => $fileConfiguration) {

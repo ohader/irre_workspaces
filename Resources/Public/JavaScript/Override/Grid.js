@@ -1,3 +1,15 @@
+TYPO3.Workspaces.SelectionModel.addListener(
+	'rowselect',
+	TYPO3.TxIrreWorkspaces.Controller.handleGridRowSelectEvent,
+	TYPO3.Workspaces.SelectionModel
+);
+
+TYPO3.Workspaces.SelectionModel.addListener(
+	'rowdeselect',
+	TYPO3.TxIrreWorkspaces.Controller.handleGridRowDeselectEvent,
+	TYPO3.Workspaces.SelectionModel
+);
+
 TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 	initColModel: function() {
 		if (TYPO3.settings.Workspaces.isLiveWorkspace) {
