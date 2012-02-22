@@ -392,7 +392,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 					startRow: rowIndex,
 					rs: [r],
 					cls: gcls,
-					style: gstyle + 'padding-left:' + (gp.idx * 12) + 'px;'
+					style: gstyle + 'padding-left:' + (gp.idx * 24) + 'px;'
 				};
 				currGroups[gp.dataIndex] = curGroup;
 				groups.push(curGroup);
