@@ -76,7 +76,8 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.label_Workspace]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
 		enableGroupingMenu: false,
 		displayEmptyFields: true,
-  		enableNoGroups: true,
+		removeEmptyFieldsGroups: true,
+  		enableNoGroups: false,
 		hideGroupedColumn: true
 	}),
 	bbar : TYPO3.Workspaces.Toolbar.FullBottomBar,

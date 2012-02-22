@@ -187,6 +187,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 		return Ext.DomQuery.select("div.x-grid-group", this.mainBody.dom);
 	}
 	,displayEmptyFields: false
+	,removeEmptyFieldsGroups: false
 	,displayFieldSeperator: ', '
 	,renderRows: function(){
 		var groupField = this.getGroupField();
@@ -405,25 +406,28 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 				this.groups.push(curGroup);
 			} // end of "for k"
 		} // end of "for i"
-console.log(groups);
+
 		var buf = [];
 		var parents_queued = [];
-		var queue_count = 0;
+
 		for (var ilen = 0, len = groups.length; ilen < len; ilen++) {
 			var g = groups[ilen];
 			var next_group = groups[ilen + 1];
 			var cur_level = g.group_level;
 			var next_level = next_group == null ? -1 : next_group.group_level;
-			var leaf = g.group == groupField[gfLen - 1]
+			var currentIsEmptyFieldsGroup = this.removeEmptyFieldsGroups && this.displayEmptyFields && !g.gvalue;
+			var leaf = g.group == groupField[gfLen - 1];
 
-			this.doGroupStart(buf, g, cs, ds, colCount);
+			if (!currentIsEmptyFieldsGroup) {
+				this.doGroupStart(buf, g, cs, ds, colCount);
+			}
 
-			if (g.rs.length != 0 && leaf) {
+			if (g.rs.length != 0 && (leaf || currentIsEmptyFieldsGroup)) {
 				buf[buf.length] = Ext.grid.GroupingView.superclass.doRender.call(
 					this, cs, g.rs, ds, g.startRow, colCount, stripe);
 			}
 
-			if (leaf) {
+			if (leaf && !currentIsEmptyFieldsGroup) {
 				// do summaries on all grouping levels for this group
 				this.doGroupEnd(buf, g, cs, ds, colCount);
 			} else {
