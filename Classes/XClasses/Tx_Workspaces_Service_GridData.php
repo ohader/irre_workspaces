@@ -32,6 +32,13 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	const GridColumn_Collection = 'Tx_IrreWorkspaces_Collection';
 
 	/**
+	 * @param array $dataArray
+	 */
+	public function setDataArray(array $dataArray) {
+		$this->dataArray = $dataArray;
+	}
+
+	/**
 	 * Generates grid list array from given versions.
 	 *
 	 * @param array $versions
@@ -138,7 +145,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 	/**
 	 * @param array $element
-	 * @param string $value
+	 * @param integer $value
 	 */
 	protected function setCollectionIdentifier(array &$element, $value = 0) {
 		$element[self::GridColumn_Collection] = $value;
