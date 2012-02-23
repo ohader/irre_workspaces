@@ -42,6 +42,12 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	public function sanitizeDataMap(t3lib_TCEmain $parent) {
 		$this->anyTceMain = $parent;
 
+		// No action, if on live workspace:
+		if ($parent->BE_USER->workspace === 0) {
+			return FALSE;
+		}
+
+		// Pre-process data map:
 		foreach ($parent->datamap as $table => $records) {
 			foreach ($records as $uid => $fields) {
 				// Non-Integer values are new records:
