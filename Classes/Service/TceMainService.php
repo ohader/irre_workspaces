@@ -35,6 +35,11 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	protected $recordsCache = array();
 
 	/**
+	 * @var array
+	 */
+	protected $expectedCopyRecords = array();
+
+	/**
 	 * @var t3lib_TCEmain
 	 */
 	protected $anyTceMain;
@@ -72,6 +77,30 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 				unset($parent->datamap[$table]);
 			}
 		}
+
+		debug($this->expectedCopyRecords);
+	}
+
+	/**
+	 * @param string $table
+	 * @param integer $uid
+	 * @param string $field
+	 * @param string $value
+	 * @param t3lib_TCEmain $parent
+	 * @return boolean
+	 */
+	public function forwardCopyRecord($table, $uid, $field, $value, t3lib_TCEmain $parent) {
+		$this->anyTceMain = $parent;
+
+		return (
+			$parent->BE_USER->workspace === 0 ||
+			!$this->isInlineField($table, $field) ||
+			$this->isExpectedCopyRecordField($table, $uid, $field)
+		);
+	}
+
+	protected function isExpectedCopyRecordField($table, $uid, $field) {
+		return isset($this->expectedCopyRecords[$table][$uid][$field]);
 	}
 
 	/**
@@ -89,7 +118,13 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 			}
 		}
 
-		return count($differences) === 0;
+		$canRejectDifferences = (count($differences) === 0);
+
+		if ($canRejectDifferences === FALSE) {
+			$this->expectedCopyRecords[$table][$uid] = $differences;
+		}
+
+		return $canRejectDifferences;
 	}
 
 	/**

@@ -40,6 +40,26 @@ class ux_t3lib_TceMain extends t3lib_TCEmain {
 	}
 
 	/**
+	 * Processing/Preparing content for copyRecord() function
+	 *
+	 * @param	string		$table Table name
+	 * @param	integer		$uid Record uid
+	 * @param	string		$field Field name being processed
+	 * @param	string		$value Input value to be processed.
+	 * @return	string
+	 */
+	public function copyRecord_procBasedOnFieldType($table, $uid, $field, $value) {
+		if ($this->getTceMainService()->forwardCopyRecord($table, $uid, $field, $value, $this)) {
+			$value = call_user_func_array(
+				'parent::copyRecord_procBasedOnFieldType',
+				func_get_args()
+			);
+		}
+
+		return $value;
+	}
+
+	/**
 	 * @return Tx_IrreWorkspaces_Service_TceMainService
 	 */
 	protected function getTceMainService() {
