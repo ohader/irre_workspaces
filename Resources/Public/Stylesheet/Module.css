@@ -1,3 +1,13 @@
+div.x-grid3-row img.x-action-col-icon {
+	display:inline-block;
+}
+
+div.x-grid3-row img.t3-icon-extensions-workspaces {
+	visibility: visible;
+}
+
+
+
 .x-grid3-viewport .x-grid3-body .x-grid-group-hd .x-grid-group-title,
 .x-grid3-viewport .x-grid3-body .x-grid-group-body .x-grid3-row {
 
