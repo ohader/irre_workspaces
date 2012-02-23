@@ -90,7 +90,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 * @return void
 	 */
 	protected function resolveDataDependencies() {
-		$dependency = $this->getDependencyUtility();
+		$dependency = $this->getDependencyService()->create();
 
 		foreach ($this->dataArray as $dataElement) {
 			$dependency->addElement($dataElement['table'], $dataElement['uid']);
@@ -187,92 +187,11 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		);
 	}
 
-
 	/**
-	 * DEPENDENCY HANDLING AND CALLBACKS ======================================
+	 * @return Tx_IrreWorkspaces_Service_DependencyService
 	 */
-
-
-	/**
-	 * @return t3lib_utility_Dependency
-	 */
-	protected function getDependencyUtility() {
-		/** @var $dependency t3lib_utility_Dependency */
-		$dependency = t3lib_div::makeInstance('t3lib_utility_Dependency');
-		$dependency->setOuterMostParentsRequireReferences(TRUE);
-
-		$dependency->setEventCallback(
-			t3lib_utility_Dependency_Element::EVENT_CreateChildReference,
-			$this->getDependencyCallback('createNewDependentElementChildReferenceCallback')
-		);
-
-		$dependency->setEventCallback(
-			t3lib_utility_Dependency_Element::EVENT_CreateParentReference,
-			$this->getDependencyCallback('createNewDependentElementParentReferenceCallback')
-		);
-
-		return $dependency;
-	}
-
-	/**
-	 * Gets a new callback to be used in the dependency resolver utility.
-	 *
-	 * @param string $method
-	 * @param array $targetArguments
-	 * @return t3lib_utility_Dependency_Callback
-	 */
-	protected function getDependencyCallback($method, array $targetArguments = array()) {
-		return t3lib_div::makeInstance('t3lib_utility_Dependency_Callback', $this, $method, $targetArguments);
-	}
-
-	/**
-	 * @return t3lib_TCEmain
-	 */
-	protected function getTceMainHelper() {
-		if (!isset($this->tceMainHelper)) {
-			$this->tceMainHelper = t3lib_div::makeInstance('t3lib_TCEmain');
-		}
-		return $this->tceMainHelper;
-	}
-
-	/**
-	 * Callback to determine whether a new child reference shall be considered in the dependency resolver utility.
-	 *
-	 * @param array $callerArguments
-	 * @param array $targetArgument
-	 * @param t3lib_utility_Dependency_Element $caller
-	 * @param string $eventName
-	 * @return string Skip response (if required)
-	 */
-	public function createNewDependentElementChildReferenceCallback(array $callerArguments, array $targetArgument, t3lib_utility_Dependency_Element $caller, $eventName) {
-		/** @var $reference t3lib_utility_Dependency_Reference */
-		$reference = $callerArguments['reference'];
-
-		$fieldCOnfiguration = t3lib_BEfunc::getTcaFieldConfiguration($caller->getTable(), $reference->getField());
-
-		if (!$fieldCOnfiguration || !t3lib_div::inList('field,list', $this->getTceMainHelper()->getInlineFieldType($fieldCOnfiguration))) {
-			return t3lib_utility_Dependency_Element::RESPONSE_Skip;
-		}
-	}
-
-	/**
-	 * Callback to determine whether a new parent reference shall be considered in the dependency resolver utility.
-	 *
-	 * @param array $callerArguments
-	 * @param array $targetArgument
-	 * @param t3lib_utility_Dependency_Element $caller
-	 * @param string $eventName
-	 * @return string Skip response (if required)
-	 */
-	public function createNewDependentElementParentReferenceCallback(array $callerArguments, array $targetArgument, t3lib_utility_Dependency_Element $caller, $eventName) {
-		/** @var $reference t3lib_utility_Dependency_Reference */
-		$reference = $callerArguments['reference'];
-
-		$fieldCOnfiguration = t3lib_BEfunc::getTcaFieldConfiguration($reference->getElement()->getTable(), $reference->getField());
-
-		if (!$fieldCOnfiguration || !t3lib_div::inList('field,list', $this->getTceMainHelper()->getInlineFieldType($fieldCOnfiguration))) {
-			return t3lib_utility_Dependency_Element::RESPONSE_Skip;
-		}
+	protected function getDependencyService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_DependencyService');
 	}
 }
 

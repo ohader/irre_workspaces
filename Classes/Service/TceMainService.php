@@ -30,176 +30,72 @@
  */
 class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	/**
-	 * @var array
+	 * @param t3lib_TCEmain $parent
+	 * @return boolean Whether sanitazion was performed
 	 */
-	protected $recordsCache = array();
-
-	/**
-	 * @var array
-	 */
-	protected $expectedCopyRecords = array();
-
-	/**
-	 * @var t3lib_TCEmain
-	 */
-	protected $anyTceMain;
-
 	public function sanitizeDataMap(t3lib_TCEmain $parent) {
-		$this->anyTceMain = $parent;
-
 		// No action, if on live workspace:
-		if ($parent->BE_USER->workspace === 0) {
+		if ($parent->BE_USER->workspace === 0 || $parent->isOuterMostInstance() === FALSE) {
 			return FALSE;
+		}
+
+		foreach ($this->getSanitationServices($parent) as $sanitazionService) {
+			$sanitazionService->sanitize();
 		}
 
 		// Pre-process data map:
 		foreach ($parent->datamap as $table => $records) {
-			foreach ($records as $uid => $fields) {
-				// Non-Integer values are new records:
-				if (t3lib_div::testInt($uid) === FALSE) {
-					continue;
-				}
-
-				// Calculate differences between database and submission:
-				$differences = array_diff_assoc(
-					$fields,
-					$this->getRecord($table, $uid)
-				);
-
-				// If differences can be resolves as unmodifies IRRE child nodes:
-				if (!$differences || $this->canRejectDifferences($table, $uid, $differences)) {
-					unset($parent->datamap[$table][$uid]);
-				}
-			}
-
 			// If table does not have elementy (anymore), drop it:
 			if (empty($parent->datamap[$table])) {
 				unset($parent->datamap[$table]);
 			}
 		}
 
-		debug($this->expectedCopyRecords);
+		return TRUE;
 	}
 
 	/**
-	 * @param string $table
-	 * @param integer $uid
-	 * @param string $field
-	 * @param string $value
 	 * @param t3lib_TCEmain $parent
-	 * @return boolean
+	 * @return Tx_IrreWorkspaces_Service_SanitazionService[]
 	 */
-	public function forwardCopyRecord($table, $uid, $field, $value, t3lib_TCEmain $parent) {
-		$this->anyTceMain = $parent;
+	protected function getSanitationServices(t3lib_TCEmain $parent) {
+		$sanitazionServices = array();
 
-		return (
-			$parent->BE_USER->workspace === 0 ||
-			!$this->isInlineField($table, $field) ||
-			$this->isExpectedCopyRecordField($table, $uid, $field)
-		);
-	}
+		$dependency = $this->getDependencyService()->create();
 
-	protected function isExpectedCopyRecordField($table, $uid, $field) {
-		return isset($this->expectedCopyRecords[$table][$uid][$field]);
-	}
-
-	/**
-	 * @param string $table
-	 * @param integer $uid
-	 * @param array $differences
-	 * @return boolean
-	 */
-	protected function canRejectDifferences($table, $uid, array $differences) {
-		foreach ($differences as $field => $value) {
-			if ($this->isInlineField($table, $field)) {
-				if ($this->hasDifferentReferences($table, $uid, $field, $value) === FALSE) {
-					unset($differences[$field]);
+		foreach ($parent->datamap as $table => $records) {
+			foreach ($records as $uid => $fields) {
+				if (t3lib_div::testInt($uid)) {
+					$dependency->addElement($table, $uid, $fields);
 				}
 			}
 		}
 
-		$canRejectDifferences = (count($differences) === 0);
-
-		if ($canRejectDifferences === FALSE) {
-			$this->expectedCopyRecords[$table][$uid] = $differences;
+		foreach ($dependency->getOuterMostParents() as $outerMostParent) {
+			$sanitazionServices[] = $this->getSanitazionService($parent, $outerMostParent);
 		}
 
-		return $canRejectDifferences;
+		return $sanitazionServices;
 	}
 
 	/**
-	 * @param string $table
-	 * @param integer $uid
-	 * @return NULL|array
+	 * @return Tx_IrreWorkspaces_Service_DependencyService
 	 */
-	protected function getRecord($table, $uid) {
-		if (!isset($this->recordsCache[$table][$uid])) {
-			$this->recordsCache[$table][$uid] = t3lib_BEfunc::getRecord($table, $uid);
-		}
-		return $this->recordsCache[$table][$uid];
+	protected function getDependencyService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_DependencyService');
 	}
 
 	/**
-	 * @param string $table
-	 * @param string $field
-	 * @return boolean
+	 * @param t3lib_TCEmain $parent
+	 * @param t3lib_utility_Dependency_Element $outerMostParent
+	 * @return Tx_IrreWorkspaces_Service_SanitazionService
 	 */
-	protected function isInlineField($table, $field) {
-		$configuration = $this->getTcaConfiguration($table, $field);
-
-		return (
-			$configuration !== FALSE &&
-			$this->anyTceMain->getInlineFieldType($configuration) !== FALSE
+	protected function getSanitazionService(t3lib_TCEmain $parent, t3lib_utility_Dependency_Element $outerMostParent) {
+		return t3lib_div::makeInstance(
+			'Tx_IrreWorkspaces_Service_SanitazionService',
+			$parent,
+			$outerMostParent
 		);
-	}
-
-	/**
-	 * @param string $table
-	 * @param string $field
-	 * @return boolean|array
-	 */
-	protected function getTcaConfiguration($table, $field) {
-		$configuration = FALSE;
-
-		t3lib_div::loadTCA($table);
-		if (!empty($GLOBALS['TCA'][$table]['columns'][$field]['config'])) {
-			$configuration = $GLOBALS['TCA'][$table]['columns'][$field]['config'];
-		}
-
-		return $configuration;
-	}
-
-	/**
-	 * @param string $table
-	 * @param integer $uid
-	 * @param string $field
-	 * @param string $value
-	 * @return boolean
-	 */
-	protected function hasDifferentReferences($table, $uid, $field, $value) {
-		$configuration = $this->getTcaConfiguration($table, $field);
-		$inlineType = $this->anyTceMain->getInlineFieldType($configuration);
-
-		if ($inlineType === FALSE) {
-			return TRUE;
-		}
-
-		$allowedTables = $configuration['foreign_table'];
-		$mmTable = $configuration['MM'] ?: '';
-
-		/* @var $dbAnalysis t3lib_loadDBGroup */
-		$dbAnalysis = t3lib_div::makeInstance('t3lib_loadDBGroup');
-		$dbAnalysis->start($value, $allowedTables, $mmTable, $uid, $table, $configuration);
-
-		$submittedItems = t3lib_div::trimExplode(',', $value);
-		$storedItems = $dbAnalysis->getValueArray();
-
-		$diffenreces = array_merge(
-			array_diff($submittedItems, $storedItems),
-			array_diff($storedItems, $submittedItems)
-		);
-
-		return (count($diffenreces) > 0);
 	}
 }
 
