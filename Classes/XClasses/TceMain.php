@@ -28,29 +28,22 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Hooks_WorkspaceHook implements t3lib_Singleton {
+class ux_t3lib_TceMain extends t3lib_TCEmain {
 	/**
-	 * @var array
+	 * Pre-processes the dataMap.
+	 *
+	 * @todo Introduce new hook "processDatamap_beforeStart" similar to process_cmdmap()
 	 */
-	protected $sanitizedDataMap;
-
-	/**
-	 * @param array $incomingFieldArray
-	 * @param string $table
-	 * @param integer|string $id
-	 * @param t3lib_TCEmain $parent
-	 */
-	public function processDatamap_preProcessFieldArray(array $incomingFieldArray, $table, $id, t3lib_TCEmain $parent) {
-		var_dump($incomingFieldArray);
-		$this->sanitizeDataMap($parent);
-		die('x');
+	public function process_datamap() {
+		$this->getTceMainService()->sanitizeDataMap($this);
+		parent::process_datamap();
 	}
 
-	protected function sanitizeDataMap(t3lib_TCEmain $parent) {
-		if (!isset($this->sanitizedDataMap)) {
-			$this->sanitizedDataMap = array();
-			var_dump($parent->datamap);
-		}
+	/**
+	 * @return Tx_IrreWorkspaces_Service_TceMainService
+	 */
+	protected function getTceMainService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_TceMainService');
 	}
 }
 
