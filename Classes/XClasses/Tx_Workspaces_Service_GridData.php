@@ -52,6 +52,27 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		$this->resolveDataDependencies();
 	}
 
+	/**
+	 * Gets the data array by considering the page to be shown in the grid view.
+	 *
+	 * @param integer $start
+	 * @param integer $limit
+	 * @return array
+	 */
+	protected function getDataArray($start, $limit) {
+		$dataArrayPart = parent::getDataArray($start, $limit);
+		$lastIndex = count($dataArrayPart) - 1;
+
+		if ($this->hasDependentCollectionIdentifier($lastIndex)) {
+			for ($i = $lastIndex + 1; $this->hasDependentCollectionIdentifier($i); $i++) {
+				$dataArrayPart[] = $this->dataArray[$i];
+			}
+		}
+
+		return $dataArrayPart;
+	}
+
+
 	protected function getDataArrayFromCache() {
 		return FALSE;
 	}
@@ -149,6 +170,17 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function setCollectionIdentifier(array &$element, $value = 0) {
 		$element[self::GridColumn_Collection] = $value;
+	}
+
+	/**
+	 * @param integer $index
+	 * @return boolean
+	 */
+	protected function hasDependentCollectionIdentifier($index) {
+		return (
+			isset($this->dataArray[$index][self::GridColumn_Collection])
+			&& $this->dataArray[$index][self::GridColumn_Collection] > 0
+		);
 	}
 }
 

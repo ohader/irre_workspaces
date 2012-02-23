@@ -50,14 +50,14 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 	protected $parentTableName;
 
 	/**
-	 * @var array
-	 */
-	protected $records;
-
-	/**
 	 * @var string
 	 */
 	protected $childTableName;
+
+	/**
+	 * @var array
+	 */
+	protected $records;
 
 	/**
 	 * Sets up this test case
@@ -95,6 +95,7 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 			'Ux_Tx_Workspaces_Service_GridData',
 			array('getDataArrayFromCache')
 		);
+		// Do not query database:
 		$this->gridDataMock->expects($this->once())
 			->method('getDataArrayFromCache')
 			->will($this->returnCallback(array($this, 'getDataArrayFromCacheCallback')));
@@ -112,20 +113,46 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 	/**
 	 * @test
 	 */
+	public function areRegularRecordsLimited() {
+		$this->gridDataMock = $this->getMock(
+			'Ux_Tx_Workspaces_Service_GridData',
+			array('getDataArrayFromCache', 'setCollectionIdentifier')
+		);
+		// Do not query database:
+		$this->gridDataMock->expects($this->once())
+			->method('getDataArrayFromCache')
+			->will($this->returnCallback(array($this, 'getDataArrayFromCacheCallback')));
+
+		$parameters = new stdClass();
+		$parameters->limit = 3;
+
+		$result = $this->gridDataMock->generateGridListFromVersions(array(), $parameters, 1);
+
+		$this->assertEquals(
+			$parameters->limit,
+			count($result['data'])
+		);
+	}
+
+	/**
+	 * @test
+	 */
 	public function areDependentRecordsCarriedOverLimit() {
 		$this->gridDataMock = $this->getMock(
 			'Ux_Tx_Workspaces_Service_GridData',
 			array('getDataArrayFromCache', 'setCollectionIdentifier')
 		);
+		// Do not query database:
 		$this->gridDataMock->expects($this->once())
 			->method('getDataArrayFromCache')
 			->will($this->returnCallback(array($this, 'getDataArrayFromCacheCallback')));
+		// Set special collection value for all:
 		$this->gridDataMock->expects($this->any())
 			->method('setCollectionIdentifier')
 			->will($this->returnCallback(array($this, 'setCollectionIdentifierCallback')));
 
 		$parameters = new stdClass();
-		$parameters->limit = 5;
+		$parameters->limit = 3;
 
 		$result = $this->gridDataMock->generateGridListFromVersions(array(), $parameters, 1);
 
@@ -196,9 +223,9 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 	/**
 	 * Sets up virtual test records.
 	 *
-	 * @param integer $amount
+	 * @param integer $children
 	 */
-	protected function setUpRecords($amount = 10) {
+	protected function setUpRecords($children = 10) {
 		$this->records = array();
 
 		$this->records[] = array(
@@ -207,7 +234,7 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 			'uid' => 1,
 		);
 
-		for ($i=1; $i <= $amount; $i++) {
+		for ($i=1; $i <= $children; $i++) {
 			$this->records[] = array(
 				'table' => $this->childTableName,
 				'pid' => 1,
