@@ -1,4 +1,4 @@
-Ext.namespace('TYPO3.TxIrreWorkspaces.Controller');
+Ext.namespace('TYPO3.TxIrreWorkspaces');
 
 TYPO3.TxIrreWorkspaces.Controller = {
 	isHandlerActive: false,

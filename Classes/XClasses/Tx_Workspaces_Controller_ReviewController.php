@@ -41,11 +41,13 @@ class Ux_Tx_Workspaces_Controller_ReviewController extends Tx_Workspaces_Control
 
 		$this->pageRenderer->disableCompressCss();
 		$this->pageRenderer->disableCompressJavascript();
+
 		$this->pageRenderer->addCssFile($publicResourcesPath . 'Stylesheet/Module.css');
 
 		$jsFiles = $this->pageRenderer->getJsFiles();
 		$this->pageRenderer->setJsFiles(array());
 
+		$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Actions.js');
 		$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
 		$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/MultiGrouping.js');
 

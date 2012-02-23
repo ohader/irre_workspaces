@@ -2,8 +2,6 @@ TYPO3.Workspaces.Toolbar.selectMassActionStore.addListener(
 	'load', TYPO3.TxIrreWorkspaces.Controller.handleSelectionStoreLoadEvent
 );
 
-
-
 TYPO3.Workspaces.Toolbar.selectionActionCombo = new Ext.form.ComboBox({
 	width: 150,
 	lazyRender: true,
@@ -23,7 +21,7 @@ TYPO3.Workspaces.Toolbar.selectionActionCombo = new Ext.form.ComboBox({
 			var label = '';
 			var affectWholeWorkspaceWarning = TYPO3.lang["tooltip.affectWholeWorkspace"];
 			var selection = TYPO3.Workspaces.WorkspaceGrid.getSelectionModel().getSelections();
-console.log(selection);
+
 			switch (record.data.action) {
 				case 'publish':
 					label = 'Ready to public selected records';// TYPO3.lang["tooltip.publishAll"];
@@ -37,6 +35,7 @@ console.log(selection);
 			}
 
 			top.TYPO3.Windows.close('executeMassActionWindow');
+
 			var dialog = top.TYPO3.Windows.showWindow({
 				id: 'executeMassActionWindow',
 				title: TYPO3.lang["window.massAction.title"],
@@ -47,25 +46,17 @@ console.log(selection);
 						width: '100%',
 						html: label,
 						bodyStyle: 'padding: 5px 5px 3px 5px; border-width: 0; margin-bottom: 7px;'
-					},
-					{
-						xtype: 'progress',
-						id: 'executeMassActionProgressBar',
-						autoWidth: true,
-						autoHeight: true,
-						hidden: true,
-						value: 0
 					}
 				],
 				buttons: [
 					{
 						id: 'executeMassActionOkButton',
-						data: record.data,
+						data: {action: record.data.action, selection: selection},
 						scope: this,
 						text: TYPO3.lang.ok,
 						disabled:false,
 						handler: function(event) {
-							TYPO3.Workspaces.Actions.triggerMassAction(event.data.action);
+							TYPO3.TxIrreWorkspaces.Actions.executeSelectionAction(event.data);
 						}
 					},
 					{
