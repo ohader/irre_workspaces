@@ -10,6 +10,12 @@ TYPO3.Workspaces.SelectionModel.addListener(
 	TYPO3.Workspaces.SelectionModel
 );
 
+TYPO3.Workspaces.SelectionModel.addListener(
+	'selectionchange',
+	TYPO3.TxIrreWorkspaces.Controller.handleSelectionModelSelectionChangeEvent,
+	TYPO3.Workspaces.SelectionModel
+);
+
 TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 	initColModel: function() {
 		if (TYPO3.settings.Workspaces.isLiveWorkspace) {

@@ -60,6 +60,9 @@ class Ux_Tx_Workspaces_Controller_ReviewController extends Tx_Workspaces_Control
 
 			} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/grid.js')) {
 				$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Grid.js');
+
+			} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/toolbar.js')) {
+				$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Toolbar.js');
 			}
 		}
 	}

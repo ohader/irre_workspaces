@@ -3,6 +3,22 @@ Ext.namespace('TYPO3.TxIrreWorkspaces.Controller');
 TYPO3.TxIrreWorkspaces.Controller = {
 	isHandlerActive: false,
 
+	handleSelectionStoreLoadEvent: function(store, records) {
+		if (records.length == 0) {
+			TYPO3.Workspaces.Toolbar.selectionActionCombo.hide();
+		} else {
+			TYPO3.Workspaces.Toolbar.selectionActionCombo.show();
+		}
+	},
+
+	handleSelectionModelSelectionChangeEvent: function (selection) {
+		if (selection.grid.getSelectionModel().getSelections().length > 0) {
+			TYPO3.Workspaces.Toolbar.selectionActionCombo.setDisabled(false);
+		} else {
+			TYPO3.Workspaces.Toolbar.selectionActionCombo.setDisabled(true);
+		}
+	},
+
 	handleGridRowSelectEvent: function(selection, index, row) {
 		if (!TYPO3.TxIrreWorkspaces.Controller.isHandlerActive) {
 			TYPO3.TxIrreWorkspaces.Controller.isHandlerActive = true;
