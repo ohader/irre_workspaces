@@ -44,26 +44,36 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 
 		foreach ($parent->datamap as $table => $records) {
 			foreach ($records as $uid => $fields) {
+				// Non-Integer values are new records:
 				if (t3lib_div::testInt($uid) === FALSE) {
 					continue;
 				}
 
+				// Calculate differences between database and submission:
 				$differences = array_diff_assoc(
 					$fields,
 					$this->getRecord($table, $uid)
 				);
 
+				// If differences can be resolves as unmodifies IRRE child nodes:
 				if (!$differences || $this->canRejectDifferences($table, $uid, $differences)) {
 					unset($parent->datamap[$table][$uid]);
 				}
 			}
 
+			// If table does not have elementy (anymore), drop it:
 			if (empty($parent->datamap[$table])) {
 				unset($parent->datamap[$table]);
 			}
 		}
 	}
 
+	/**
+	 * @param string $table
+	 * @param integer $uid
+	 * @param array $differences
+	 * @return boolean
+	 */
 	protected function canRejectDifferences($table, $uid, array $differences) {
 		foreach ($differences as $field => $value) {
 			if ($this->isInlineField($table, $field)) {
@@ -118,6 +128,13 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 		return $configuration;
 	}
 
+	/**
+	 * @param string $table
+	 * @param integer $uid
+	 * @param string $field
+	 * @param string $value
+	 * @return boolean
+	 */
 	protected function hasDifferentReferences($table, $uid, $field, $value) {
 		$configuration = $this->getTcaConfiguration($table, $field);
 		$inlineType = $this->anyTceMain->getInlineFieldType($configuration);
