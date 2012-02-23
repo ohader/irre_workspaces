@@ -41,6 +41,8 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		$commands = $this->getPublishCommands($parameters->records);
 		$result = $this->executeCommands($commands);
 
+		$this->setResultCount($result, count($parameters->records));
+
 		return $result;
 	}
 
@@ -53,6 +55,8 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	public function swapWorkspace(stdClass $parameters) {
 		$commands = $this->getSwapCommands($parameters->records);
 		$result = $this->executeCommands($commands);
+
+		$this->setResultCount($result, count($parameters->records));
 
 		return $result;
 	}
@@ -67,6 +71,8 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		$commands = $this->getFlushCommands($parameters->records);
 		$result = $this->executeCommands($commands);
 
+		$this->setResultCount($result, count($parameters->records));
+
 		return $result;
 	}
 
@@ -78,7 +84,7 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		$commands = array();
 
 		// if ($this->checkWorkspacePermission($this->getCurrentWorkspace(), self::Permission_Publish)) {
-			$commands = $this->getPublishSwapCommands($records, FALSE);
+		$commands = $this->getPublishSwapCommands($records, FALSE);
 		// }
 
 		return $commands;
@@ -152,7 +158,6 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	 */
 	protected function executeCommands(array $commands) {
 		$result = array(
-			'total' => count($commands),
 			'error' => 'No records given',
 		);
 
@@ -179,6 +184,14 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		$tceMain = t3lib_div::makeInstance('t3lib_TCEmain');
 		$tceMain->stripslashes_values = 0;
 		return $tceMain;
+	}
+
+	/**
+	 * @param array $result
+	 * @param integer $count
+	 */
+	protected function setResultCount(&$result, $count) {
+		$result['count'] = (int) $count;
 	}
 }
 
