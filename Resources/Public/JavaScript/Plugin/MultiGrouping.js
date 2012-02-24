@@ -241,7 +241,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 	 * The store at this point is already stored based on the groups.
 	 */
 	doRender: function(cs, rs, ds, startRow, colCount, stripe){
-		var ss = this.grid.getTopToolbar();
+		// disabled: var ss = this.grid.getTopToolbar();
 		if (rs.length < 1) {return '';}
 		var groupField = this.getGroupField();
 		var gfLen = groupField.length;
@@ -249,9 +249,11 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 			cs[i].style = this.getColumnStyle(i, false);
 
 		// Remove all entries alreay in the toolbar
-		for (var hh = 0; hh < ss.items.length; hh++)
-			Ext.removeNode(Ext.getDom(ss.items.itemAt(hh).id));
+		// disabled: for (var hh = 0; hh < ss.items.length; hh++)
+		// disabled: 	Ext.removeNode(Ext.getDom(ss.items.itemAt(hh).id));
 
+		// disabled:
+		/*
 		if (gfLen==0)
 			ss.addItem(new Ext.Toolbar.TextItem("Drop Columns Here To Group"));
 		else {
@@ -268,7 +270,8 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 					ss.addItem(b);
 				}
 			}
-		}
+		} */
+
 		this.enableGrouping = !!groupField;
 		if (!this.enableGrouping || this.isUpdating)
 			return Ext.grid.GroupingView.superclass.doRender.apply(this, arguments);
@@ -447,8 +450,6 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 			}
 		}
 
-		this.fireEvent('afterDoRender', {grid: this.grid});
-
 		return buf.join('');
 	},
 	getGroup:function(A,D,F,G,B,E)
@@ -511,7 +512,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 });
 
 Ext.ux.MultiGroupingPanelEditor = function(config) {
-	config = config||{};
+	config = config || {};
 	config.tbar = new Ext.Toolbar({id:'grid-tbr'});
 	Ext.ux.MultiGroupingPanelEditor.superclass.constructor.call(this, config);
 };
@@ -793,47 +794,50 @@ Ext.ux.MultiGroupingGrid = function(config) {
 	  this.origColModel = Ext.ux.clone(config.cm.config);
 	else if(config.colModel)
 	  this.origColModel = Ext.ux.clone(config.colModel.config);
-	  
-	config.tbar = [{
-		xtype:'tbtext'
-	  ,text:this.emptyToolbarText
-	},{
-		xtype:'tbfill'
-	  ,noDelete:true
-	},{
-		xtype:'tbbutton'
-	  ,text:'Options'
-	  ,noDelete:true
-	  ,menu:{
-		 items: [{
-			text:'Columns Reset',
-			scope: this,
-			disabled: !this.origColModel,
-			handler: function() {
-				this.getColumnModel().setConfig(this.origColModel,false);
-				this.saveState();
-				return true;
+
+	if (!config.tbar) {
+		config.tbar = [{
+			xtype:'tbtext'
+		  ,text:this.emptyToolbarText
+		},{
+			xtype:'tbfill'
+		  ,noDelete:true
+		},{
+			xtype:'tbbutton'
+		  ,text:'Options'
+		  ,noDelete:true
+		  ,menu:{
+			 items: [{
+				text:'Columns Reset',
+				scope: this,
+				disabled: !this.origColModel,
+				handler: function() {
+					this.getColumnModel().setConfig(this.origColModel,false);
+					this.saveState();
+					return true;
+				}
+			 },{
+				text:'Show columns grouped'
+			  ,checked: !config.view.hideGroupedColumn
+			  ,scope:this
+			  ,checkHandler: function (item, checked) {
+				 this.view.hideGroupedColumn = !checked;
+				 this.view.refresh(true);
+				}
+			 },{
+				text: 'Clean filters' // Labels.get('label.jaffa.jaffaRIA.jaffa.finder.grid.deactivateFilters')
+			  ,scope: this
+			  ,handler: function () {
+				 //@TODO use the clearFilters() method!
+				 this.plugins.filters.each(function(flt) {
+					flt.setActive(false);
+				 });
+				}
+			 }]
 			}
-		 },{
-			text:'Show columns grouped'
-		  ,checked: !config.view.hideGroupedColumn
-		  ,scope:this
-		  ,checkHandler: function (item, checked) {
-			 this.view.hideGroupedColumn = !checked;
-			 this.view.refresh(true);
-			}
-		 },{
-			text: 'Clean filters' // Labels.get('label.jaffa.jaffaRIA.jaffa.finder.grid.deactivateFilters')
-		  ,scope: this
-		  ,handler: function () {
-			 //@TODO use the clearFilters() method!
-			 this.plugins.filters.each(function(flt) {
-				flt.setActive(false);
-			 });
-			}
-		 }]	 
-		}
-	}];
+		}];
+	}
+
 	Ext.ux.MultiGroupingGrid.superclass.constructor.call(this, config);
 	//console.debug("Create MultiGroupingGrid",config);
 };
