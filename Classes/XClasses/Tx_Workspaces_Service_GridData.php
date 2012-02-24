@@ -118,13 +118,15 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 				foreach ($outerMostParent->getNestedChildren() as $child) {
 					$childIdentifier = $child->__toString();
 
-					$this->setCollectionIdentifier(
-						$dataArray[$childIdentifier],
-						$collectionIdentifier
-					);
+					if (isset($dataArray[$childIdentifier])) {
+						$this->setCollectionIdentifier(
+							$dataArray[$childIdentifier],
+							$collectionIdentifier
+						);
 
-					$nestedElements[] = $dataArray[$childIdentifier];
-					unset($dataArray[$childIdentifier]);
+						$nestedElements[] = $dataArray[$childIdentifier];
+						unset($dataArray[$childIdentifier]);
+					}
 				}
 
 				$nestedDataArray[$parentIdentifier] = $nestedElements;
