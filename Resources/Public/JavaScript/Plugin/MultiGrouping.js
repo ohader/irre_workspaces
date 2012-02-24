@@ -286,7 +286,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 			st.remove();
 		var html_code =
 			"div#" + gidPrefix +
-			" div.x-grid3-row {padding-left:" + (gfLen*12) + "px}" +
+			" div.x-grid3-row {margin-left:" + (gfLen*12) + "px}" +
 			"div#" + gidPrefix + " div.x-grid3-header {padding-left:" + (gfLen*12) + "px}";
 		Ext.getDoc().child("head").createChild({
 			tag: 'style',
@@ -392,7 +392,7 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 					startRow: rowIndex,
 					rs: [r],
 					cls: gcls,
-					style: gstyle + 'padding-left:' + (gp.idx * 24) + 'px;'
+					style: gstyle + 'margin-left:' + (gp.idx * 24) + 'px;'
 				};
 				currGroups[gp.dataIndex] = curGroup;
 				groups.push(curGroup);
@@ -446,6 +446,9 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 				cur_level--;
 			}
 		}
+
+		this.fireEvent('afterDoRender', {grid: this.grid});
+
 		return buf.join('');
 	},
 	getGroup:function(A,D,F,G,B,E)

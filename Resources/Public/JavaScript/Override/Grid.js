@@ -33,7 +33,6 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 					TYPO3.Workspaces.Configuration.ChangeDate
 				],
 				listeners: {
-
 					columnmoved: function(colModel) {
 						TYPO3.Workspaces.Actions.updateColModel(colModel);
 					},
@@ -62,7 +61,6 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 					TYPO3.Workspaces.Configuration.RowButtons
 				],
 				listeners: {
-
 					columnmoved: function(colModel) {
 						TYPO3.Workspaces.Actions.updateColModel(colModel);
 					},
@@ -72,8 +70,8 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 				}
 			});
 		}
-
 	},
+
 	border : true,
 	store : TYPO3.Workspaces.MainStore,
 	colModel : null,
@@ -90,6 +88,12 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 		new Ext.ux.plugins.FitToParent()
 	],
 	view : new Ext.ux.MultiGroupingView({
+		listeners: {
+			afterDoRender: function(event) {
+				event.grid.syncHeight();
+			}
+		},
+
 		forceFit: true,
 		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.label_Workspace]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
 		enableGroupingMenu: false,
@@ -98,6 +102,7 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
   		enableNoGroups: false,
 		hideGroupedColumn: true
 	}),
+
 	bbar : TYPO3.Workspaces.Toolbar.FullBottomBar,
 	tbar : TYPO3.Workspaces.Toolbar.FullTopToolbar
 });
