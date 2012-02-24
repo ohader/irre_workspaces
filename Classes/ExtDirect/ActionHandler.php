@@ -191,7 +191,7 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	 * @param integer $count
 	 */
 	protected function setResultCount(&$result, $count) {
-		$result['count'] = (int) $count;
+		$result['total'] = (int) $count;
 	}
 }
 
