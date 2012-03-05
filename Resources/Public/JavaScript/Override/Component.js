@@ -1,7 +1,7 @@
 TYPO3.Workspaces.MainStore = new Ext.ux.MultiGroupingStore({
 	storeId : 'workspacesMainStore',
 	reader : new Ext.data.JsonReader({
-		idProperty : 'uid',
+		idProperty : 'id',
 		root : 'data',
 		totalProperty : 'total'
 	}, TYPO3.Workspaces.Configuration.StoreFieldArray),
