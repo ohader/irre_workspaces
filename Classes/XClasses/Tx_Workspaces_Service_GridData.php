@@ -29,6 +29,7 @@
  * @package EXT:irre_workspaces
  */
 class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
+	const GridColumn_Title = 'Tx_IrreWorkspaces_Title';
 	const GridColumn_Collection = 'Tx_IrreWorkspaces_Collection';
 	const GridColumn_Modification = 'Tx_IrreWorkspaces_Modification';
 
@@ -113,11 +114,21 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 			// For each outer most parent, get all nested child elements:
 			foreach ($outerMostParents as $outerMostParent) {
-				$collectionIdentifier++;
 				$nestedElements = array();
+				$collectionIdentifier++;
+
 				$parentIdentifier = $outerMostParent->__toString();
+				$parentTitle = t3lib_BEfunc::getRecordTitle(
+					$outerMostParent->getTable(),
+					$outerMostParent->getRecord()
+				);
 
 				if (isset($dataArray[$parentIdentifier])) {
+					$this->setTitleIdentifier(
+						$dataArray[$parentIdentifier],
+						$parentTitle
+					);
+
 					$this->setCollectionIdentifier(
 						$dataArray[$parentIdentifier],
 						$collectionIdentifier
@@ -134,6 +145,11 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 					$childIdentifier = $child->__toString();
 
 					if (isset($dataArray[$childIdentifier])) {
+						$this->setTitleIdentifier(
+							$dataArray[$childIdentifier],
+							$parentTitle
+						);
+
 						$this->setCollectionIdentifier(
 							$dataArray[$childIdentifier],
 							$collectionIdentifier
@@ -202,6 +218,14 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 		// Update array index
 		$this->dataArray = array_merge($this->dataArray, array());
+	}
+
+	/**
+	 * @param array $element
+	 * @param string $value
+	 */
+	protected function setTitleIdentifier(array &$element, $value) {
+		$element[self::GridColumn_Title] = $value;
 	}
 
 	/**

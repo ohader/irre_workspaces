@@ -90,7 +90,7 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 
 	view : new Ext.ux.MultiGroupingView({
 		forceFit: true,
-		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.label_Workspace]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
+		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.Tx_IrreWorkspaces_Title]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
 		enableGroupingMenu: false,
 		displayEmptyFields: true,
 		removeEmptyFieldsGroups: true,
