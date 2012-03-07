@@ -30,11 +30,17 @@
  */
 class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	const GridColumn_Collection = 'Tx_IrreWorkspaces_Collection';
+	const GridColumn_Modification = 'Tx_IrreWorkspaces_Modification';
 
 	/**
 	 * @var t3lib_TCEmain
 	 */
 	protected $tceMainHelper;
+
+	/**
+	 * @var Tx_IrreWorkspaces_Service_ComparisonService
+	 */
+	protected $comparisonService;
 
 	/**
 	 * @param array $dataArray
@@ -55,6 +61,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 		$this->extendDataArray();
 		$this->resolveDataDependencies();
+		$this->purgeDataArray();
 	}
 
 	/**
@@ -115,6 +122,11 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 						$dataArray[$parentIdentifier],
 						$collectionIdentifier
 					);
+
+					$this->setModificationIdentifier(
+						$dataArray[$parentIdentifier],
+						$this->isElementModified($outerMostParent)
+					);
 				}
 
 				/** @var $child t3lib_utility_Dependency_Element */
@@ -125,6 +137,11 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 						$this->setCollectionIdentifier(
 							$dataArray[$childIdentifier],
 							$collectionIdentifier
+						);
+
+						$this->setModificationIdentifier(
+							$dataArray[$childIdentifier],
+							$this->isElementModified($child)
 						);
 
 						$nestedElements[] = $dataArray[$childIdentifier];
@@ -165,7 +182,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
-	 * @return array
+	 * @return void
 	 */
 	protected function extendDataArray() {
 		foreach ($this->dataArray as &$dataElement) {
@@ -174,11 +191,33 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
+	 * @return void
+	 */
+	protected function purgeDataArray() {
+		foreach ($this->dataArray as $key => $dataElement) {
+			if (isset($dataElement[self::GridColumn_Modification]) && $dataElement[self::GridColumn_Modification] === FALSE) {
+				unset($this->dataArray[$key]);
+			}
+		}
+
+		// Update array index
+		$this->dataArray = array_merge($this->dataArray, array());
+	}
+
+	/**
 	 * @param array $element
 	 * @param integer $value
 	 */
 	protected function setCollectionIdentifier(array &$element, $value = 0) {
 		$element[self::GridColumn_Collection] = $value;
+	}
+
+	/**
+	 * @param array $element
+	 * @param boolean $value
+	 */
+	protected function setModificationIdentifier(array &$element, $value) {
+		$element[self::GridColumn_Modification] = (bool) $value;
 	}
 
 	/**
@@ -193,10 +232,71 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
+	 * @param t3lib_utility_Dependency_Element $element
+	 * @return boolean
+	 */
+	protected function isElementModified(t3lib_utility_Dependency_Element $element) {
+		$element->setDataValue(
+			Tx_IrreWorkspaces_Service_ComparisonService::KEY_Origin,
+			t3lib_BEfunc::getLiveVersionOfRecord($element->getTable(),$element->getId())
+		);
+
+		return $this->getComparisonService()->hasDifferences($element);
+	}
+
+	/**
+	 * @param array $callerArguments
+	 * @param array $targetArguments
+	 * @param Tx_IrreWorkspaces_Service_ComparisonService $caller
+	 * @param string $eventName
+	 */
+	public function comparisonServicePostProcessDifferencesCallback(array $callerArguments, array $targetArguments, Tx_IrreWorkspaces_Service_ComparisonService $caller, $eventName) {
+		$element = $callerArguments['element'];
+		$differences =& $callerArguments['differences'];
+
+		foreach ($differences as $field => $value) {
+			$fieldConfiguration = $caller->getTcaConfiguration($element, $field);
+
+			if (preg_match('#^(uid|pid|tstamp|crdate|t3_origuid|t3ver_.+)$#', $field)) {
+				unset($differences[$field]);
+			} elseif (t3lib_div::inList('passthrough,none', $fieldConfiguration['type'])) {
+				unset($differences[$field]);
+			}
+		}
+	}
+
+	/**
 	 * @return Tx_IrreWorkspaces_Service_DependencyService
 	 */
 	protected function getDependencyService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_DependencyService');
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_ComparisonService
+	 */
+	protected function getComparisonService() {
+		if (!isset($this->comparisonService)) {
+			$this->comparisonService = t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_ComparisonService');
+
+			$this->comparisonService->setEventCallback(
+				Tx_IrreWorkspaces_Service_ComparisonService::EVENT_PostProcessDifferences,
+				$this->createEventCallback('comparisonServicePostProcessDifferencesCallback')
+			);
+		}
+
+		return $this->comparisonService;
+	}
+
+	/**
+	 * Gets a new callback to be used in the dependency resolver utility.
+	 *
+	 * @param string $method
+	 * @param array $targetArguments
+	 * @return t3lib_utility_Dependency_Callback
+	 */
+	protected function createEventCallback($method, array $targetArguments = array()) {
+		return t3lib_div::makeInstance('t3lib_utility_Dependency_Callback', $this, $method, $targetArguments);
 	}
 }
 
