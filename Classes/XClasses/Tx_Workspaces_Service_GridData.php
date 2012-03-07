@@ -106,13 +106,16 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 			// For each outer most parent, get all nested child elements:
 			foreach ($outerMostParents as $outerMostParent) {
+				$collectionIdentifier++;
 				$nestedElements = array();
 				$parentIdentifier = $outerMostParent->__toString();
 
-				$this->setCollectionIdentifier(
-					$dataArray[$parentIdentifier],
-					++$collectionIdentifier
-				);
+				if (isset($dataArray[$parentIdentifier])) {
+					$this->setCollectionIdentifier(
+						$dataArray[$parentIdentifier],
+						$collectionIdentifier
+					);
+				}
 
 				/** @var $child t3lib_utility_Dependency_Element */
 				foreach ($outerMostParent->getNestedChildren() as $child) {
