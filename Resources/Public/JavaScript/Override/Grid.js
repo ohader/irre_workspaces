@@ -87,6 +87,7 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 		TYPO3.Workspaces.Configuration.GridFilters,
 		new Ext.ux.plugins.FitToParent()
 	],
+
 	view : new Ext.ux.MultiGroupingView({
 		forceFit: true,
 		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.label_Workspace]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
