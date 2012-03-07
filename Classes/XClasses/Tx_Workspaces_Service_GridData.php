@@ -225,10 +225,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 * @return boolean
 	 */
 	protected function hasDependentCollectionIdentifier($index) {
-		return (
-			isset($this->dataArray[$index][self::GridColumn_Collection])
-			&& $this->dataArray[$index][self::GridColumn_Collection] > 0
-		);
+		return !empty($this->dataArray[$index][self::GridColumn_Collection]);
 	}
 
 	/**
