@@ -50,6 +50,11 @@ class Tx_IrreWorkspaces_Service_SanitazionService {
 	protected $outerMostParent;
 
 	/**
+	 * @var Tx_IrreWorkspaces_Service_ComparisonService
+	 */
+	protected $comparisonService;
+
+	/**
 	 * @param t3lib_TCEmain $tceMain
 	 * @param t3lib_utility_Dependency_Element $outerMostParent
 	 */
@@ -70,7 +75,7 @@ class Tx_IrreWorkspaces_Service_SanitazionService {
 	 * @param t3lib_utility_Dependency_Element $element
 	 */
 	protected function sanitizeElement(t3lib_utility_Dependency_Element $element) {
-		if ($this->hasDifferences($element) === FALSE) {
+		if ($this->getComparisonService()->hasDifferences($element) === FALSE) {
 			$this->sanitizeChildren($element->getChildren());
 			$this->purgeDataMap($element);
 		}
@@ -96,103 +101,14 @@ class Tx_IrreWorkspaces_Service_SanitazionService {
 	}
 
 	/**
-	 * RESOLVE DIFFERENCES
+	 * @return Tx_IrreWorkspaces_Service_ComparisonService
 	 */
-
-	/**
-	 * @param t3lib_utility_Dependency_Element $element
-	 * @return boolean
-	 */
-	protected function hasDifferences(t3lib_utility_Dependency_Element $element) {
-		// Calculate differences between database and submission:
-		$differences = $this->resolveDifferences(
-			$element,
-			array_diff_assoc(
-				$element->getData(),
-				$element->getRecord()
-			)
-		);
-
-		var_dump($differences, 'd');
-
-		return (count($differences) > 0);
-	}
-
-	/**
-	 * @param t3lib_utility_Dependency_Element $element
-	 * @param array $differences
-	 * @return boolean
-	 */
-	protected function resolveDifferences(t3lib_utility_Dependency_Element $element, array $differences) {
-		foreach ($differences as $field => $value) {
-			if ($this->isInlineField($element, $field)) {
-				if ($this->canResolveDifferentInlineReferences($element, $field)) {
-					unset($differences[$field]);
-				}
-			}
+	protected function getComparisonService() {
+		if (!isset($this->comparisonService)) {
+			$this->comparisonService = t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_ComparisonService', $this->tceMain);
 		}
 
-		return $differences;
-	}
-
-	/**
-	 * @param t3lib_utility_Dependency_Element
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function canResolveDifferentInlineReferences(t3lib_utility_Dependency_Element $element, $field) {
-		$configuration = $this->getTcaConfiguration($element, $field);
-
-		/* @var $dbAnalysis t3lib_loadDBGroup */
-		$dbAnalysis = t3lib_div::makeInstance('t3lib_loadDBGroup');
-		$dbAnalysis->start(
-			$element->getDataValue($field),
-			$configuration['foreign_table'],
-			$configuration['MM'] ?: '',
-			$element->getId(),
-			$element->getTable(),
-			$configuration
-		);
-
-		$submittedItems = t3lib_div::trimExplode(',', $element->getDataValue($field));
-		$storedItems = $dbAnalysis->getValueArray();
-
-		$diffenreces = array_merge(
-			array_diff($submittedItems, $storedItems),
-			array_diff($storedItems, $submittedItems)
-		);
-
-		return (count($diffenreces) === 0);
-	}
-
-	/**
-	 * @param t3lib_utility_Dependency_Element
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isInlineField(t3lib_utility_Dependency_Element $element, $field) {
-		$configuration = $this->getTcaConfiguration($element, $field);
-
-		return (
-			$configuration !== FALSE &&
-			$this->tceMain->getInlineFieldType($configuration) !== FALSE
-		);
-	}
-
-	/**
-	 * @param t3lib_utility_Dependency_Element
-	 * @param string $field
-	 * @return boolean|array
-	 */
-	protected function getTcaConfiguration(t3lib_utility_Dependency_Element $element, $field) {
-		$configuration = FALSE;
-
-		t3lib_div::loadTCA($element->getTable());
-		if (!empty($GLOBALS['TCA'][$element->getTable()]['columns'][$field]['config'])) {
-			$configuration = $GLOBALS['TCA'][$element->getTable()]['columns'][$field]['config'];
-		}
-
-		return $configuration;
+		return $this->comparisonService;
 	}
 }
 

@@ -66,7 +66,10 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 		foreach ($parent->datamap as $table => $records) {
 			foreach ($records as $uid => $fields) {
 				if (t3lib_div::testInt($uid)) {
-					$dependency->addElement($table, $uid, $fields);
+					$data = array(
+						Tx_IrreWorkspaces_Service_ComparisonService::KEY_Modification => $fields
+					);
+					$dependency->addElement($table, $uid, $data);
 				}
 			}
 		}

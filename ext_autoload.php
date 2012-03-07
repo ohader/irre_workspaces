@@ -7,6 +7,7 @@ $extensionClassesPath = $extensionPath . 'classes/';
 return array(
 	'tx_irreworkspaces_extdirect_actionhandler' => $extensionClassesPath . 'ExtDirect/ActionHandler.php',
 	'tx_irreworkspaces_extdirect_parameterrecord' => $extensionClassesPath . 'ExtDirect/ParameterRecord.php',
+	'tx_irreworkspaces_service_comparisonservice' => $extensionClassesPath . 'Service/ComparisonService.php',
 	'tx_irreworkspaces_service_dependencyservice' => $extensionClassesPath . 'Service/DependencyService.php',
 	'tx_irreworkspaces_service_sanitazionservice' => $extensionClassesPath . 'Service/SanitazionService.php',
 	'tx_irreworkspaces_service_tcemainservice' => $extensionClassesPath . 'Service/TceMainService.php',
