@@ -13,4 +13,6 @@ if (TYPO3_MODE == 'BE' && !(TYPO3_REQUESTTYPE & TYPO3_REQUESTTYPE_INSTALL)) {
 	);
 }
 
+require_once t3lib_extMgm::extPath($_EXTKEY) . 'Configuration/TCA/SysWorkspace.php';
+require_once t3lib_extMgm::extPath($_EXTKEY) . 'Configuration/TCA/SysWorkspaceStage.php';
 ?>
