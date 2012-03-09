@@ -34,7 +34,6 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	const RecipientMode_EditorAndOwner = 2;
 	const RecipientMode_None = 9;
 
-	const Field_WorkspaceAction_RecipientMode = 'tx_irreworkspaces_action_recipient_mode';
 	const Field_StageEditing_RecipientMode = 'tx_irreworkspaces_stage_editing_recipient_mode';
 	const Field_StagePublish_RecipientMode = 'tx_irreworkspaces_stage_publish_recipient_mode';
 	const Field_StageAny_RecipientMode = 'tx_irreworkspaces_recipient_mode';
@@ -64,14 +63,6 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	 */
 	public function setAffectedRecords(array $affectedRecords = NULL) {
 		$this->affectedRecords = $affectedRecords;
-	}
-
-	/**
-	 * @param integer $workspaceId
-	 * @return array
-	 */
- 	public function getActionRecipients($workspaceId) {
-		throw new RuntimeException('Not implemented');
 	}
 
 	/**
@@ -152,22 +143,6 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		);
 
 		return $editors;
-	}
-
-	/**
-	 * @param integer $workspaceId
-	 * @return integer
-	 */
-	public function getWorkspaceActionRecipientMode($workspaceId = NULL) {
-		if ($workspaceId === NULL) {
-			$workspaceId = $this->getCurrentWorkspaceId();
-		}
-
-		return $this->getArrayValue(
-			self::Field_WorkspaceAction_RecipientMode,
-			$this->getWorkspaceRecord($workspaceId),
-			0
-		);
 	}
 
 	/**
