@@ -54,7 +54,10 @@ class Ux_Tx_Workspaces_Controller_ReviewController extends Tx_Workspaces_Control
 		foreach ($jsFiles as $filePath => $fileConfiguration) {
 			$this->pageRenderer->appendJsFile($filePath, $fileConfiguration);
 
-			if (strpos($filePath, '/workspaces/Resources/Public/JavaScript/component.js')) {
+			if (strpos($filePath, '/workspaces/Resources/Public/JavaScript/actions.js')) {
+				$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Actions.js');
+
+			} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/component.js')) {
 				$this->pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Component.js');
 
 			} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/configuration.js')) {

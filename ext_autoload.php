@@ -5,8 +5,10 @@
 $extensionPath = t3lib_extMgm::extPath('irre_workspaces');
 $extensionClassesPath = $extensionPath . 'classes/';
 return array(
+	'tx_irreworkspaces_domain_model_record' => $extensionClassesPath . 'Domain/Model/Record.php',
 	'tx_irreworkspaces_extdirect_actionhandler' => $extensionClassesPath . 'ExtDirect/ActionHandler.php',
 	'tx_irreworkspaces_extdirect_parameterrecord' => $extensionClassesPath . 'ExtDirect/ParameterRecord.php',
+	'tx_irreworkspaces_service_behaviourservice' => $extensionClassesPath . 'Service/BehaviourService.php',
 	'tx_irreworkspaces_service_comparisonservice' => $extensionClassesPath . 'Service/ComparisonService.php',
 	'tx_irreworkspaces_service_dependencyservice' => $extensionClassesPath . 'Service/DependencyService.php',
 	'tx_irreworkspaces_service_sanitazionservice' => $extensionClassesPath . 'Service/SanitazionService.php',
