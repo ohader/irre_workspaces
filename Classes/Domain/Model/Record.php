@@ -96,6 +96,21 @@ class Tx_IrreWorkspaces_Domain_Model_Record {
 	}
 
 	/**
+	 * @return integer|NULL
+	 */
+	public function getEditorId() {
+		$editorId = NULL;
+
+		if (!empty($GLOBALS['TCA'][$this->getTable()]['ctrl']['cruser_id'])) {
+			$field = $GLOBALS['TCA'][$this->getTable()]['ctrl']['cruser_id'];
+			$record = $this->getRecord();
+			$editorId = (int) $record[$field];
+		}
+
+		return $editorId;
+	}
+
+	/**
 	 * @return t3lib_DB
 	 */
 	protected function getDatabase() {

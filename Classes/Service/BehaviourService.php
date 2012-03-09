@@ -54,57 +54,104 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	 */
 	protected $workspaceRecords = array();
 
+	/**
+	 * @var Tx_Workspaces_Service_Stages
+	 */
+	protected $stagesService;
+
+	/**
+	 * @param array|NULL $affectedRecords
+	 */
 	public function setAffectedRecords(array $affectedRecords = NULL) {
 		$this->affectedRecords = $affectedRecords;
 	}
 
+	/**
+	 * @param integer $workspaceId
+	 * @return array
+	 */
  	public function getActionRecipients($workspaceId) {
-
+		throw new RuntimeException('Not implemented');
 	}
 
+	/**
+	 * @param integer $stageId
+	 * @param array $regularRecipients
+	 * @return array
+	 */
 	public function getStageRecipients($stageId, array $regularRecipients = array()) {
 		switch ($this->getStageRecipientMode($stageId)) {
 			case self::RecipientMode_None:
 				return $this->convertRecipientsToCheckboxItems($regularRecipients, FALSE);
 				break;
 			case self::RecipientMode_Editor:
+				return $this->convertRecipientsToCheckboxItems(
+					$this->getAffectedRecordsEditors(),
+					TRUE
+				);
 				break;
 			case self::RecipientMode_EditorAndOwner:
+				return $this->convertRecipientsToCheckboxItems(
+					$this->mergeRecipients(
+						$this->getAffectedRecordsEditors(),
+						$this->getWorkspaceOwners($this->getCurrentWorkspaceId())
+					),
+					TRUE
+				);
 				break;
 			case self::RecipientMode_All:
 			default:
 				return $this->convertRecipientsToCheckboxItems($regularRecipients, TRUE);
 		}
+	}
 
-		$recipients = $this->getRecipients(
-			$this->getStageRecipientMode($stageId)
+	/**
+	 * @param integer $workspaceId
+	 * @return array
+	 */
+	protected function getWorkspaceOwners($workspaceId) {
+		$workspaceRecord = $this->getWorkspaceRecord($workspaceId);
+
+		$responsibleUserList = $this->getStagesService()->getResponsibleUser(
+			$workspaceRecord['adminusers']
 		);
 
-		foreach ($regularRecipients as $regularRecipient) {
-			$userId = $regularRecipient['uid'];
+		$owners = (array) $this->getDatabase()->exec_SELECTgetRows(
+			'uid,username,realName,email',
+			'be_users',
+			'deleted=0 AND uid IN (' . $responsibleUserList . ')',
+			'',
+			'',
+			'',
+			'uid'
+		);
 
-			if (!isset($regularRecipient[$userId])) {
-				$recipients[] = $regularRecipient;
+		return $owners;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getAffectedRecordsEditors() {
+		$editorIds = array();
+
+		foreach ($this->affectedRecords as $affectedRecord) {
+			if (NULL !== $editorId = $affectedRecord->getEditorId()) {
+				$editorIds[] = $editorId;
 			}
 		}
 
-		return $recipients;
-	}
+		$editors = (array) $this->getDatabase()->exec_SELECTgetRows(
+			'uid,username,realName,email',
+			'be_users',
+			'deleted=0 AND uid IN (' . implode(',', array_unique($editorIds)) . ')',
+			'',
+			'',
+			'',
+			'uid'
+		);
 
-	protected function getRecipients($recipientMode) {
-
-	}
-
-	protected function getWorkspaceOwner($workspaceId) {
-
-	}
-
-	protected function getElementEditor(array $record) {
-
-	}
-
-	protected function getElementsEditors(array $records) {
-
+		return $editors;
 	}
 
 	/**
@@ -117,8 +164,8 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		}
 
 		return $this->getArrayValue(
-			$this->getWorkspaceRecord($workspaceId),
 			self::Field_WorkspaceAction_RecipientMode,
+			$this->getWorkspaceRecord($workspaceId),
 			0
 		);
 	}
@@ -153,8 +200,8 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		}
 
 		return $this->getArrayValue(
-			$this->getWorkspaceRecord($workspaceId),
 			self::Field_StageEditing_RecipientMode,
+			$this->getWorkspaceRecord($workspaceId),
 			0
 		);
 	}
@@ -169,8 +216,8 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		}
 
 		return $this->getArrayValue(
-			$this->getWorkspaceRecord($workspaceId),
 			self::Field_StagePublish_RecipientMode,
+			$this->getWorkspaceRecord($workspaceId),
 			0
 		);
 	}
@@ -181,10 +228,31 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	 */
 	protected function getStageAnyRecipientMode($stageId) {
 		return $this->getArrayValue(
-			$this->getStageRecord($stageId),
 			self::Field_StageAny_RecipientMode,
+			$this->getStageRecord($stageId),
 			0
 		);
+	}
+
+	/**
+	 * @param array $first
+	 * @param array $second
+	 * @return array
+	 */
+	protected function mergeRecipients(array $first, array $second) {
+		$recipients = $first;
+
+		if (empty($recipients)) {
+			$recipients = $second;
+		} else {
+			foreach ($second as $id => $recipient) {
+				if (!isset($recipients[$id])) {
+					$recipients[$id] = $recipient;
+				}
+			}
+		}
+
+		return $recipients;
 	}
 
 	/**
@@ -196,7 +264,9 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		$checkboxItems = array();
 
 		foreach ($recipients as $recipient) {
-			$checkboxItems[] = $this->createRecipientCheckboxItem($recipient, $checked);
+			if (t3lib_div::validEmail($recipient['email'])) {
+				$checkboxItems[] = $this->createRecipientCheckboxItem($recipient, $checked);
+			}
 		}
 
 		return $checkboxItems;
@@ -270,6 +340,21 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 		}
 
 		return $this->workspaceRecords[$workspaceId];
+	}
+
+	/**
+	 * @return t3lib_DB
+	 */
+	protected function getDatabase() {
+		return $GLOBALS['TYPO3_DB'];
+	}
+
+	protected function getStagesService() {
+		if (!isset($this->stagesService)) {
+			$this->stagesService = t3lib_div::makeInstance('Tx_Workspaces_Service_Stages');
+		}
+
+		return $this->stagesService;
 	}
 }
 

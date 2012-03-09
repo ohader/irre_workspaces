@@ -98,9 +98,8 @@ class Ux_Tx_Workspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_A
 	 * @return array
 	 */
 	protected function getReceipientsOfStage($stageId) {
-		return parent::getReceipientsOfStage($stageId);
-#		$regularRecipients = $this->getStageService()->getResponsibleBeUser($stageId);
-#		return $this->getBehaviourService()->getStageRecipients($stageId, $regularRecipients);
+		$regularRecipients = $this->getStageService()->getResponsibleBeUser($stageId);
+		return $this->getBehaviourService()->getStageRecipients($stageId, $regularRecipients);
 	}
 
 	/**
