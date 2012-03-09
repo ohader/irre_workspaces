@@ -35,7 +35,8 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	const RecipientMode_None = 9;
 
 	const Field_StageEditing_RecipientMode = 'tx_irreworkspaces_stage_editing_recipient_mode';
-	const Field_StagePublish_RecipientMode = 'tx_irreworkspaces_stage_publish_recipient_mode';
+	const Field_StageReadyToPublish_RecipientMode = 'tx_irreworkspaces_stage_readypublish_recipient_mode';
+	const Field_StageExecutePublish_RecipientMode = 'tx_irreworkspaces_stage_executepublish_recipient_mode';
 	const Field_StageAny_RecipientMode = 'tx_irreworkspaces_recipient_mode';
 
 	/**
@@ -151,14 +152,14 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	 */
 	public function getStageRecipientMode($stageId) {
 		switch ($stageId) {
-			case Tx_Workspaces_Service_Stages::STAGE_PUBLISH_EXECUTE_ID:
-				return $this->getStagePublishRecipientMode();
-				break;
-			case Tx_Workspaces_Service_Stages::STAGE_PUBLISH_ID:
-				return $this->getStagePublishRecipientMode();
-				break;
 			case Tx_Workspaces_Service_Stages::STAGE_EDIT_ID:
 				return $this->getStageEditingRecipientMode();
+				break;
+			case Tx_Workspaces_Service_Stages::STAGE_PUBLISH_ID:
+				return $this->getStageReadyToPublishRecipientMode();
+				break;
+			case Tx_Workspaces_Service_Stages::STAGE_PUBLISH_EXECUTE_ID:
+				return $this->getStageExecutePublishRecipientMode();
 				break;
 			default:
 				return $this->getStageAnyRecipientMode($stageId);
@@ -185,13 +186,29 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 	 * @param integer $workspaceId
 	 * @return integer
 	 */
-	protected function getStagePublishRecipientMode($workspaceId = NULL) {
+	protected function getStageReadyToPublishRecipientMode($workspaceId = NULL) {
 		if ($workspaceId === NULL) {
 			$workspaceId = $this->getCurrentWorkspaceId();
 		}
 
 		return $this->getArrayValue(
-			self::Field_StagePublish_RecipientMode,
+			self::Field_StageReadyToPublish_RecipientMode,
+			$this->getWorkspaceRecord($workspaceId),
+			0
+		);
+	}
+
+	/**
+	 * @param integer $workspaceId
+	 * @return integer
+	 */
+	protected function getStageExecutePublishRecipientMode($workspaceId = NULL) {
+		if ($workspaceId === NULL) {
+			$workspaceId = $this->getCurrentWorkspaceId();
+		}
+
+		return $this->getArrayValue(
+			self::Field_StageExecutePublish_RecipientMode,
 			$this->getWorkspaceRecord($workspaceId),
 			0
 		);

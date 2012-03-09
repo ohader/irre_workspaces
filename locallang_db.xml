@@ -11,7 +11,8 @@
 			<label index="sys_workspace.tx_irreworkspaces.recipient_mode.I.2">Editor &amp; Owner</label>
 			<label index="sys_workspace.tx_irreworkspaces.recipient_mode.I.9">None</label>
 			<label index="sys_workspace.tx_irreworkspaces_stage_editing_recipient_mode">&quot;editing&quot; Recipient Mode</label>
-			<label index="sys_workspace.tx_irreworkspaces_stage_publish_recipient_mode">&quot;ready to publish&quot; Recipient Mode</label>
+			<label index="sys_workspace.tx_irreworkspaces_stage_readypublish_recipient_mode">&quot;ready to publish&quot; Recipient Mode</label>
+			<label index="sys_workspace.tx_irreworkspaces_stage_executepublish_recipient_mode">&quot;publish&quot; Recipient Mode</label>
 			<label index="sys_workspace_stage.tx_irreworkspaces_recipient_mode">Recipient Mode</label>
 		</languageKey>
 		<languageKey index="de" type="array">
@@ -20,7 +21,8 @@
 			<label index="sys_workspace.tx_irreworkspaces.recipient_mode.I.2">Redakteur &amp; Inhaber</label>
 			<label index="sys_workspace.tx_irreworkspaces.recipient_mode.I.9">Keiner</label>
 			<label index="sys_workspace.tx_irreworkspaces_stage_editing_recipient_mode">&quot;in Bearbeitung&quot; Empfängermodus</label>
-			<label index="sys_workspace.tx_irreworkspaces_stage_publish_recipient_mode">&quot;fertig zur Publizierung&quot; Empfängermodus</label>
+			<label index="sys_workspace.tx_irreworkspaces_stage_readypublish_recipient_mode">&quot;fertig zur Publizierung&quot; Empfängermodus</label>
+			<label index="sys_workspace.tx_irreworkspaces_stage_executepublish_recipient_mode">&quot;Publizieren&quot; Empfängermodus</label>
 			<label index="sys_workspace_stage.tx_irreworkspaces_recipient_mode">Empfängermodus</label>
 		</languageKey>
 	</data>
