@@ -76,21 +76,34 @@ class Tx_IrreWorkspaces_Service_BehaviourService implements t3lib_Singleton {
 			case self::RecipientMode_None:
 				return $this->convertRecipientsToCheckboxItems($regularRecipients, FALSE);
 				break;
+
 			case self::RecipientMode_Editor:
-				return $this->convertRecipientsToCheckboxItems(
-					$this->getAffectedRecordsEditors(),
-					TRUE
+				$promotedEditors = $this->getAffectedRecordsEditors();
+				$remainingRegularEditors = array_diff_assoc(
+					$regularRecipients,
+					$promotedEditors
+				);
+				return array_merge(
+					$this->convertRecipientsToCheckboxItems($promotedEditors, TRUE),
+					$this->convertRecipientsToCheckboxItems($remainingRegularEditors, FALSE)
 				);
 				break;
+
 			case self::RecipientMode_EditorAndOwner:
-				return $this->convertRecipientsToCheckboxItems(
-					$this->mergeRecipients(
-						$this->getAffectedRecordsEditors(),
-						$this->getWorkspaceOwners($this->getCurrentWorkspaceId())
-					),
-					TRUE
+				$promotedEditors = $this->mergeRecipients(
+					$this->getAffectedRecordsEditors(),
+					$this->getWorkspaceOwners($this->getCurrentWorkspaceId())
+				);
+				$remainingRegularEditors = array_diff_assoc(
+					$regularRecipients,
+					$promotedEditors
+				);
+				return array_merge(
+					$this->convertRecipientsToCheckboxItems($promotedEditors, TRUE),
+					$this->convertRecipientsToCheckboxItems($remainingRegularEditors, FALSE)
 				);
 				break;
+
 			case self::RecipientMode_All:
 			default:
 				return $this->convertRecipientsToCheckboxItems($regularRecipients, TRUE);
