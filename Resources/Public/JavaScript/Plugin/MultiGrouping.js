@@ -1180,7 +1180,7 @@ Ext.ux.MultiGroupingPagingGrid = Ext.extend(Ext.ux.MultiGroupingGrid, {
 	  // of data being loaded, it does not refocus  
 	  this.store.on("load", function(r,o) {
 		 if(o&&o.initial==true)
-		   Ext.ux.MultiGroupingView.superclass.onLoad.call(this);		
+		   Ext.ux.MultiGroupingView.superclass.onLoad.call(this);
 	  }, this.view);
 	}
 	
