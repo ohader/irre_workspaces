@@ -18,7 +18,13 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Controller/Review
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/class.t3lib_pagerenderer.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/PageRenderer.php';
 
+/*
+
+DISABLED - Since the workspace module does not show unmodified elements,
+there is no need to manipulate data structures (without changes) on editing
+
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/class.t3lib_tcemain.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/TceMain.php';
+*/
 
 ?>
