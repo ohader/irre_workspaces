@@ -123,49 +123,41 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 					$outerMostParent->getRecord()
 				);
 
-				if (isset($dataArray[$parentIdentifier])) {
-					$this->setTitleIdentifier(
-						$dataArray[$parentIdentifier],
-						$parentTitle
-					);
-
-					$this->setCollectionIdentifier(
-						$dataArray[$parentIdentifier],
-						$collectionIdentifier
-					);
-
-					$this->setModificationIdentifier(
-						$dataArray[$parentIdentifier],
-						$this->isElementModified($outerMostParent)
-					);
-				}
+				$isParentOnWorkspace = isset($dataArray[$parentIdentifier]);
 
 				/** @var $child t3lib_utility_Dependency_Element */
 				foreach ($outerMostParent->getNestedChildren() as $child) {
 					$childIdentifier = $child->__toString();
 
 					if (isset($dataArray[$childIdentifier])) {
-						$this->setTitleIdentifier(
+						$this->setElementProperties(
 							$dataArray[$childIdentifier],
-							$parentTitle
+							array(
+								self::GridColumn_Title => $parentTitle,
+								self::GridColumn_Collection => $collectionIdentifier,
+								self::GridColumn_Modification => $this->isElementModified($child),
+							)
 						);
 
-						$this->setCollectionIdentifier(
-							$dataArray[$childIdentifier],
-							$collectionIdentifier
-						);
-
-						$this->setModificationIdentifier(
-							$dataArray[$childIdentifier],
-							$this->isElementModified($child)
-						);
-
-						$nestedElements[] = $dataArray[$childIdentifier];
-						unset($dataArray[$childIdentifier]);
+						if ($isParentOnWorkspace) {
+							$nestedElements[] = $dataArray[$childIdentifier];
+							unset($dataArray[$childIdentifier]);
+						}
 					}
 				}
 
-				$nestedDataArray[$parentIdentifier] = $nestedElements;
+				if ($isParentOnWorkspace) {
+					$this->setElementProperties(
+						$dataArray[$parentIdentifier],
+						array(
+							self::GridColumn_Title => $parentTitle,
+							self::GridColumn_Collection => $collectionIdentifier,
+							self::GridColumn_Modification => $this->isElementModified($outerMostParent),
+						)
+					);
+
+					$nestedDataArray[$parentIdentifier] = $nestedElements;
+				}
 			}
 
 			// Apply structures to instance data array:
@@ -222,14 +214,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 	/**
 	 * @param array $element
-	 * @param string $value
-	 */
-	protected function setTitleIdentifier(array &$element, $value) {
-		$element[self::GridColumn_Title] = $value;
-	}
-
-	/**
-	 * @param array $element
 	 * @param integer $value
 	 */
 	protected function setCollectionIdentifier(array &$element, $value = 0) {
@@ -238,10 +222,12 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 	/**
 	 * @param array $element
-	 * @param boolean $value
+	 * @param array $properties
 	 */
-	protected function setModificationIdentifier(array &$element, $value) {
-		$element[self::GridColumn_Modification] = (bool) $value;
+	protected function setElementProperties(array &$element, array $properties) {
+		foreach ($properties as $identifier => $value) {
+			$element[$identifier] = $value;
+		}
 	}
 
 	/**
