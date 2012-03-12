@@ -111,7 +111,7 @@ class Tx_IrreWorkspaces_Service_ComparisonService {
 	protected function resolveDifferences(t3lib_utility_Dependency_Element $element, array $differences) {
 		foreach ($differences as $field => $value) {
 			if ($this->isInlineField($element, $field)) {
-				if ($this->canResolveDifferentInlineReferences($element, $field)) {
+				if ($this->canResolveDifferentInlineReferences($element, $field, $value)) {
 					unset($differences[$field]);
 				}
 			}
@@ -123,15 +123,16 @@ class Tx_IrreWorkspaces_Service_ComparisonService {
 	/**
 	 * @param t3lib_utility_Dependency_Element
 	 * @param string $field
+	 * @param string $workspaceValue
 	 * @return boolean
 	 */
-	protected function canResolveDifferentInlineReferences(t3lib_utility_Dependency_Element $element, $field) {
+	protected function canResolveDifferentInlineReferences(t3lib_utility_Dependency_Element $element, $field, $workspaceValue) {
 		$configuration = $this->getTcaConfiguration($element, $field);
 
 		/* @var $dbAnalysis t3lib_loadDBGroup */
 		$dbAnalysis = t3lib_div::makeInstance('t3lib_loadDBGroup');
 		$dbAnalysis->start(
-			$element->getDataValue($field),
+			$workspaceValue,
 			$configuration['foreign_table'],
 			$configuration['MM'] ?: '',
 			$element->getId(),
@@ -139,7 +140,7 @@ class Tx_IrreWorkspaces_Service_ComparisonService {
 			$configuration
 		);
 
-		$submittedItems = t3lib_div::trimExplode(',', $element->getDataValue($field));
+		$submittedItems = t3lib_div::trimExplode(',', $workspaceValue);
 		$storedItems = $dbAnalysis->getValueArray();
 
 		$diffenreces = array_merge(
