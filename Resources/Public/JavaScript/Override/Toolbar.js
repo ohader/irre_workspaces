@@ -76,9 +76,9 @@ TYPO3.Workspaces.Toolbar.selectionActionCombo = new Ext.form.ComboBox({
 });
 
 TYPO3.Workspaces.Toolbar.FullBottomBar = [
-	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : TYPO3.Workspaces.Toolbar.selectionActionCombo,
-	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : '-',
 	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : TYPO3.Workspaces.Toolbar.selectStateActionCombo,
+	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : '-',
+	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : TYPO3.Workspaces.Toolbar.selectionActionCombo,
 	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : '-',
 	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : TYPO3.Workspaces.Toolbar.selectStateMassActionCombo,
 
