@@ -4,6 +4,12 @@ if (!defined('TYPO3_MODE')) {
 }
 
 // Modify the bahaviour of the workspace module
+// Hook to add additional stylesheet and JavaScript resources to Workspaces Module:
+
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/ReviewControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook->renderPreProcess';
+
+// Modify the bahaviour of the workspace module
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Service/GridData.php'] =
@@ -12,14 +18,7 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Service/GridData.
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/ActionHandler.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Workspaces_ExtDirect_ActionHandler.php';
 
-$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Controller/ReviewController.php'] =
-	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Workspaces_Controller_ReviewController.php';
-
-$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/class.t3lib_pagerenderer.php'] =
-	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/PageRenderer.php';
-
 /*
-
 DISABLED - Since the workspace module does not show unmodified elements,
 there is no need to manipulate data structures (without changes) on editing
 
