@@ -22,11 +22,13 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 			this.colModel = new Ext.grid.ColumnModel({
 				columns: [
 					TYPO3.Workspaces.RowExpander,
+					TYPO3.Workspaces.Configuration.Integrity,
 					{id: 'uid', dataIndex : 'uid', width: 40, sortable: true, header : TYPO3.lang["column.uid"], hidden: true, filterable : true },
 					{id: 't3ver_oid', dataIndex : 't3ver_oid', width: 40, sortable: true, header : TYPO3.lang["column.oid"], hidden: true, filterable : true },
 					{id: 'workspace_Title', dataIndex : 'workspace_Title', width: 120, sortable: true, header : TYPO3.lang["column.workspaceName"], hidden: true, filter : {type : 'string'}},
 					TYPO3.Workspaces.Configuration.TxIrreWorkspacesCollection,
 					TYPO3.Workspaces.Configuration.WsPath,
+					TYPO3.Workspaces.Configuration.Language,
 					TYPO3.Workspaces.Configuration.LivePath,
 					TYPO3.Workspaces.Configuration.WsTitleWithIcon,
 					TYPO3.Workspaces.Configuration.TitleWithIcon,
@@ -46,11 +48,13 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 				columns: [
 					TYPO3.Workspaces.SelectionModel,
 					TYPO3.Workspaces.RowExpander,
+					TYPO3.Workspaces.Configuration.Integrity,
 					{id: 'uid', dataIndex : 'uid', width: 40, sortable: true, header : TYPO3.lang["column.uid"], hidden: true, filterable : true },
 					{id: 't3ver_oid', dataIndex : 't3ver_oid', width: 40, sortable: true, header : TYPO3.lang["column.oid"], hidden: true, filterable : true },
 					{id: 'workspace_Title', dataIndex : 'workspace_Title', width: 120, sortable: true, header : TYPO3.lang["column.workspaceName"], hidden: true, filter : {type : 'string'}},
 					TYPO3.Workspaces.Configuration.TxIrreWorkspacesCollection,
 					TYPO3.Workspaces.Configuration.WsPath,
+					TYPO3.Workspaces.Configuration.Language,
 					TYPO3.Workspaces.Configuration.LivePath,
 					TYPO3.Workspaces.Configuration.WsTitleWithIcon,
 					TYPO3.Workspaces.Configuration.SwapButton,
