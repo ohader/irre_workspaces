@@ -273,6 +273,19 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
+	 * Calculates the percentage of changes between two records.
+	 *
+	 * @param string $table
+	 * @param array $diffRecordOne
+	 * @param array $diffRecordTwo
+	 * @return integer
+	 * @scope performance
+	 */
+	public function calculateChangePercentage($table, array $diffRecordOne, array $diffRecordTwo) {
+		return 0;
+	}
+
+	/**
 	 * @return Tx_IrreWorkspaces_Service_DependencyService
 	 */
 	protected function getDependencyService() {
