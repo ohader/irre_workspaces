@@ -75,10 +75,12 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	protected function getDataArray($start, $limit) {
 		$dataArrayPart = parent::getDataArray($start, $limit);
 
-		$lastIndex = count($dataArrayPart) - 1;
+		$lastIndex = $start + count($dataArrayPart) - 1;
+		$collectionIdentifier = $this->getDependentCollectionIdentifier($lastIndex);
+		$dataCount = count($this->dataArray);
 
-		if ($this->hasDependentCollectionIdentifier($lastIndex)) {
-			for ($i = $lastIndex + 1; $i < count($this->dataArray) && $this->hasDependentCollectionIdentifier($i); $i++) {
+		if ($collectionIdentifier !== NULL) {
+			for ($i = $lastIndex + 1; $i < $dataCount && $collectionIdentifier === $this->getDependentCollectionIdentifier($i); $i++) {
 				$dataArrayPart[] = $this->dataArray[$i];
 			}
 		}
@@ -194,7 +196,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function extendDataArray() {
 		foreach ($this->dataArray as &$dataElement) {
-			$this->setCollectionIdentifier($dataElement);
+			$dataElement = $this->setCollectionIdentifier($dataElement);
 		}
 	}
 
@@ -215,9 +217,11 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	/**
 	 * @param array $element
 	 * @param integer $value
+	 * @return array
 	 */
-	protected function setCollectionIdentifier(array &$element, $value = 0) {
+	protected function setCollectionIdentifier(array $element, $value = 0) {
 		$element[self::GridColumn_Collection] = $value;
+		return $element;
 	}
 
 	/**
@@ -236,6 +240,20 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function hasDependentCollectionIdentifier($index) {
 		return !empty($this->dataArray[$index][self::GridColumn_Collection]);
+	}
+
+	/**
+	 * @param integer $index
+	 * @return integer|NULL
+	 */
+	protected function getDependentCollectionIdentifier($index) {
+		$result = NULL;
+
+		if (!empty($this->dataArray[$index][self::GridColumn_Collection])) {
+			$result = $this->dataArray[$index][self::GridColumn_Collection];
+		}
+
+		return $result;
 	}
 
 	/**

@@ -174,9 +174,11 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 	 *
 	 * @param array $element
 	 * @param integer $value
+	 * @return array
 	 */
-	public function setCollectionIdentifierCallback(array &$element, $value) {
+	public function setCollectionIdentifierCallback(array $element, $value) {
 		$element[Ux_Tx_Workspaces_Service_GridData::GridColumn_Collection] = $value ?: $this->collectionValue;
+		return $element;
 	}
 
 	/**
@@ -224,19 +226,21 @@ class Tx_Workspaces_Service_GridDataTest extends Tx_Phpunit_TestCase {
 	 * Sets up virtual test records.
 	 *
 	 * @param integer $children
+	 * @param integer $parentUid
 	 */
-	protected function setUpRecords($children = 10) {
+	protected function setUpRecords($children = 10, $parentUid = 1) {
 		$this->records = array();
 
 		$this->records[] = array(
 			'table' => $this->parentTableName,
 			'pid' => 1,
-			'uid' => 1,
+			'uid' => $parentUid,
 		);
 
 		for ($i=1; $i <= $children; $i++) {
 			$this->records[] = array(
 				'table' => $this->childTableName,
+				'parent' => $parentUid,
 				'pid' => 1,
 				'uid' => $i,
 			);

@@ -17,7 +17,7 @@ TYPO3.Workspaces.MainStore = new Ext.ux.MultiGroupingStore({
 		id: TYPO3.settings.Workspaces.id,
 		query: '',
 		start: 0,
-		limit: 10
+		limit: 30
 	},
 
 	showAction : false,
