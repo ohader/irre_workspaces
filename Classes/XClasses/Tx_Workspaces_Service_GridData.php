@@ -88,11 +88,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		return $dataArrayPart;
 	}
 
-
-	protected function getDataArrayFromCache() {
-		return FALSE;
-	}
-
 	/**
 	 * Resolves dependencies of nested structures
 	 * and sort data elements considering these dependencies.
