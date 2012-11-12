@@ -15,6 +15,14 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-pre
 $TYPO3_CONF_VARS['SC_OPTIONS']['workspaces']['modifyDifferenceArray'][] =
 	'EXT:' . $_EXTKEY . '/Classes/Hooks/ExtDirectServerHook.php:Tx_IrreWorkspaces_Hooks_ExtDirectServerHook';
 
+
+// Hook to pre- and post-process values (required for FlexForm rendering)
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['preProcessValue'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook->preProcess';
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['postProcessValue'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook->postProcess';
+
+
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 
 // @todo: Might use signal-dispatcher for TYPO3 4.7, see http://forge.typo3.org/issues/35166
