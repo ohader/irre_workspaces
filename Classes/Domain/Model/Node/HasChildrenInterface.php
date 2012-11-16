@@ -40,6 +40,8 @@ interface Tx_IrreWorkspaces_Domain_Model_Node_HasChildrenInterface {
 
 	public function moveChildren(Tx_IrreWorkspaces_Domain_Model_Node_NodeCollection $collection, Tx_IrreWorkspaces_Domain_Model_Node_HasParentInterface $afterNode = NULL);
 
+	public function purgeChildren();
+
 	public function getIndexOfChild(Tx_IrreWorkspaces_Domain_Model_Node_HasParentInterface $node);
 
 	/**

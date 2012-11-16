@@ -56,6 +56,16 @@ class Tx_IrreWorkspaces_Domain_Model_Node_NodeCollection {
 		}
 	}
 
+	public function __clone() {
+		$clonedNodes = array();
+
+		foreach ($this->nodes as $node) {
+			$clonedNodes[] = clone $node;
+		}
+
+		$this->nodes = $clonedNodes;
+	}
+
 	/**
 	 * @return array|Tx_IrreWorkspaces_Domain_Model_Node_HasParentInterface[]
 	 */

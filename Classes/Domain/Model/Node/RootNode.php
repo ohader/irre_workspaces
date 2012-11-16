@@ -30,11 +30,6 @@
  */
 class Tx_IrreWorkspaces_Domain_Model_Node_RootNode extends Tx_IrreWorkspaces_Domain_Model_Node_AbstractChildrenNode {
 	/**
-	 * @var string
-	 */
-	protected $comment;
-
-	/**
 	 * @return Tx_IrreWorkspaces_Domain_Model_Node_RootNode
 	 */
 	static public function create() {

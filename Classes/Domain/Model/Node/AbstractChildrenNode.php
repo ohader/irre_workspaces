@@ -56,6 +56,7 @@ abstract class Tx_IrreWorkspaces_Domain_Model_Node_AbstractChildrenNode implemen
 	/**
 	 * @param Tx_IrreWorkspaces_Domain_Model_Node_HasParentInterface $node
 	 * @return Tx_IrreWorkspaces_Domain_Model_Node_AbstractChildrenNode
+	 * @throws LogicException
 	 */
 	public function addChild(Tx_IrreWorkspaces_Domain_Model_Node_HasParentInterface $node) {
 		if ($node->getParent() !== NULL && $node->getParent() !== $this) {
@@ -81,6 +82,10 @@ abstract class Tx_IrreWorkspaces_Domain_Model_Node_AbstractChildrenNode implemen
 		}
 
 		return $this;
+	}
+
+	public function purgeChildren() {
+		$this->children = Tx_IrreWorkspaces_Domain_Model_Node_NodeCollection::create();
 	}
 
 	/**

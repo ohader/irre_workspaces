@@ -73,6 +73,17 @@ class Tx_IrreWorkspaces_Domain_Model_Node_HtmlNode extends Tx_IrreWorkspaces_Dom
 		$this->setEndTag($endTag);
 	}
 
+	public function __clone() {
+		$clonedChildren = clone $this->children;
+
+		foreach ($clonedChildren->__toArray() as $node) {
+			$node->setParent($this);
+		}
+
+		$this->children = $clonedChildren;
+		$this->parent = NULL;
+	}
+
 	/**
 	 * @param Tx_IrreWorkspaces_Domain_Model_Node_HasChildrenInterface $node
 	 */

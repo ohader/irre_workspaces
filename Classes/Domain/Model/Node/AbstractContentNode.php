@@ -46,6 +46,10 @@ abstract class Tx_IrreWorkspaces_Domain_Model_Node_AbstractContentNode implement
 		$this->setContent($content);
 	}
 
+	public function __clone() {
+		$this->parent = NULL;
+	}
+
 	/**
 	 * @param string $content
 	 */
