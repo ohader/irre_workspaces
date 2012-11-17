@@ -94,6 +94,10 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 		new Ext.ux.plugins.FitToParent()
 	],
 
+	listeners: {
+		'groupmousedown': TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupEvent
+	},
+
 	view : new Ext.ux.MultiGroupingView({
 		forceFit: true,
 		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.Tx_IrreWorkspaces_Title]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',

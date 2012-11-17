@@ -61,5 +61,28 @@ TYPO3.TxIrreWorkspaces.Controller = {
 				}
 			});
 		}
+	},
+
+	handleGridViewGroupEvent: function(grid, field, groupValue, e) {
+		var group, pageId, expanded
+		var hd = e.getTarget('.x-grid-group-hd', grid.getView().mainBody);
+
+		if (hd) {
+			// "expanded" has the state after(!) the event,
+			// thus if it was just expanded then the value is true
+			expanded = Ext.get(hd.parentNode).hasClass('x-grid-group-collapsed');
+			group = grid.getView().getGroupById(hd.parentNode.id);
+
+			// Group level "0" are pages
+			if (group && group.group_level === 0) {
+				pageId = group.rs[0].data.livepid;
+
+				if (Ext.isDefined(pageId) && top && top.TYPO3.Backend.NavigationContainer.PageTree) {
+					top.TYPO3.Backend.NavigationContainer.PageTree.select(
+						expanded ? pageId : TYPO3.settings.Workspaces.id
+					);
+				}
+			}
+		}
 	}
 };
