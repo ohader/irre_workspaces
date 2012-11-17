@@ -39,12 +39,13 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	 * This method is required to keep the initial value to be processed.
 	 *
 	 *
-	 * @param array $parameters
+	 * @param array $configuration
 	 * @return void
 	 */
-	public function preProcess(array $parameters) {
-		if ($this->isFlexFormField($parameters)) {
-			$this->valueStack[] = $parameters['value'];
+	public function preProcess(array $configuration) {
+		if ($this->isFlexFormField($configuration)) {
+			$originalParameters = $this->getGetProcessedValueParameters();
+			$this->valueStack[] = $originalParameters['value'];
 		}
 	}
 
@@ -59,20 +60,23 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	 */
 	public function postProcess(array $parameters) {
 		$value = $parameters['value'];
+		$configuration = $parameters['colConf'];
 
-		if ($this->isFlexFormField($parameters)) {
+		if ($this->isFlexFormField($configuration)) {
 			if (empty($this->valueStack)) {
 				throw new RuntimeException('Post-processing was triggered without any pre-processing', 1352712620);
 			}
 
+			$originalParameters = $this->getGetProcessedValueParameters();
+
 			$valueFromStack = array_pop($this->valueStack);
 			$valueStructure = t3lib_div::xml2array($valueFromStack);
 
-			if ($this->canPostProcessFlexForm($parameters) && !empty($valueStructure['data']) && is_array($valueStructure['data'])) {
+			if ($this->canPostProcessFlexForm($configuration, $originalParameters['uid']) && !empty($valueStructure['data']) && is_array($valueStructure['data'])) {
 				$dataStructure = t3lib_BEfunc::getFlexFormDS(
-					$parameters['colConf'],
-					$this->getRecord($parameters),
-					$parameters['table'],
+					$configuration,
+					$this->getRecord($originalParameters),
+					$originalParameters['table'],
 					'',
 					TRUE
 				);
@@ -288,24 +292,23 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	}
 
 	/**
-	 * @param array $parameters
+	 * @param array $configuration
 	 * @return boolean
 	 */
-	protected function isFlexFormField(array $parameters) {
-		return (!empty($parameters['colConf']['type']) && $parameters['colConf']['type'] === 'flex');
+	protected function isFlexFormField(array $configuration) {
+		return (!empty($configuration['type']) && $configuration['type'] === 'flex');
 	}
 
 	/**
-	 * @param array $parameters
+	 * @param array $configuration
+	 * @param integer $uid
 	 * @return boolean
 	 */
-	protected function canPostProcessFlexForm(array $parameters) {
-		$configuration = $parameters['colConf'];
-
+	protected function canPostProcessFlexForm(array $configuration, $uid) {
 		return (
 			empty($configuration['ds_pointerField'])
 			|| is_array($configuration['ds']) && count($configuration['ds']) === 1
-			|| $parameters['uid'] > 0
+			|| $uid > 0
 		);
 	}
 
@@ -318,6 +321,28 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 			$parameters['table'],
 			$parameters['uid']
 		);
+	}
+
+	/**
+	 * @return array|NULL
+	 */
+	protected function getGetProcessedValueParameters() {
+		$arguments = NULL;
+		$stack = debug_backtrace();
+
+		foreach ($stack as $stackItem) {
+			if (isset($stackItem['class']) && $stackItem['class'] === 't3lib_BEfunc' && $stackItem['function'] === 'getProcessedValue') {
+				$arguments = array(
+					'table' => $stackItem['args'][0],
+					'col' => $stackItem['args'][1],
+					'value' => $stackItem['args'][2],
+					'uid' => $stackItem['args'][6],
+				);
+				break;
+			}
+		}
+
+		return $arguments;
 	}
 
 	/**
