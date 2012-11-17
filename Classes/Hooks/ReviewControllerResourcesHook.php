@@ -37,6 +37,8 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 	 */
 	public function renderPreProcess(array $parameters, t3lib_PageRenderer $pageRenderer) {
 		if ($this->isReviewControllerCall($parameters)) {
+			$this->updatePageTreeVisualization();
+
 			$publicResourcesPath = t3lib_extMgm::extRelPath('irre_workspaces') . 'Resources/Public/';
 
 			$jsFiles = $parameters['jsFiles'];
@@ -66,6 +68,19 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Toolbar.js');
 				}
 			}
+		}
+	}
+
+	/**
+	 * Updates the highlighting in the page tree.
+	 *
+	 * @return void
+	 */
+	protected function updatePageTreeVisualization() {
+		$pageId = t3lib_div::_GP('id');
+
+		if (t3lib_div::testInt($pageId) && $pageId > 0) {
+			t3lib_BEfunc::setUpdateSignal('tx_irreworkspaces::updateEditing', $pageId);
 		}
 	}
 

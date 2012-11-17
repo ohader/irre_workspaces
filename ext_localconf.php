@@ -23,6 +23,14 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['postProcessValue
 	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook->postProcess';
 
 
+// Hook to visualize current target page if editing a workspace element
+$TYPO3_CONF_VARS['SC_OPTIONS']['typo3/alt_doc.php']['makeEditForm_accessCheck'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/PageTreeVisualizationHook.php:Tx_IrreWorkspaces_Hooks_PageTreeVisualizationHook->handleEditing';
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['tx_irreworkspaces::updateEditing'] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/PageTreeVisualizationHook.php:Tx_IrreWorkspaces_Hooks_PageTreeVisualizationHook->updateEditing';
+
+
+
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 
 // @todo: Might use signal-dispatcher for TYPO3 4.7, see http://forge.typo3.org/issues/35166
