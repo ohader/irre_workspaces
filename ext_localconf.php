@@ -21,7 +21,8 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['preProcessValue'
 	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook->preProcess';
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['postProcessValue'][] =
 	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook->postProcess';
-
+$TYPO3_CONF_VARS['SC_OPTIONS']['workspaces']['modifyDifferenceArray'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/ValueProcessingHook.php:Tx_IrreWorkspaces_Hooks_ValueProcessingHook';
 
 // Hook to visualize current target page if editing a workspace element
 $TYPO3_CONF_VARS['SC_OPTIONS']['typo3/alt_doc.php']['makeEditForm_accessCheck'][] =
