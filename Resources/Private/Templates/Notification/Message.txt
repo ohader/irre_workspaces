@@ -1,0 +1,23 @@
+=============================================================================
+Workspace: ###workspace.title###
+Aktion:    ###stage.title###
+Akteur:    "###user.title###" <###user.email###>
+=============================================================================
+Kommentar:
+###comment###
+-----------------------------------------------------------------------------
+
+###iterator:data.paths(path)###
+- Pfad: ###iterator.path.title###
+  URL: ###iterator.path.url###
+###iterator:iterator.path.tables(table)###
+  + Tabelle: ###iterator.table.title###
+###iterator:iterator.table.elements(element)###
+    * ###iterator.element.uid###: ###iterator.element.title###
+###/iterator:iterator.table.elements###
+###/iterator:iterator.path.tables###
+###/iterator:data.paths###
+
+=============================================================================
+###system.siteName### (###system.httpHost###)
+=============================================================================

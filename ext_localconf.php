@@ -43,6 +43,8 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Service/GridData.
 
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/ActionHandler.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Workspaces_ExtDirect_ActionHandler.php';
+$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/version/class.tx_version_tcemain.php'] =
+	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Version_TceMain.php';
 
 /*
 DISABLED - Since the workspace module does not show unmodified elements,

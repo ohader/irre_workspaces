@@ -1,0 +1,5 @@
+	# cat=basic//10; type=string; label=notificationMessageSubject: Subject of notifications
+notificationSubject = TYPO3 Workspace Änderungen
+
+	# cat=basic//10; type=string; label=notificationMessageTemplate: Subject of notifications
+notificationMessageTemplate = EXT:irre_workspaces/Resources/Private/Templates/Notification/Message.txt
