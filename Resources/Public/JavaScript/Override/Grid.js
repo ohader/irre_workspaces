@@ -1,14 +1,23 @@
-TYPO3.Workspaces.SelectionModel.addListener(
-	'rowselect',
-	TYPO3.TxIrreWorkspaces.Controller.handleGridRowSelectEvent,
-	TYPO3.Workspaces.SelectionModel
-);
+/**
+ * Handles selection of all related IRRE elements
+ * if one single of that collection has been selected
+ *
+ * @disabled in favour of handling (de-)select all using a header checkbox
+ * @see TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupSelectEvent
+ */
+/*
+	TYPO3.Workspaces.SelectionModel.addListener(
+		'rowselect',
+		TYPO3.TxIrreWorkspaces.Controller.handleGridRowSelectEvent,
+		TYPO3.Workspaces.SelectionModel
+	);
 
-TYPO3.Workspaces.SelectionModel.addListener(
-	'rowdeselect',
-	TYPO3.TxIrreWorkspaces.Controller.handleGridRowDeselectEvent,
-	TYPO3.Workspaces.SelectionModel
-);
+	TYPO3.Workspaces.SelectionModel.addListener(
+		'rowdeselect',
+		TYPO3.TxIrreWorkspaces.Controller.handleGridRowDeselectEvent,
+		TYPO3.Workspaces.SelectionModel
+	);
+*/
 
 TYPO3.Workspaces.SelectionModel.addListener(
 	'selectionchange',
@@ -95,18 +104,11 @@ TYPO3.Workspaces.WorkspaceGrid = new Ext.ux.MultiGroupingGrid({
 	],
 
 	listeners: {
-		'groupmousedown': TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupEvent
+		groupmousedown: TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupExpandEvent,
+		beforegroupmousedown: TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupSelectEvent
 	},
 
-	view : new Ext.ux.MultiGroupingView({
-		forceFit: true,
-		groupTextTpl : '{text}: {[values.group_level == 0 ? values.gvalue : values.rs[0].json.Tx_IrreWorkspaces_Title]} ({[values.rs.length]} {[values.rs.length > 1 ? "' + TYPO3.lang["items"] + '" : "' + TYPO3.lang["item"] + '"]})',
-		enableGroupingMenu: false,
-		displayEmptyFields: true,
-		removeEmptyFieldsGroups: true,
-  		enableNoGroups: false,
-		hideGroupedColumn: true
-	}),
+	view : TYPO3.TxIrreWorkspaces.Helper.createMultiGroupingView(),
 
 	bbar : TYPO3.Workspaces.Toolbar.FullBottomBar,
 	tbar : TYPO3.Workspaces.Toolbar.FullTopToolbar

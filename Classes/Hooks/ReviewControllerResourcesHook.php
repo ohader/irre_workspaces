@@ -44,6 +44,13 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 			$jsFiles = $parameters['jsFiles'];
 			$parameters['jsFiles'] = array();
 
+			$pageRenderer->addJsFile(
+				$publicResourcesPath . 'JavaScript/Helper.js',
+				'text/javascript',
+				TRUE,
+				TRUE
+			);
+
 			$pageRenderer->addCssFile($publicResourcesPath . 'Stylesheet/Module.css');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Actions.js');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');

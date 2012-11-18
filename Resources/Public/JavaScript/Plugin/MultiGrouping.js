@@ -484,6 +484,11 @@ Ext.ux.MultiGroupingView = Ext.extend(Ext.grid.GroupingView, {
 	 */
 	processEvent: function(name, e)
 	{
+		// Stops processing of this event (if return value is false)
+		if (this.grid.fireEvent('beforegroup' + name, this.grid, field, groupValue, e) === false) {
+			return;
+		}
+
 		Ext.grid.GroupingView.superclass.processEvent.call(this, name, e);
 		var hd = e.getTarget('.x-grid-group-hd', this.mainBody);
 		if (hd)

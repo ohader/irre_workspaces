@@ -22,7 +22,7 @@ TYPO3.TxIrreWorkspaces.Controller = {
 	handleGridRowSelectEvent: function(selection, index, row) {
 		if (!TYPO3.TxIrreWorkspaces.Controller.isHandlerActive) {
 			TYPO3.TxIrreWorkspaces.Controller.isHandlerActive = true;
-			TYPO3.TxIrreWorkspaces.Controller.findCollectionElements(
+			TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentRow(
 					selection,
 					index,
 					row,
@@ -35,7 +35,7 @@ TYPO3.TxIrreWorkspaces.Controller = {
 	handleGridRowDeselectEvent: function(selection, index, row) {
 		if (!TYPO3.TxIrreWorkspaces.Controller.isHandlerActive) {
 			TYPO3.TxIrreWorkspaces.Controller.isHandlerActive = true;
-			TYPO3.TxIrreWorkspaces.Controller.findCollectionElements(
+			TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentRow(
 					selection,
 					index,
 					row,
@@ -45,8 +45,18 @@ TYPO3.TxIrreWorkspaces.Controller = {
 		}
 	},
 
-	findCollectionElements: function(selection, currentIndex, currentRow, isSelect) {
+	setCollectionElementsByCurrentRow: function(selection, currentIndex, currentRow, isSelect) {
 		var currentValue = currentRow.json.Tx_IrreWorkspaces_Collection;
+		TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentValue(
+			selection,
+			currentIndex,
+			currentValue,
+			isSelect
+		);
+	},
+
+	setCollectionElementsByCurrentValue: function(selection, currentIndex, currentValue, isSelect) {
+		currentValue = parseInt(currentValue);
 
 		if (currentValue) {
 			selection.grid.getStore().each(function(row, index) {
@@ -63,7 +73,15 @@ TYPO3.TxIrreWorkspaces.Controller = {
 		}
 	},
 
-	handleGridViewGroupEvent: function(grid, field, groupValue, e) {
+	/**
+	 * Handles additional actions on expanding/collapsing a group element.
+	 *
+	 * @param grid
+	 * @param field
+	 * @param groupValue
+	 * @param e
+	 */
+	handleGridViewGroupExpandEvent: function(grid, field, groupValue, e) {
 		var group, pageId, expanded
 		var hd = e.getTarget('.x-grid-group-hd', grid.getView().mainBody);
 
@@ -83,6 +101,42 @@ TYPO3.TxIrreWorkspaces.Controller = {
 					);
 				}
 			}
+		}
+	},
+
+	/**
+	 * Handles additional actions on selecting a group element
+	 * (selects all sub elements as well)
+	 *
+	 * @param grid
+	 * @param field
+	 * @param groupValue
+	 * @param e
+	 * @return {Boolean} Whether to stop handling this event
+	 * @see Ext.ux.MultiGroupingView.processEvent
+	 */
+	handleGridViewGroupSelectEvent: function(grid, field, groupValue, e) {
+		var parent, selected, collectionId,
+			mainBody = grid.getView().mainBody,
+			checker = e.getTarget('.x-grid3-hd-checker', mainBody, true);
+
+		if (checker) {
+			// Toggles view and assigns data
+			parent = checker.findParent('.x-grid-group-hd', mainBody, true);
+			parent.toggleClass('x-grid3-hd-checker-on');
+			selected = parent.hasClass('x-grid3-hd-checker-on');
+			collectionId = parent.getAttribute('data-collection-id');
+
+			// Selects all related IRRE elements of this collection
+			TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentValue(
+				grid.getSelectionModel(),
+				null,
+				collectionId,
+				selected
+			);
+
+			// Stops processing of this event
+			return false;
 		}
 	}
 };
