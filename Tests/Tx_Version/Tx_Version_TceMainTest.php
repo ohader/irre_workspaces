@@ -234,8 +234,11 @@ class Tx_Version_TceMainTest extends Tx_Phpunit_TestCase {
 	}
 
 	public function assertDeliverMailCallback(array $recipients, $subject, $message) {
+		echo($message);
+		ob_flush();
 		$this->assertEquals($this->testRecipients, $recipients);
 		$this->assertContains($this->testStageTitle, $message);
+		$this->assertContains($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'], $message);
 		$this->assertNotEmpty($subject);
 	}
 
