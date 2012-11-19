@@ -30,7 +30,11 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['typo3/alt_doc.php']['makeEditForm_accessCheck'][
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['tx_irreworkspaces::updateEditing'] =
 	'EXT:' . $_EXTKEY . '/Classes/Hooks/PageTreeVisualizationHook.php:Tx_IrreWorkspaces_Hooks_PageTreeVisualizationHook->updateEditing';
 
-
+// Hook to store original request URL during login
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->handle';
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->fetch';
 
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 

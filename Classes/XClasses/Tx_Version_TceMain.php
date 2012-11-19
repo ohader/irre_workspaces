@@ -63,7 +63,8 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	 */
 	protected function notifyStageChange(array $stat, $stageId, $table, $id, $comment, t3lib_TCEmain $tcemainObj, array $notificationAlternativeRecipients = array()) {
 		$elements = $this->extractElements($table, $id);
-		$data = $this->getElementData($elements);
+		$linkData = array('workspaceId' => $stat['uid'], 'stageId' => $stageId);
+		$data = $this->getElementData($elements, $linkData);
 
 		$system = array(
 			'httpHost' => t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
@@ -123,7 +124,7 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	 * @param array $elements
 	 * @return array
 	 */
-	protected function getElementData(array $elements) {
+	protected function getElementData(array $elements, array $linkData = array()) {
 		$data = array(
 			'paths' => array(),
 		);
@@ -138,6 +139,7 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 					$data['paths'][$pid] = array(
 						'pid' => $pid,
 						'title' => '',
+						'url' => '',
 						'tables' => array(),
 					);
 				}
@@ -163,9 +165,25 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 
 		foreach ($data['paths'] as $pid => &$path) {
 			$path['title'] = t3lib_BEfunc::getRecordPath($pid, '', 20);
+			$path['url'] = $this->generateLink($pid, $linkData);
 		}
 
 		return $data;
+	}
+
+	/**
+	 * @param integer $pageId
+	 * @param array $linkData
+	 * @return string
+	 */
+	protected function generateLink($pageId, array $linkData = array()) {
+		$domain = t3lib_BEfunc::getViewDomain($pageId);
+		$path = '/typo3/mod.php?M=web_WorkspacesWorkspaces&id=' . $pageId .
+			t3lib_div::implodeArrayForUrl('data', $linkData) .
+			t3lib_div::implodeArrayForUrl('tx_workspaces_web_workspacesworkspaces', array('controller' => 'Preview'));
+		$url = $domain . $path;
+
+		return $domain . '/typo3/index.php?' . Tx_IrreWorkspaces_Service_RedirectService::getInstance()->getValueForUrl($url);
 	}
 
 	/**
