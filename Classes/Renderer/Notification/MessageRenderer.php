@@ -44,7 +44,13 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 	 * @return string
 	 */
 	public function render($content) {
-		return $this->substituteMarkers($content);
+		$content = $this->substituteMarkers($content, FALSE);
+
+		if ($this->replaceUnknownMarkers) {
+			$content = $this->substituteMarkers($content, TRUE);
+		}
+
+		return $content;
 	}
 
 	/**
@@ -69,12 +75,11 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 	 * Substitutes markes by accordant Fluid-styled content lookups.
 	 *
 	 * @param string $content
+	 * @param boolean $replaceUnknownMarkers
 	 * @return string
 	 */
-	protected function substituteMarkers($content) {
+	protected function substituteMarkers($content, $replaceUnknownMarkers = FALSE) {
 		$matches = array();
-		$search = array();
-		$replace = array();
 
 			// Iterator pattern:
 			// Example:
@@ -83,6 +88,8 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 			// ###/iterator:object.property###
 		if (preg_match_all('!###iterator:([^#(]+)\(([^)]+)\)###\n?(.+)\n?###/iterator:\1###\n?!mis', $content, $matches)) {
 			$variables = $this->variables;
+			$iteratorSearch = array();
+			$iteratorReplace = array();
 
 			foreach ($matches[0] as $index => $rawData) {
 				$path = $matches[1][$index];
@@ -104,19 +111,28 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 					}
 				}
 
-				$search[] = $rawData;
-				$replace[] = $result;
+				$iteratorSearch[] = $rawData;
+				$iteratorReplace[] = $result;
 			}
+
+			$content = str_replace(
+				$iteratorSearch,
+				$iteratorReplace,
+				$content
+			);
 
 			$this->variables = $variables;
 		}
 
 			// Regular string elements:
 		if (preg_match_all('/###([^#]+)###/', $content, $matches)) {
+			$search = array();
+			$replace = array();
+
 			foreach ($matches[1] as $index => $path) {
 				$resolvedValue = $this->resolveVariable($path);
 
-				if ($this->replaceUnknownMarkers || $resolvedValue !== NULL) {
+				if ($replaceUnknownMarkers || $resolvedValue !== NULL) {
 					$search[] = $matches[0][$index];
 					$replace[] = $resolvedValue;
 				}
@@ -139,19 +155,19 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 	 */
 	protected function resolveVariable($path, $toString = TRUE) {
 		$data = NULL;
-		$segments = t3lib_div::trimExplode('.', strtolower($path));
+		$segments = t3lib_div::trimExplode('.', $path);
 		$lastSegment = $segments[count($segments) - 1];
 
 		foreach ($segments as $index => $segment) {
-			if ($index === 0 && isset($this->variables[$segment])) {
-				$data = $this->variables[$segment];
-			} elseif (is_object($data) && method_exists($data, 'get' . ucfirst($segment))) {
+			if ($index === 0 && NULL !== $possibleKey = $this->getPossibleArrayKey($this->variables, $segment)) {
+				$data = $this->variables[$possibleKey];
+			} elseif (is_object($data) && NULL !== $possibleMethod = $this->getPossibleObjectMethod($data, $segment)) {
 				$data = call_user_func_array(
-					array($data, 'get' . ucfirst($segment)),
+					array($data, $possibleMethod),
 					array()
 				);
-			} elseif (is_array($data) && isset($data[$segment])) {
-				$data = $data[$segment];
+			} elseif (is_array($data) && NULL !== $possibleKey = $this->getPossibleArrayKey($data, $segment)) {
+				$data = $data[$possibleKey];
 			} else {
 				$data = NULL;
 				$toString = FALSE;
@@ -174,6 +190,32 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 		}
 
 		return $data;
+	}
+
+	protected function getPossibleArrayKey(array $array, $key) {
+		$possibleKey = NULL;
+		$lowerKey = strtolower($key);
+
+		if (isset($array[$key])) {
+			$possibleKey = $key;
+		} elseif (isset($array[$lowerKey])) {
+			$possibleKey = $lowerKey;
+		}
+
+		return $possibleKey;
+	}
+
+	protected function getPossibleObjectMethod($object, $key) {
+		$possibleMethod = NULL;
+		$lowerKey = strtolower($key);
+
+		if (method_exists($object, 'get' . ucfirst($key))) {
+			$possibleMethod = 'get' . ucfirst($key);
+		} elseif (method_exists($object, 'get' . ucfirst($lowerKey))) {
+			$possibleMethod = 'get' . ucfirst($lowerKey);
+		}
+
+		return $possibleMethod;
 	}
 }
 
