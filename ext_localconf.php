@@ -36,6 +36,10 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp
 $TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing'][] =
 	'EXT:' . $_EXTKEY . '/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->fetch';
 
+// Hook to render preview URL for non page-related records (e.g. plugin records)
+$TYPO3_CONF_VARS['SC_OPTIONS']['workspaces']['viewSingleRecord'] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/PreviewHook.php:Tx_IrreWorkspaces_Hooks_PreviewHook->getSingleRecordLink';
+
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 
 // @todo: Might use signal-dispatcher for TYPO3 4.7, see http://forge.typo3.org/issues/35166
