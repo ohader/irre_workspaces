@@ -93,32 +93,6 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	}
 
 	/**
-	 * Post-processes the differences array shown in workspace module.
-	 * Basically all newlines are transformed to accordant <br/> HTML tags.
-	 *
-	 * @param stdClass $parameter
-	 * @param array $diffReturnArray
-	 * @param array $liveReturnArray
-	 * @param t3lib_diff $differenceHandler
-	 * @see tx_Workspaces_ExtDirect_Server::getRowDetails
-	 */
-	public function modifyDifferenceArray($parameter, array &$diffReturnArray, array &$liveReturnArray, t3lib_diff $differenceHandler) {
-		$table = $parameter->table;
-
-		foreach ($diffReturnArray as &$diffElement) {
-			if ($this->isFileField($table, $diffElement['field']) === FALSE) {
-				$diffElement['content'] = nl2br($diffElement['content']);
-			}
-		}
-
-		foreach ($liveReturnArray as &$liveElement) {
-			if ($this->isFileField($table, $liveElement['field']) === FALSE) {
-				$liveElement['content'] = nl2br($liveElement['content']);
-			}
-		}
-	}
-
-	/**
 	 * @param array $processedData
 	 * @return string
 	 * @deprecated Currently not used due to a hardcoded htmlspecialchars() in t3lib_diff
@@ -320,20 +294,6 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	}
 
 	/**
-	 * Determines whether a field is of type file.
-	 *
-	 * @param string $table
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isFileField($table, $field) {
-		return (
-			$GLOBALS['TCA'][$table]['columns'][$field]['config']['type'] == 'group'
-			&& $GLOBALS['TCA'][$table]['columns'][$field]['config']['internal_type'] == 'file'
-		);
-	}
-
-	/**
 	 * @param array $configuration
 	 * @return boolean
 	 */
@@ -385,6 +345,28 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 		}
 
 		return $arguments;
+	}
+
+	/**
+	 * Determines whether a field is considered to be internal.
+	 *
+	 * @param string $table Name of the table
+	 * @param string $field Name of the field to be checked
+	 * @return boolean
+	 */
+	protected function isInternalField($table, $field) {
+		$result = FALSE;
+
+			// Regular system fields:
+		if (t3lib_div::inList('uid,pid', $field)) {
+			$result = TRUE;
+
+			// Translation differences:
+		} elseif (!empty($GLOBALS['TCA'][$table]['ctrl']['transOrigDiffSourceField']) && $field === $GLOBALS['TCA'][$table]['ctrl']['transOrigDiffSourceField']) {
+			$result = TRUE;
+		}
+
+		return $result;
 	}
 
 	/**
