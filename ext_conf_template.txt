@@ -3,3 +3,21 @@ notificationSubject = TYPO3 Workspace Änderungen
 
 	# cat=basic//10; type=string; label=notificationMessageTemplate: Subject of notifications
 notificationMessageTemplate = EXT:irre_workspaces/Resources/Private/Templates/Notification/Message.txt
+
+	# cat=basic//10; type=boolean; label=enableFlexFormRendering: Enables better FlexForm rendering in workspace module
+enableFlexFormRendering = 1
+
+	# cat=basic//10; type=boolean; label=enableRecordReduction: Enables reduction of non-modified elements in workspace module
+enableRecordReduction = 1
+
+	# cat=basic//10; type=boolean; label=enableRecordDetailReduction: Enables reduction of internal fields in element history in workspace module
+enableRecordDetailReduction = 1
+
+	# cat=basic//10; type=boolean; label=enableAlternativeNotification: Enables alternative notification rendering
+enableAlternativeNotification = 1
+
+	# cat=basic//10; type=boolean; label=enablePageTreeUpdateOnEditing: Enables highlighting of accordant page in page-tree if editing a record out of the workspace module
+enablePageTreeUpdateOnEditing = 1
+
+	# cat=basic//10; type=boolean; label=enableCache: Enables caching of the workspace elements
+enableCache = 1

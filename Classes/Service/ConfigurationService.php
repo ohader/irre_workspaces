@@ -31,6 +31,12 @@
 class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton {
 	const KEY_NotificationSubject = 'notificationSubject';
 	const KEY_NotificationMessageTemplate = 'notificationMessageTemplate';
+	const KEY_EnableFlexFormRendering = 'enableFlexFormRendering';
+	const KEY_EnableRecordReduction = 'enableRecordReduction';
+	const KEY_EnableRecordDetailReduction = 'enableRecordDetailReduction';
+	const KEY_EnableAlternativeNotification = 'enableAlternativeNotification';
+	const KEY_EnablePageTreeUpdateOnEditing = 'enablePageTreeUpdateOnEditing';
+	const KEY_EnableCache = 'enableCache';
 
 	/**
 	 * @var array
@@ -65,6 +71,48 @@ class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton 
 	 */
 	public function getNotificationMessageTemplate() {
 		return $this->get(self::KEY_NotificationMessageTemplate);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableFlexFormRendering() {
+		return (bool) $this->get(self::KEY_EnableFlexFormRendering);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableRecordReduction() {
+		return (bool) $this->get(self::KEY_EnableRecordReduction);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableRecordDetailReduction() {
+		return (bool) $this->get(self::KEY_EnableRecordDetailReduction);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableAlternativeNotification() {
+		return (bool) $this->get(self::KEY_EnableAlternativeNotification);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnablePageTreeUpdateOnEditing() {
+		return (bool) $this->get(self::KEY_EnablePageTreeUpdateOnEditing);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableCache() {
+		return (bool) $this->get(self::KEY_EnableCache);
 	}
 
 	/**

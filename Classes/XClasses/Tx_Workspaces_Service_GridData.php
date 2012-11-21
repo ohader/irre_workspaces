@@ -90,6 +90,23 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
+	 * Checks if a cache entry is given for given versions and filter text and tries to load the data array from cache.
+	 *
+	 * @param array $versions All records uids etc. First key is table name, second key incremental integer. Records are associative arrays with uid, t3ver_oid and t3ver_swapmode fields. The pid of the online record is found as "livepid" the pid of the offline record is found in "wspid"
+	 * @param string $filterTxt The given filter text from the grid.
+	 * @return boolean
+	 */
+	protected function getDataArrayFromCache (array $versions, $filterTxt) {
+		$result = FALSE;
+
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableCache()) {
+			$result = parent::getDataArrayFromCache($versions, $filterTxt);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Resolves dependencies of nested structures
 	 * and sort data elements considering these dependencies.
 	 *
