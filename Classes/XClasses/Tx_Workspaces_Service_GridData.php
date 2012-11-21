@@ -62,6 +62,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 		$this->extendDataArray();
 		$this->resolveDataDependencies();
+		$this->reduceDataArray();
 		$this->purgeDataArray();
 	}
 
@@ -189,6 +190,28 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	/**
 	 * @return void
 	 */
+	protected function reduceDataArray() {
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordReduction()) {
+			foreach ($this->dataArray as $index => $dataElement) {
+				$combinedRecord = Tx_Workspaces_Domain_Model_CombinedRecord::create(
+					$dataElement['table'],
+					$dataElement['t3ver_oid'],
+					$dataElement['uid']
+				);
+
+				if ($this->getDeviationService()->hasDeviation($combinedRecord) === FALSE) {
+					unset($this->dataArray[$index]);
+				}
+			}
+
+			// Update array index
+			$this->dataArray = array_merge($this->dataArray, array());
+		}
+	}
+
+	/**
+	 * @return void
+	 */
 	protected function extendDataArray() {
 		foreach ($this->dataArray as &$dataElement) {
 			$dataElement = $this->setCollectionIdentifier($dataElement);
@@ -296,6 +319,13 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	public function calculateChangePercentage($table, array $diffRecordOne, array $diffRecordTwo) {
 		return 0;
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Record_DeviationService
+	 */
+	protected function getDeviationService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Record_DeviationService');
 	}
 
 	/**
