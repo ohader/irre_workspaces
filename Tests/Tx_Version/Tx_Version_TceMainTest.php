@@ -124,7 +124,7 @@ class Tx_Version_TceMainTest extends Tx_Phpunit_TestCase {
 		$this->testStageId = -20;
 
 		$this->testRecipients = array(
-			'oliver.hader@typo3.org',
+			array('email' => 'oliver.hader@typo3.org'),
 		);
 
 		$this->testNotifications = array(
@@ -262,7 +262,11 @@ class Tx_Version_TceMainTest extends Tx_Phpunit_TestCase {
 		#echo($message);
 		#ob_flush();
 
-		$this->assertEquals($this->testRecipients, $recipients);
+		$expectedRecipients = array(
+			'oliver.hader@typo3.org',
+		);
+
+		$this->assertEquals($expectedRecipients, $recipients);
 		$this->assertContains($this->testStageTitle, $message);
 		$this->assertContains($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'], $message);
 		$this->assertNotEmpty($subject);

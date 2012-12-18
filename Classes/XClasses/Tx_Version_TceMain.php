@@ -97,12 +97,30 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 			->render($this->getNotificationMessageTemplate());
 
 		$notificationSubject = $this->getNotificationSubject();
+		$notificationRecipients = array_map(
+			array($this, 'getRecipientAddress'),
+			$notificationAlternativeRecipients
+		);
 
 		$this->deliverMail(
-			$notificationAlternativeRecipients,
+			$notificationRecipients,
 			$notificationSubject,
 			$notificationMessage
 		);
+	}
+
+	/**
+	 * @param array|string $recipient
+	 * @return string
+	 */
+	protected function getRecipientAddress($recipient) {
+		$recipientAddress = $recipient;
+
+		if (is_array($recipient) && isset($recipient['email'])) {
+			$recipientAddress = $recipient['email'];
+		}
+
+		return $recipientAddress;
 	}
 
 	/**
