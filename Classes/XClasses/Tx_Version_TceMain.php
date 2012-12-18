@@ -122,6 +122,7 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 
 	/**
 	 * @param array $elements
+	 * @param array $linkData
 	 * @return array
 	 */
 	protected function getElementData(array $elements, array $linkData = array()) {
@@ -195,7 +196,7 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 
 		foreach ($elements as $element) {
 			$table = $element['table'];
-			$id = $element['id'];
+			$id = $element['uid'];
 
 			if (!isset($elementIdsByTable[$table])) {
 				$elementIdsByTable[$table] = array();

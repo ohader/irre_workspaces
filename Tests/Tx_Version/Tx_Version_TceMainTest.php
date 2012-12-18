@@ -225,6 +225,31 @@ class Tx_Version_TceMainTest extends Tx_Phpunit_TestCase {
 	/**
 	 * @test
 	 */
+	public function elementAreDeliveredPerTable() {
+		$testTableA = uniqid('table_a');
+		$testTableB = uniqid('table_b');
+
+		$elements = array(
+			array('table' => $testTableA, 'uid' => '1'),
+			array('table' => $testTableB, 'uid' => '1'),
+			array('table' => $testTableA, 'uid' => '2'),
+			array('table' => $testTableB, 'uid' => '2'),
+			array('table' => $testTableA, 'uid' => '3'),
+			array('table' => $testTableB, 'uid' => '3'),
+		);
+
+		$expectedResult = array(
+			$testTableA => array('1', '2', '3'),
+			$testTableB => array('1', '2', '3'),
+		);
+
+		$result = $this->versionTceMain->_callMethod('getElementIdsPerTable', $elements);
+		$this->assertEquals($expectedResult, $result);
+	}
+
+	/**
+	 * @test
+	 */
 	public function singleElementNotificationIsProcessed() {
 		$this->versionTceMain->expects($this->once())->method('deliverMail')
 			->will($this->returnCallback(array($this, 'assertDeliverMailCallback')));
@@ -234,8 +259,9 @@ class Tx_Version_TceMainTest extends Tx_Phpunit_TestCase {
 	}
 
 	public function assertDeliverMailCallback(array $recipients, $subject, $message) {
-		echo($message);
-		ob_flush();
+		#echo($message);
+		#ob_flush();
+
 		$this->assertEquals($this->testRecipients, $recipients);
 		$this->assertContains($this->testStageTitle, $message);
 		$this->assertContains($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'], $message);
