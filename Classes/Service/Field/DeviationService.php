@@ -59,6 +59,7 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 			'transOrigDiffSourceField',
 			'transOrigPointerField',
 			'tstamp',
+			'sortby',
 		),
 	);
 
