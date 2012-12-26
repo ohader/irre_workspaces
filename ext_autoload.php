@@ -42,6 +42,7 @@ return array(
 	'tx_irreworkspaces_service_htmldifferenceservicetest' => $extensionPath . 'Tests/Tx_IrreWorkspaces/Classes/Service/HtmlDifferenceServiceTest.php',
 	'tx_irreworkspaces_service_node_parserservice' => $extensionClassesPath . 'Service/Node/ParserService.php',
 	'tx_irreworkspaces_service_node_parserservicetest' => $extensionPath . 'Tests/Tx_IrreWorkspaces/Classes/Service/Node/ParserServiceTest.php',
+	'tx_irreworkspaces_service_field_deviationservice' => $extensionClassesPath . 'Service/Field/DeviationService.php',
 	'tx_irreworkspaces_service_record_deviationservice' => $extensionClassesPath . 'Service/Record/DeviationService.php',
 	'tx_irreworkspaces_service_redirectservice' => $extensionClassesPath . 'Service/RedirectService.php',
 	'tx_irreworkspaces_service_sanitazionservice' => $extensionClassesPath . 'Service/SanitazionService.php',

@@ -29,39 +29,6 @@
  * @package EXT:irre_workspaces
  */
 class Tx_IrreWorkspaces_Service_Record_DeviationService implements t3lib_Singleton {
-	const STATE_New = 'new';
-	const STATE_Deleted = 'deleted';
-	const STATE_Moved = 'moved';
-	const STATE_Modified = 'modified';
-
-	/**
-	 * @var array
-	 */
-	protected $systemFields = array(
-		'fields' => array(
-			'uid',
-			'pid',
-			't3ver_oid',
-			't3ver_id',
-			't3ver_wsid',
-			't3ver_label',
-			't3ver_state', // Delete and move placeholder
-			't3ver_stage',
-			't3ver_count',
-			't3ver_tstamp',
-			't3ver_move_id', // Move placeholder
-		),
-		'tcaControlKeys' => array(
-			'crdate',
-			'cruser_id',
-			'deleted',
-			'origUid',
-			'transOrigDiffSourceField',
-			'transOrigPointerField',
-			'tstamp',
-		),
-	);
-
 	/**
 	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
 	 * @return boolean
@@ -85,77 +52,26 @@ class Tx_IrreWorkspaces_Service_Record_DeviationService implements t3lib_Singlet
 
 	/**
 	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
+	 * @return boolean
+	 */
+	public function isModified(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord) {
+		return $this->getFieldDeviationService()->isModified(
+			$combinedRecord->getVersionRecord()->getRow()
+		);
+	}
+
+	/**
+	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
 	 * @param string $field
 	 * @return boolean
 	 */
 	protected function isDeviation(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		$result = TRUE;
-
-		if ($this->isSystemField($combinedRecord, $field)) {
-			$result = FALSE;
-		} elseif ($this->isUndefinedField($combinedRecord, $field)) {
-			$result = FALSE;
-		} elseif ($this->isEqual($combinedRecord, $field)) {
-			$result = FALSE;
-		} elseif ($this->isNotRelevant($combinedRecord, $field)) {
-			$result = FALSE;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isSystemField(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		return in_array($field, $this->getSystemFields($combinedRecord));
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isUndefinedField(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		return (in_array($field, $this->getDefinedFields($combinedRecord)) === FALSE);
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isEqual(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		$liveRow = $combinedRecord->getLiveRecord()->getRow();
-		$versionRow = $combinedRecord->getVersionRecord()->getRow();
-		return ($liveRow[$field] === $versionRow[$field]);
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @param string $field
-	 * @return boolean
-	 */
-	protected function isNotRelevant(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		$result = FALSE;
-		$fieldDefinition = $this->getFieldDefinition($combinedRecord, $field);
-
-		if (t3lib_div::inList('passthrough,none', $fieldDefinition['type'])) {
-			$result = TRUE;
-		} elseif ($fieldDefinition['type'] === 'inline' && !empty($fieldDefinition['foreign_field'])) {
-			$result = TRUE;
-		} elseif (!empty($fieldDefinition['MM'])) {
-			$result = TRUE;
-		}
-
-		return $result;
-	}
-
-	protected function getFieldDefinition(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord, $field) {
-		$table = $combinedRecord->getTable();
-		return $GLOBALS['TCA'][$table]['columns'][$field]['config'];
+		return $this->getFieldDeviationService()->isDeviation(
+			$combinedRecord->getTable(),
+			$field,
+			$combinedRecord->getLiveRecord()->getRow(),
+			$combinedRecord->getVersionRecord()->getRow()
+		);
 	}
 
 	/**
@@ -167,70 +83,10 @@ class Tx_IrreWorkspaces_Service_Record_DeviationService implements t3lib_Singlet
 	}
 
 	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @return array
+	 * @return Tx_IrreWorkspaces_Service_Field_DeviationService
 	 */
-	protected function getDefinedFields(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord) {
-		$table = $combinedRecord->getTable();
-		return array_keys($GLOBALS['TCA'][$table]['columns']);
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @return array
-	 */
-	protected function getSystemFields(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord) {
-		$systemFields = $this->systemFields['fields'];
-		$table = $combinedRecord->getTable();
-		$tcaControl = $GLOBALS['TCA'][$table]['ctrl'];
-
-		foreach ($this->systemFields['tcaControlKeys'] as $key) {
-			if (!empty($tcaControl[$key])) {
-				 $field = $tcaControl[$key];
-				if (!in_array($field, $systemFields)) {
-					$systemFields[] = $field;
-				}
-			}
-		}
-
-		return $systemFields;
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @return boolean
-	 */
-	protected function isModified(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord) {
-		$versionState = $this->getVersionState($combinedRecord);
-		return ($versionState === self::STATE_Modified);
-	}
-
-	/**
-	 * @param Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord
-	 * @return NULL|string
-	 */
-	protected function getVersionState(Tx_Workspaces_Domain_Model_CombinedRecord $combinedRecord) {
-		$versionState = NULL;
-		$versionRow = $combinedRecord->getVersionRecord()->getRow();
-
-		if (isset($versionRow['t3ver_state'])) {
-			switch ($versionRow['t3ver_state']) {
-				case -1:
-					$versionState = self::STATE_New;
-					break;
-				case 1:
-				case 2:
-				$versionState = self::STATE_Deleted;
-					break;
-				case 4:
-					$versionState = self::STATE_Moved;
-					break;
-				default:
-					$versionState = self::STATE_Modified;
-			}
-		}
-
-		return $versionState;
+	protected function getFieldDeviationService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
 	}
 }
 

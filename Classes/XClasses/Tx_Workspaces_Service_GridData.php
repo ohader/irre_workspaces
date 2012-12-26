@@ -216,7 +216,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 					$dataElement['uid']
 				);
 
-				if ($this->getDeviationService()->hasDeviation($combinedRecord) === FALSE) {
+				if ($this->getRecordDeviationService()->hasDeviation($combinedRecord) === FALSE) {
 					unset($this->dataArray[$index]);
 				}
 			}
@@ -341,7 +341,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	/**
 	 * @return Tx_IrreWorkspaces_Service_Record_DeviationService
 	 */
-	protected function getDeviationService() {
+	protected function getRecordDeviationService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Record_DeviationService');
 	}
 

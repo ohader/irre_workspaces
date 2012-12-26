@@ -42,9 +42,11 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 		$modified = FALSE;
 		$table = $parameter->table;
 
+		$fieldDeviationService = $this->getFieldDeviationService();
+
 		// Unset internal values
 		foreach ($diffReturnArray as $index => $diffElement) {
-			if ($this->isInternalField($table, $diffElement['field'])) {
+			if ($fieldDeviationService->isSystemField($table, $diffElement['field'])) {
 				unset($diffReturnArray[$index]);
 				unset($liveReturnArray[$index]);
 				$modified = TRUE;
@@ -53,14 +55,14 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 
 		// Fix content
 		foreach ($diffReturnArray as &$diffElement) {
-			if ($this->isFileField($table, $diffElement['field']) === FALSE) {
+			if ($fieldDeviationService->isFileField($table, $diffElement['field']) === FALSE) {
 				$diffElement['content'] = nl2br(trim($diffElement['content']));
 			}
 		}
 
 		// Fix content
 		foreach ($liveReturnArray as &$liveElement) {
-			if ($this->isFileField($table, $liveElement['field']) === FALSE) {
+			if ($fieldDeviationService->isFileField($table, $liveElement['field']) === FALSE) {
 				$liveElement['content'] = nl2br(trim($liveElement['content']));
 			}
 		}
@@ -73,39 +75,10 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 	}
 
 	/**
-	 * Determines whether a field is of type file.
-	 *
-	 * @param string $table
-	 * @param string $field
-	 * @return boolean
+	 * @return Tx_IrreWorkspaces_Service_Field_DeviationService
 	 */
-	protected function isFileField($table, $field) {
-		return (
-			$GLOBALS['TCA'][$table]['columns'][$field]['config']['type'] == 'group'
-			&& $GLOBALS['TCA'][$table]['columns'][$field]['config']['internal_type'] == 'file'
-		);
-	}
-
-	/**
-	 * Determines whether a field is considered to be internal.
-	 *
-	 * @param string $table Name of the table
-	 * @param string $field Name of the field to be checked
-	 * @return boolean
-	 */
-	protected function isInternalField($table, $field) {
-		$result = FALSE;
-
-			// Regular system fields:
-		if (t3lib_div::inList('uid,pid', $field)) {
-			$result = TRUE;
-
-			// Translation differences:
-		} elseif (!empty($GLOBALS['TCA'][$table]['ctrl']['transOrigDiffSourceField']) && $field === $GLOBALS['TCA'][$table]['ctrl']['transOrigDiffSourceField']) {
-			$result = TRUE;
-		}
-
-		return $result;
+	protected function getFieldDeviationService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
 	}
 }
 
