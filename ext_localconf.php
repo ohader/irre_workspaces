@@ -59,6 +59,11 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/Service/GridData.
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/ActionHandler.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Workspaces_ExtDirect_ActionHandler.php';
 
+// XClass to fetch all nodes of the page-tree at once
+$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/tree/pagetree/extdirect/class.t3lib_tree_pagetree_extdirect_tree.php'] =
+	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/T3lib_Tree_PageTree_ExtDirect_Tree.php';
+
+// XClass to enable alternative notification rendering
 if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableAlternativeNotification()) {
 	$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/version/class.tx_version_tcemain.php'] =
 		t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Version_TceMain.php';

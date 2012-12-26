@@ -32,6 +32,20 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	const Permission_Publish = 'publish_access';
 
 	/**
+	 * @return array
+	 */
+	public function getPages() {
+		$pages = array();
+		$rows = $this->getDatabase()->exec_SELECTgetRows('uid,pid', 'pages', 'deleted=0');
+
+		if ($rows !== NULL) {
+			$pages = $rows;
+		}
+
+		return array('data' => $pages);
+	}
+
+	/**
 	 * Publishes the current workspace.
 	 *
 	 * @param stdclass $parameters
@@ -192,6 +206,13 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	 */
 	protected function setResultCount(&$result, $count) {
 		$result['total'] = (int) $count;
+	}
+
+	/**
+	 * @return t3lib_DB
+	 */
+	protected function getDatabase() {
+		return $GLOBALS['TYPO3_DB'];
 	}
 }
 

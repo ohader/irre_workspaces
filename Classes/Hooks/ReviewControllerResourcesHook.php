@@ -53,6 +53,7 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 
 			$pageRenderer->addCssFile($publicResourcesPath . 'Stylesheet/Module.css');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Actions.js');
+			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Components.js');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/MultiGrouping.js');
 

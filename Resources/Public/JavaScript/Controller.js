@@ -94,14 +94,43 @@ TYPO3.TxIrreWorkspaces.Controller = {
 			// Group level "0" are pages
 			if (group && group.group_level === 0) {
 				pageId = group.rs[0].data.livepid;
-
-				if (Ext.isDefined(pageId) && top && top.TYPO3.Backend.NavigationContainer.PageTree) {
-					top.TYPO3.Backend.NavigationContainer.PageTree.select(
-						expanded ? pageId : TYPO3.settings.Workspaces.id
-					);
-				}
+				TYPO3.TxIrreWorkspaces.Controller.pageTreeSelect(
+					expanded ? pageId : TYPO3.settings.Workspaces.id
+				);
 			}
 		}
+	},
+
+	pageTreeSelect: function(pageId) {
+		var node, result = false;
+
+		if (Ext.isDefined(pageId) && top && top.TYPO3.Backend.NavigationContainer.PageTree) {
+			node = TYPO3.TxIrreWorkspaces.Controller.expandParentsInPageTree(pageId);
+			result = top.TYPO3.Backend.NavigationContainer.PageTree.select(pageId);
+		}
+
+		return result;
+	},
+
+	expandParentsInPageTree: function(pageId) {
+		var tree = top.TYPO3.Backend.NavigationContainer.PageTree.getTree();
+		var node = tree.getRootNode().findChild('realId', pageId, true);
+		var parentNode;
+
+		if (!node) {
+			parentNode = TYPO3.TxIrreWorkspaces.PagesStore.getById(pageId);
+
+			if (parentNode && parentNode.data.pid) {
+				TYPO3.TxIrreWorkspaces.Controller.expandParentsInPageTree(parentNode.data.pid);
+				node = tree.getRootNode().findChild('realId', pageId, true);
+			}
+		}
+
+		if(node && !node.leaf) {
+			node.expand(false, false);
+		}
+
+		return node;
 	},
 
 	/**
