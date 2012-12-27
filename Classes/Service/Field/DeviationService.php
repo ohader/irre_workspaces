@@ -117,13 +117,23 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	}
 
 	/**
+	 * @param string $table
+	 * @param string $field
+	 * @return boolean
+	 */
+	public function isInlineField($table, $field) {
+		$fieldDefinition = $this->getFieldDefinition($table, $field);
+		return ($fieldDefinition['type'] === 'inline' && !empty($fieldDefinition['foreign_field']));
+	}
+
+	/**
 	 * @param string $field
 	 * @param array $liveRecord
 	 * @param array $versionRecord
 	 * @return boolean
 	 */
 	public function isEqual($field, array $liveRecord, array $versionRecord) {
-		return ($liveRecord[$field] === $versionRecord[$field]);
+		return ((string) $liveRecord[$field] === (string) $versionRecord[$field]);
 	}
 
 	/**
@@ -137,7 +147,7 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 
 		if (t3lib_div::inList('passthrough,none', $fieldDefinition['type'])) {
 			$result = TRUE;
-		} elseif ($fieldDefinition['type'] === 'inline' && !empty($fieldDefinition['foreign_field'])) {
+		} elseif ($this->isInlineField($table, $field)) {
 			$result = TRUE;
 		} elseif (!empty($fieldDefinition['MM'])) {
 			$result = TRUE;
