@@ -46,7 +46,13 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 
 		// Unset internal values
 		foreach ($diffReturnArray as $index => $diffElement) {
+			// Remove system fields:
 			if ($fieldDeviationService->isSystemField($table, $diffElement['field'])) {
+				unset($diffReturnArray[$index]);
+				unset($liveReturnArray[$index]);
+				$modified = TRUE;
+			// Remove fields with no differences:
+			} elseif (trim($diffElement['value']) === '') {
 				unset($diffReturnArray[$index]);
 				unset($liveReturnArray[$index]);
 				$modified = TRUE;

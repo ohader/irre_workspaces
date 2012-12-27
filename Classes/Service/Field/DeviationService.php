@@ -78,6 +78,8 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 			$result = FALSE;
 		} elseif ($this->isEqual($field, $liveRecord, $versionRecord)) {
 			$result = FALSE;
+		} elseif ($this->isNotEditable($table, $field, $liveRecord, $versionRecord)) {
+			$result = FALSE;
 		} elseif ($this->isNotRelevant($table, $field)) {
 			$result = FALSE;
 		}
@@ -133,6 +135,33 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	 */
 	public function isEqual($field, array $liveRecord, array $versionRecord) {
 		return ((string) $liveRecord[$field] === (string) $versionRecord[$field]);
+	}
+
+	/**
+	 * Determines whether a field is not editable in the back-end form view.
+	 *
+	 * @param string $table
+	 * @param string $field
+	 * @param array $liveRecord
+	 * @param array $versionRecord
+	 * @return boolean
+	 */
+	public function isNotEditable($table, $field, array $liveRecord, array $versionRecord) {
+		$isNotEditable = FALSE;
+		$typeField = $this->getTcaControlField($table, 'type');
+
+		if ($typeField !== NULL && $this->isEqual($typeField, $liveRecord, $versionRecord)) {
+			$typeValue = $versionRecord[$typeField];
+			$pattern = '#(^|,)\s*' . preg_quote($field, '#') . '\s*(;|,|$)#';
+
+			if (!empty($GLOBALS['TCA'][$table]['types'][$typeValue]['showitem'])) {
+				if (!preg_match($pattern, $GLOBALS['TCA'][$table]['types'][$typeValue]['showitem'])) {
+					$isNotEditable = TRUE;
+				}
+			}
+		}
+
+		return $isNotEditable;
 	}
 
 	/**
