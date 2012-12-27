@@ -157,6 +157,22 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 
 	/**
 	 * @param string $table
+	 * @param string $key
+	 * @return string|NULL
+	 */
+	public function getTcaControlField($table, $key) {
+		$field = NULL;
+
+		$tcaControl = $GLOBALS['TCA'][$table]['ctrl'];
+		if (!empty($tcaControl[$key])) {
+			$field = $tcaControl[$key];
+		}
+
+		return $field;
+	}
+
+	/**
+	 * @param string $table
 	 * @param string $field
 	 * @return string
 	 */
@@ -178,11 +194,10 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	 */
 	protected function getSystemFields($table) {
 		$systemFields = $this->systemFields['fields'];
-		$tcaControl = $GLOBALS['TCA'][$table]['ctrl'];
 
 		foreach ($this->systemFields['tcaControlKeys'] as $key) {
-			if (!empty($tcaControl[$key])) {
-				 $field = $tcaControl[$key];
+			$field = $this->getTcaControlField($table, $key);
+			if ($field !== NULL) {
 				if (!in_array($field, $systemFields)) {
 					$systemFields[] = $field;
 				}

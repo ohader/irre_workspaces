@@ -36,16 +36,35 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 	 * @return array $data
 	 */
 	public function getRowDetails($parameter) {
+		$table = $parameter->table;
+
 		/**
 		 * Register a (fake) singleton instance to override t3lib_diff behaviours on rendering large FlexForms
 		 * @var $differenceService Tx_IrreWorkspaces_Service_Difference_AlternativeCoreService
 		 */
 		$differenceService = t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Difference_AlternativeCoreService');
 		$differenceService->setUseClearBuffer(FALSE);
-
 		t3lib_div::setSingletonInstance('t3lib_diff', $differenceService);
 
+		// Add sorting field to list of fields to be processed:
+		t3lib_div::loadTCA($table);
+		$sortingField = $this->getFieldDeviationService()->getTcaControlField($table, 'sortby');
+		if ($sortingField !== NULL && !empty($GLOBALS['TCA'][$table]['interface']['showRecordFieldList'])) {
+			$processFields = t3lib_div::trimExplode(',', $GLOBALS['TCA'][$table]['interface']['showRecordFieldList'], TRUE);
+			if (!in_array($sortingField, $processFields)) {
+				$processFields[] = $sortingField;
+				$GLOBALS['TCA'][$table]['interface']['showRecordFieldList'] = implode(',', $processFields);
+			}
+		}
+
 		return parent::getRowDetails($parameter);
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Field_DeviationService
+	 */
+	protected function getFieldDeviationService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
 	}
 }
 
