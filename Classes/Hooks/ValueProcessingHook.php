@@ -230,17 +230,32 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 
 			// Render plain elements
 			} elseif (!empty($elementStructure['TCEforms']['config'])) {
-				$GLOBALS['TCA'][$processingTableValue]['columns'][$processingColumnValue]['config'] = $elementStructure['TCEforms']['config'];
+				$relationTable = $this->getRelationTable($elementStructure['TCEforms']['config']);
+				$labelUserFunction = $this->getRelationLabelUserFunction($relationTable);
 
-				$processedElements[$elementKey] = array(
-					'title' => $elementTitle,
-					'value' => t3lib_BEfunc::getProcessedValue(
+				if ($labelUserFunction !== NULL) {
+					$nullReference = NULL;
+					$parameters = array(
+						'table' => $relationTable,
+						'row' => t3lib_BEfunc::getRecord($relationTable, $valueStructure[$elementKey]['vDEF']),
+						'title' => $valueStructure[$elementKey]['vDEF'],
+					);
+					t3lib_div::callUserFunction($labelUserFunction, $parameters, $nullReference);
+					$processedValue = $parameters['title'];
+				} else {
+					$GLOBALS['TCA'][$processingTableValue]['columns'][$processingColumnValue]['config'] = $elementStructure['TCEforms']['config'];
+					$processedValue = t3lib_BEfunc::getProcessedValue(
 						$processingTableValue,
 						$processingColumnValue,
 						$valueStructure[$elementKey]['vDEF'],
 						0,
 						FALSE
-					),
+					);
+				}
+
+				$processedElements[$elementKey] = array(
+					'title' => $elementTitle,
+					'value' => $processedValue,
 				);
 			}
 		}
@@ -289,7 +304,6 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 			$title = $this->getLanguageObject()->sL($structure['tx_templavoila']['title']);
 		}
 
-
 		return $title;
 	}
 
@@ -299,6 +313,37 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	 */
 	protected function isFlexFormFieldConfiguration(array $configuration) {
 		return (!empty($configuration['type']) && $configuration['type'] === 'flex');
+	}
+
+	/**
+	 * @param array $configuration
+	 * @return string|NULL Currently used relation table
+	 */
+	protected function getRelationTable(array $configuration) {
+		$relationTable = NULL;
+
+		// If allowed tables is defined, but with only one(!) table:
+		if (!empty($configuration['allowed']) && strpos($configuration['allowed'], ',') === FALSE) {
+			$relationTable = $configuration['allowed'];
+		} elseif (!empty($configuration['foreign_table'])) {
+			$relationTable = $configuration['foreign_table'];
+		}
+
+		return $relationTable;
+	}
+
+	/**
+	 * @param string $relationTable
+	 * @return array|string|NULL User function to be used
+	 */
+	protected function getRelationLabelUserFunction($relationTable) {
+		$labelUserFunction = NULL;
+
+		if (!empty($relationTable) && !empty($GLOBALS['TCA'][$relationTable]['ctrl']['label_userFunc'])) {
+			$labelUserFunction = $GLOBALS['TCA'][$relationTable]['ctrl']['label_userFunc'];
+		}
+
+		return $labelUserFunction;
 	}
 
 	/**

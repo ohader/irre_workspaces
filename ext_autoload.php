@@ -36,6 +36,7 @@ return array(
 	'tx_irreworkspaces_service_comparisonservice' => $extensionClassesPath . 'Service/ComparisonService.php',
 	'tx_irreworkspaces_service_configurationservice' => $extensionClassesPath . 'Service/ConfigurationService.php',
 	'tx_irreworkspaces_service_dependencyservice' => $extensionClassesPath . 'Service/DependencyService.php',
+	'tx_irreworkspaces_service_difference_alternativecoreservice' => $extensionClassesPath . 'Service/Difference/AlternativeCoreService.php',
 	'tx_irreworkspaces_service_differenceservice' => $extensionClassesPath . 'Service/DifferenceService.php',
 	'tx_irreworkspaces_service_differenceservicetest' => $extensionPath . 'Tests/Tx_IrreWorkspaces/Classes/Service/DifferenceServiceTest.php',
 	'tx_irreworkspaces_service_htmldifferenceservice' => $extensionClassesPath . 'Service/HtmlDifferenceService.php',
