@@ -52,7 +52,7 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 				unset($liveReturnArray[$index]);
 				$modified = TRUE;
 			// Remove fields with no differences:
-			} elseif (trim($diffElement['value']) === '') {
+			} elseif (trim($diffElement['content']) === '') {
 				unset($diffReturnArray[$index]);
 				unset($liveReturnArray[$index]);
 				$modified = TRUE;
