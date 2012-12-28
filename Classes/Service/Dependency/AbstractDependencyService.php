@@ -28,31 +28,38 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Service_DependencyService implements t3lib_Singleton {
+abstract class Tx_IrreWorkspaces_Service_Dependency_AbstractDependencyService implements t3lib_Singleton {
 	/**
 	 * @var t3lib_TCEmain
 	 */
 	protected $tceMainHelper;
 
 	/**
+	 * @var t3lib_utility_Dependency
+	 */
+	protected $dependency;
+
+	/**
 	 * @return t3lib_utility_Dependency
 	 */
-	public function create() {
-		/** @var $dependency t3lib_utility_Dependency */
-		$dependency = t3lib_div::makeInstance('t3lib_utility_Dependency');
-		$dependency->setOuterMostParentsRequireReferences(TRUE);
+	public function getDependency() {
+		if (!isset($this->dependency)) {
+			/** @var $dependency t3lib_utility_Dependency */
+			$this->dependency = t3lib_div::makeInstance('t3lib_utility_Dependency');
+			$this->dependency->setOuterMostParentsRequireReferences(TRUE);
 
-		$dependency->setEventCallback(
-			t3lib_utility_Dependency_Element::EVENT_CreateChildReference,
-			$this->getDependencyCallback('createNewDependentElementChildReferenceCallback')
-		);
+			$this->dependency->setEventCallback(
+				t3lib_utility_Dependency_Element::EVENT_CreateChildReference,
+				$this->getDependencyCallback('createNewDependentElementChildReferenceCallback')
+			);
 
-		$dependency->setEventCallback(
-			t3lib_utility_Dependency_Element::EVENT_CreateParentReference,
-			$this->getDependencyCallback('createNewDependentElementParentReferenceCallback')
-		);
+			$this->dependency->setEventCallback(
+				t3lib_utility_Dependency_Element::EVENT_CreateParentReference,
+				$this->getDependencyCallback('createNewDependentElementParentReferenceCallback')
+			);
+		}
 
-		return $dependency;
+		return $this->dependency;
 	}
 
 	/**
@@ -88,10 +95,9 @@ class Tx_IrreWorkspaces_Service_DependencyService implements t3lib_Singleton {
 	public function createNewDependentElementChildReferenceCallback(array $callerArguments, array $targetArgument, t3lib_utility_Dependency_Element $caller, $eventName) {
 		/** @var $reference t3lib_utility_Dependency_Reference */
 		$reference = $callerArguments['reference'];
+		$fieldConfiguration = t3lib_BEfunc::getTcaFieldConfiguration($caller->getTable(), $reference->getField());
 
-		$fieldCOnfiguration = t3lib_BEfunc::getTcaFieldConfiguration($caller->getTable(), $reference->getField());
-
-		if (!$fieldCOnfiguration || !t3lib_div::inList('field,list', $this->getTceMainHelper()->getInlineFieldType($fieldCOnfiguration))) {
+		if (!$this->isReferenceInlineField($fieldConfiguration)) {
 			return t3lib_utility_Dependency_Element::RESPONSE_Skip;
 		}
 
@@ -110,14 +116,25 @@ class Tx_IrreWorkspaces_Service_DependencyService implements t3lib_Singleton {
 	public function createNewDependentElementParentReferenceCallback(array $callerArguments, array $targetArgument, t3lib_utility_Dependency_Element $caller, $eventName) {
 		/** @var $reference t3lib_utility_Dependency_Reference */
 		$reference = $callerArguments['reference'];
+		$fieldConfiguration = t3lib_BEfunc::getTcaFieldConfiguration($reference->getElement()->getTable(), $reference->getField());
 
-		$fieldCOnfiguration = t3lib_BEfunc::getTcaFieldConfiguration($reference->getElement()->getTable(), $reference->getField());
-
-		if (!$fieldCOnfiguration || !t3lib_div::inList('field,list', $this->getTceMainHelper()->getInlineFieldType($fieldCOnfiguration))) {
+		if (!$this->isReferenceInlineField($fieldConfiguration)) {
 			return t3lib_utility_Dependency_Element::RESPONSE_Skip;
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * @param array $fieldConfiguration
+	 * @return boolean
+	 */
+	protected function isReferenceInlineField(array $fieldConfiguration) {
+
+		return (
+			$fieldConfiguration &&
+			t3lib_div::inList('field,list', $this->getTceMainHelper()->getInlineFieldType($fieldConfiguration))
+		);
 	}
 }
 

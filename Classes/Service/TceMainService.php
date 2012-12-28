@@ -61,7 +61,7 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	protected function getSanitationServices(t3lib_TCEmain $parent) {
 		$sanitazionServices = array();
 
-		$dependency = $this->getDependencyService()->create();
+		$dependency = $this->getCollectionDependencyService()->getDependency();
 
 		foreach ($parent->datamap as $table => $records) {
 			foreach ($records as $uid => $fields) {
@@ -82,10 +82,10 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	}
 
 	/**
-	 * @return Tx_IrreWorkspaces_Service_DependencyService
+	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
 	 */
-	protected function getDependencyService() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_DependencyService');
+	protected function getCollectionDependencyService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService');
 	}
 
 	/**

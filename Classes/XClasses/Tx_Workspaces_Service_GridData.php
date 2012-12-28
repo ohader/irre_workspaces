@@ -113,7 +113,7 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 * @return void
 	 */
 	protected function resolveDataDependencies() {
-		$dependency = $this->getDependencyService()->create();
+		$dependency = $this->getCollectionDependencyService()->getDependency();
 
 		foreach ($this->dataArray as $dataElement) {
 			$dependency->addElement($dataElement['table'], $dataElement['uid']);
@@ -346,10 +346,10 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
-	 * @return Tx_IrreWorkspaces_Service_DependencyService
+	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
 	 */
-	protected function getDependencyService() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_DependencyService');
+	protected function getCollectionDependencyService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService');
 	}
 
 	/**
