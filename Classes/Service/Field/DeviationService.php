@@ -259,7 +259,7 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 					break;
 				case 1:
 				case 2:
-				$versionState = self::STATE_Deleted;
+					$versionState = self::STATE_Deleted;
 					break;
 				case 4:
 					$versionState = self::STATE_Moved;
