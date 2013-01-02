@@ -53,10 +53,47 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	}
 
 	/**
+	 * Release version from this workspace (and into "Live" workspace but as an offline version).
+	 *
+	 * @param string $table Table name
+	 * @param integer $id Record UID
+ 	 * @param boolean $flush If set, will completely delete element
+	 * @param t3lib_TCEmain $tcemainObj TCEmain object
+	 * @return void
+	 */
+	public function invokeParentClearWSID($table, $id, $flush = FALSE, t3lib_TCEmain $tcemainObj) {
+		parent::version_clearWSID($table, $id, $flush, $tcemainObj);
+	}
+
+	/**
+	 * Release version from this workspace (and into "Live" workspace but as an offline version).
+	 *
+	 * @param string $table Table name
+	 * @param integer $id Record UID
+ 	 * @param boolean $flush If set, will completely delete element
+	 * @param t3lib_TCEmain $tcemainObj TCEmain object
+	 * @return void
+	 */
+	protected function version_clearWSID($table, $id, $flush = FALSE, t3lib_TCEmain $tcemainObj) {
+		if ($errorCode = $tcemainObj->BE_USER->workspaceCannotEditOfflineVersion($table, $id)) {
+			$tcemainObj->newlog('Attempt to reset workspace for record failed: ' . $errorCode, 1);
+		} elseif ($tcemainObj->checkRecordUpdateAccess($table, $id)) {
+			$this->getFlushWorkspaceActionService()->clearElement($table, $id, $flush, $tcemainObj, $this);
+		}
+	}
+
+	/**
 	 * @return Tx_IrreWorkspaces_Service_Action_ChangeStageActionService
 	 */
 	protected function getChangeStageActionService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Action_ChangeStageActionService');
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService
+	 */
+	protected function getFlushWorkspaceActionService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService');
 	}
 }
 

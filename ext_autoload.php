@@ -37,6 +37,7 @@ return array(
 	'tx_irreworkspaces_service_configurationservice' => $extensionClassesPath . 'Service/ConfigurationService.php',
 	'tx_irreworkspaces_service_action_abstractactionservice' => $extensionClassesPath . 'Service/Action/AbstractActionService.php',
 	'tx_irreworkspaces_service_action_changestageactionservice' => $extensionClassesPath . 'Service/Action/ChangeStageActionService.php',
+	'tx_irreworkspaces_service_action_flushworkspaceactionservice' => $extensionClassesPath . 'Service/Action/FlushWorkspaceActionService.php',
 	'tx_irreworkspaces_service_dependency_abstractdependencyservice' => $extensionClassesPath . 'Service/Dependency/AbstractDependencyService.php',
 	'tx_irreworkspaces_service_dependency_collectiondependencyservice' => $extensionClassesPath . 'Service/Dependency/CollectionDependencyService.php',
 	'tx_irreworkspaces_service_difference_alternativecoreservice' => $extensionClassesPath . 'Service/Difference/AlternativeCoreService.php',
