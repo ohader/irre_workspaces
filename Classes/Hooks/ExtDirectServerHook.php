@@ -51,6 +51,11 @@ class Tx_IrreWorkspaces_Hooks_ExtDirectServerHook {
 				unset($diffReturnArray[$index]);
 				unset($liveReturnArray[$index]);
 				$modified = TRUE;
+			// Remove fields that are not relevant (none, passthrough, inline fields, MM)
+			} elseif ($fieldDeviationService->isNotRelevant($table, $diffElement['field'])) {
+				unset($diffReturnArray[$index]);
+				unset($liveReturnArray[$index]);
+				$modified = TRUE;
 			// Remove fields with no differences:
 			} elseif (trim($diffElement['content']) === '') {
 				unset($diffReturnArray[$index]);
