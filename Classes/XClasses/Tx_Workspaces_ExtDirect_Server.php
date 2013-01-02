@@ -36,6 +36,7 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 	 * @return array $data
 	 */
 	public function getRowDetails($parameter) {
+		$isTcaModified = FALSE;
 		$table = $parameter->table;
 
 		/**
@@ -55,9 +56,25 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 				$processFields[] = $sortingField;
 				$GLOBALS['TCA'][$table]['interface']['showRecordFieldList'] = implode(',', $processFields);
 			}
+			if (empty($GLOBALS['TCA'][$table]['columns'][$sortingField])) {
+				$GLOBALS['TCA'][$table]['columns'][$sortingField] = array(
+					'label' => 'LLL:EXT:lang/locallang_core.xml:show_item.php.sorting',
+					'config' => array(
+						'type' => 'input',
+						'eval' => 'int',
+					),
+				);
+				$isTcaModified = TRUE;
+			}
 		}
 
-		return parent::getRowDetails($parameter);
+		$result = parent::getRowDetails($parameter);
+
+		if ($isTcaModified) {
+			unset($GLOBALS['TCA'][$table]['columns'][$sortingField]);
+		}
+
+		return $result;
 	}
 
 	/**

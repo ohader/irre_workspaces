@@ -43,8 +43,8 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 	 * @return void
 	 * @see t3lib_BEfunc::getProcessedValue
 	 */
-	public function preProcess(array $configuration) {
-		if ($this->isFlexFormFieldConfiguration($configuration)) {
+	public function preProcess(array $configuration = NULL) {
+		if ($configuration !== NULL && $this->isFlexFormFieldConfiguration($configuration)) {
 			$originalParameters = $this->getGetProcessedValueParameters();
 			$this->valueStack[] = $originalParameters['value'];
 		}
@@ -64,7 +64,7 @@ class Tx_IrreWorkspaces_Hooks_ValueProcessingHook implements t3lib_Singleton {
 		$value = $parameters['value'];
 		$configuration = $parameters['colConf'];
 
-		if ($this->isFlexFormFieldConfiguration($configuration)) {
+		if ($configuration !== NULL && $this->isFlexFormFieldConfiguration($configuration)) {
 			if (empty($this->valueStack)) {
 				throw new RuntimeException('Post-processing was triggered without any pre-processing', 1352712620);
 			}
