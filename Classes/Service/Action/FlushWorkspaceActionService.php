@@ -127,6 +127,9 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 		$this->clonedChildren[$childTable][$childVersionId] = $childCloneId;
 	}
 
+	/**
+	 * @param t3lib_TCEmain $dataHandler
+	 */
 	public function finish(t3lib_TCEmain $dataHandler) {
 		/** @var $parentReference t3lib_utility_Dependency_Reference */
 		foreach ($this->parentsToBeFinished as $parent) {
