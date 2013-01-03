@@ -239,9 +239,12 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 * @return void
 	 */
 	protected function purgeDataArray() {
-		foreach ($this->dataArray as $key => $dataElement) {
-			if (isset($dataElement[self::GridColumn_Modification]) && $dataElement[self::GridColumn_Modification] === FALSE) {
-				unset($this->dataArray[$key]);
+		// @todo Combine modification with deviation service, $this->reduceDataArray()
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordReduction()) {
+			foreach ($this->dataArray as $key => $dataElement) {
+				if (isset($dataElement[self::GridColumn_Modification]) && $dataElement[self::GridColumn_Modification] === FALSE) {
+					unset($this->dataArray[$key]);
+				}
 			}
 		}
 
