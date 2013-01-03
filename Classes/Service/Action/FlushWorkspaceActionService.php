@@ -213,26 +213,6 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 	}
 
 	/**
-	 * @param string $parentTable
-	 * @param integer $parentId
-	 * @param array $parentConfiguration
-	 * @return t3lib_loadDBGroup
-	 */
-	protected function getReferenceCollection($parentTable, $parentId, array $parentConfiguration) {
-		/** @var $referenceCollection t3lib_loadDBGroup */
-		$referenceCollection = t3lib_div::makeInstance('t3lib_loadDBGroup');
-		$referenceCollection->start(
-			'',
-			$parentConfiguration['foreign_table'],
-			$parentConfiguration['MM'],
-			$parentId,
-			$parentTable,
-			$parentConfiguration
-		);
-		return $referenceCollection;
-	}
-
-	/**
 	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
 	 */
 	protected function getCollectionDependencyService() {

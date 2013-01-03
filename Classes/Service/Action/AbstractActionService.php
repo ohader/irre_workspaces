@@ -35,6 +35,26 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	protected $workspacesStagesService;
 
 	/**
+	 * @param string $parentTable
+	 * @param integer $parentId
+	 * @param array $parentConfiguration
+	 * @return t3lib_loadDBGroup
+	 */
+	protected function getReferenceCollection($parentTable, $parentId, array $parentConfiguration) {
+		/** @var $referenceCollection t3lib_loadDBGroup */
+		$referenceCollection = t3lib_div::makeInstance('t3lib_loadDBGroup');
+		$referenceCollection->start(
+			'',
+			$parentConfiguration['foreign_table'],
+			$parentConfiguration['MM'],
+			$parentId,
+			$parentTable,
+			$parentConfiguration
+		);
+		return $referenceCollection;
+	}
+
+	/**
 	 * @return Tx_Workspaces_Service_Stages
 	 */
 	protected function getWorkspacesStagesService() {
