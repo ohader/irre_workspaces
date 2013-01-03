@@ -66,7 +66,6 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 	/**
 	 * @param t3lib_utility_Dependency_Element $parentElement
 	 * @param Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure
-	 * @return NULL|integer Id of cloned relative parent element (if any)
 	 */
 	protected function processParent(t3lib_utility_Dependency_Element $parentElement, Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure) {
 		$clonedParentId = NULL;
@@ -89,27 +88,15 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 		}
 
 		if ($isElementPublished === TRUE && count($unpublishedChildren) > 0) {
-			$clonedParentId = $this->cloneLiveVersion($parentElement, 'Automatically re-added parent');
-
 			// Clone published children, otherwise the cloned parent would be incomplete
 			foreach ($publishedChildren as $childReference) {
-				$this->cloneLiveVersion($childReference->getElement(), 'Automatically re-added child');
+				$this->cloneLiveVersion($childReference->getElement(), 'Auto-created for WS #' . $this->getBackendUser()->workspace);
 			}
 
-			$this->updateVersionReferences($parentElement);
-			$this->dataHandler->addRemapStackRefIndex(
-				$parentElement->getTable(),
-				$this->getFallbackId($parentElement)
-			);
-		}
+			$this->cloneLiveVersion($parentElement, 'Auto-created for WS #' . $this->getBackendUser()->workspace);
 
-		if ($isElementPublished === FALSE && count($publishedChildren) > 0) {
-			// Clone published children, otherwise the not published parent would be incomplete
-			foreach ($publishedChildren as $childReference) {
-				$this->cloneLiveVersion($childReference->getElement(), 'Automatically re-added child');
-			}
-
-			$this->updateLiveReferences($parentElement, $publishedChildren);
+			// @todo Use $this->dataHandler->remapStackRecords instead (if it exists)
+			$this->updateLiveReferences($parentElement, $unpublishedChildren);
 			$this->dataHandler->addRemapStackRefIndex(
 				$parentElement->getTable(),
 				$this->getLiveId($parentElement)
@@ -122,14 +109,32 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 			);
 		}
 
-		return $clonedParentId;
+		if ($isElementPublished === FALSE && count($publishedChildren) > 0) {
+			// Clone published children, otherwise the not published parent would be incomplete
+			foreach ($publishedChildren as $childReference) {
+				$this->cloneLiveVersion($childReference->getElement(), 'Auto-created for WS #' . $this->getBackendUser()->workspace);
+			}
+
+			// @todo Use $this->dataHandler->remapStackRecords instead (if it exists)
+			$this->updateLiveReferences($parentElement, $publishedChildren);
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$this->getLiveId($parentElement)
+			);
+
+			$this->updateVersionReferences($parentElement);
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$this->getFallbackId($parentElement)
+			);
+		}
 	}
 
 	/**
 	 * @param t3lib_utility_Dependency_Element $parentElement
-	 * @param array|t3lib_utility_Dependency_Reference[] $publishedChildren
+	 * @param array|t3lib_utility_Dependency_Reference[] $incompleteChildren
 	 */
-	protected function updateLiveReferences(t3lib_utility_Dependency_Element $parentElement, array $publishedChildren) {
+	protected function updateLiveReferences(t3lib_utility_Dependency_Element $parentElement, array $incompleteChildren) {
 		$childrenPerParentField = array();
 
 		$parentId = $this->getLiveId($parentElement);
@@ -137,7 +142,7 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 		t3lib_div::loadTCA($parentTable);
 
 		/** @var $childReference t3lib_utility_Dependency_Reference */
-		foreach ($publishedChildren as $childReference) {
+		foreach ($incompleteChildren as $childReference) {
 			$childrenPerParentField[$childReference->getField()][] = $childReference->getElement();
 		}
 
@@ -162,12 +167,13 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 			foreach ($children as $child) {
 				$referenceCollection->itemArray[] = array(
 					'table' => $child->getTable(),
-					'id' => $child->getId(),
+					'id' => $this->getLiveId($child),
 				);
 				$referenceCollection->tableArray[$child->getTable()][] = $child->getId();
 			}
 
 			$referenceCollection->writeForeignField($parentConfiguration, $parentId);
+			$this->updateRecord($parentTable, $parentId, array($parentField => count($referenceCollection->itemArray)));
 		}
 	}
 
@@ -201,7 +207,50 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 				$referenceCollection->tableArray[$child->getTable()][] = $this->getFallbackId($child);
 			}
 
-			$referenceCollection->writeForeignField($parentConfiguration, $parentId);
+			// Persist changes
+			if (NULL !== $remapStackIndex = $this->findRemapStackIndex($parentTable, $parentId, $parentField)) {
+				$this->updateRemapStack($remapStackIndex, 'valueArray', $referenceCollection->getValueArray());
+			} else {
+				$referenceCollection->writeForeignField($parentConfiguration, $parentId);
+				$this->updateRecord($parentTable, $parentId, array($parentField => count($referenceCollection->itemArray)));
+			}
+		}
+	}
+
+	/**
+	 * @param string $table
+	 * @param integer $id
+	 * @param string $field
+	 * @return NULL|integer
+	 */
+	protected function findRemapStackIndex($table, $id, $field) {
+		$remapStackIndex = NULL;
+
+		if (!empty($this->dataHandler->remapStackRecords[$table])) {
+			foreach ($this->dataHandler->remapStackRecords[$table] as $uniqeId => $data) {
+				$index = $data['remapStackIndex'];
+
+				if ((int) $this->dataHandler->substNEWwithIDs[$uniqeId] === (int) $id) {
+					if ($this->dataHandler->remapStack[$index]['field'] === $field) {
+						$remapStackIndex = $index;
+						break;
+					}
+				}
+			}
+		}
+
+		return $remapStackIndex;
+	}
+
+	/**
+	 * @param integer $remapStackIndex
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	protected function updateRemapStack($remapStackIndex, $key, $value) {
+		if (isset($this->dataHandler->remapStack[$remapStackIndex]['pos'][$key])) {
+			$position = $this->dataHandler->remapStack[$remapStackIndex]['pos'][$key];
+			$this->dataHandler->remapStack[$remapStackIndex]['args'][$position] = $value;
 		}
 	}
 
@@ -250,6 +299,23 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 	protected function cloneLiveVersion(t3lib_utility_Dependency_Element $element, $comment) {
 		$clonedId = $this->getClonedId($element);
 
+		// See, whether a clone has been created already
+		// e.g. during cloning a parent thus all children
+		if (empty($clonedId)) {
+			$versionRecord = t3lib_BEfunc::getWorkspaceVersionOfRecord(
+				$this->getBackendUser()->workspace,
+				$element->getTable(),
+				$this->getLiveId($element),
+				'uid'
+			);
+
+			if (!empty($versionRecord['uid'])) {
+				$clonedId = $versionRecord['uid'];
+				$element->setDataValue('clonedId', $clonedId);
+			}
+		}
+
+		// If there's nothing, clone the live version
 		if (empty($clonedId)) {
 			$clonedId = $this->dataHandler->versionizeRecord(
 				$element->getTable(),

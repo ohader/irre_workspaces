@@ -55,6 +55,15 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
+	 * @param string $table
+	 * @param integer $id
+	 * @param array $values
+	 */
+	protected function updateRecord($table, $id, array $values) {
+		$this->getDatabase()->exec_UPDATEquery($table, 'uid=' . (int) $id, $values);
+	}
+
+	/**
 	 * @return Tx_Workspaces_Service_Stages
 	 */
 	protected function getWorkspacesStagesService() {
