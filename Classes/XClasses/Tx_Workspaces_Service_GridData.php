@@ -216,7 +216,12 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 					$dataElement['uid']
 				);
 
-				if ($this->getRecordDeviationService()->hasDeviation($combinedRecord) === FALSE) {
+				$reduceElement = (
+					$this->getRecordDeviationService()->isModified($combinedRecord) &&
+					$this->getRecordDeviationService()->hasDeviation($combinedRecord) === FALSE
+				);
+
+				if ($reduceElement) {
 					unset($this->dataArray[$index]);
 				}
 			}
@@ -304,7 +309,8 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 			t3lib_BEfunc::getLiveVersionOfRecord($element->getTable(),$element->getId())
 		);
 
-		return $this->getComparisonService()->hasDifferences($element);
+		$isModified = $this->getFieldDeviationService()->isModified($element->getRecord());
+		return ($isModified === FALSE || $this->getComparisonService()->hasDifferences($element));
 	}
 
 	/**
@@ -346,6 +352,13 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function getRecordDeviationService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Record_DeviationService');
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Field_DeviationService
+	 */
+	protected function getFieldDeviationService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
 	}
 
 	/**
