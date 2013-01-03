@@ -84,14 +84,26 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	 * @return void
 	 */
 	protected function notifyStageChange(array $stat, $stageId, $table, $id, $comment, t3lib_TCEmain $tcemainObj, array $notificationAlternativeRecipients = array()) {
-		$this->getChangeStageActionService()->notify(
-			$stat,
-			$stageId,
-			$table,
-			$id,
-			$comment,
-			$notificationAlternativeRecipients
-		);
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableAlternativeNotification()) {
+			$this->getChangeStageActionService()->notify(
+				$stat,
+				$stageId,
+				$table,
+				$id,
+				$comment,
+				$notificationAlternativeRecipients
+			);
+		} else {
+			parent::notifyStageChange(
+				$stat,
+				$stageId,
+				$table,
+				$id,
+				$comment,
+				$tcemainObj,
+				$notificationAlternativeRecipients
+			);
+		}
 	}
 
 	/**

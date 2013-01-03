@@ -65,11 +65,9 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/Server.
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/tree/pagetree/extdirect/class.t3lib_tree_pagetree_extdirect_tree.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/T3lib_Tree_PageTree_ExtDirect_Tree.php';
 
-// XClass to enable alternative notification rendering
-if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableAlternativeNotification()) {
-	$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/version/class.tx_version_tcemain.php'] =
-		t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Version_TceMain.php';
-}
+// XClasses for handling workspaces actions
+$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/version/class.tx_version_tcemain.php'] =
+	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Version_TceMain.php';
 
 /*
 DISABLED - Since the workspace module does not show unmodified elements,
