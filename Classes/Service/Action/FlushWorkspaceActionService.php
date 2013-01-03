@@ -32,7 +32,12 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 	/**
 	 * @var array
 	 */
-	protected $parentsToBeFinished = array();
+	protected $finishParents = array();
+
+	/**
+	 * @var array
+	 */
+	protected $flushedParents = array();
 
 	/**
 	 * @var array
@@ -59,16 +64,20 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 		if ($liveRecord && $versionRecord && $versionRecord['t3ver_state'] == 0) {
 			$element = $this->getCollectionDependencyService()->getDependency()->addElement($table, $versionId);
 
-			/** @var $reference t3lib_utility_Dependency_Reference */
-			foreach ($element->getChildren() as $reference) {
-				$flushChildren[] = $reference->getElement();
+			if (count($element->getChildren()) > 0) {
+				$this->addFlushedParent($element);
+				/** @var $childReference t3lib_utility_Dependency_Reference */
+				foreach ($element->getChildren() as $childReference) {
+					$flushChildren[] = $childReference->getElement();
+				}
 			}
 
 			// Re-add clone of live version later on to parent
 			if (count($element->getParents()) > 0) {
 				$hasParents = TRUE;
+				/** @var $parentReference t3lib_utility_Dependency_Reference */
 				foreach ($element->getParents() as $parentReference) {
-					$this->addParentToBeFinished($parentReference);
+					$this->addFinishParent($parentReference);
 				}
 			}
 		}
@@ -92,12 +101,23 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 	}
 
 	/**
+	 * @param t3lib_utility_Dependency_Element $parentElement
+	 */
+	protected function addFlushedParent(t3lib_utility_Dependency_Element $parentElement) {
+		$identifier = $parentElement->__toString();
+
+		if (!isset($this->flushedParents[$identifier])) {
+			$this->flushedParents[$identifier] = $parentElement;
+		}
+	}
+
+	/**
 	 * @param t3lib_utility_Dependency_Reference $parentReference
 	 */
-	protected function addParentToBeFinished(t3lib_utility_Dependency_Reference $parentReference) {
+	protected function addFinishParent(t3lib_utility_Dependency_Reference $parentReference) {
 		$identifier = $parentReference->__toString();
 
-		if (!isset($this->parentsToBeFinished[$identifier])) {
+		if (!isset($this->finishParents[$identifier])) {
 			$parentTable = $parentReference->getElement()->getTable();
 			$parentField = $parentReference->getField();
 			$parentId = $parentReference->getElement()->getId();
@@ -106,7 +126,7 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 			t3lib_div::loadTCA($parentTable);
 			$parentConfiguration = $GLOBALS['TCA'][$parentTable]['columns'][$parentField]['config'];
 
-			$this->parentsToBeFinished[$identifier] = array(
+			$this->finishParents[$identifier] = array(
 				'parentItems' => $this->getReferenceCollection($parentTable, $parentId, $parentConfiguration)->itemArray,
 				'parentReference' => $parentReference,
 				'parentConfiguration' => $parentConfiguration,
@@ -132,9 +152,16 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 	 */
 	public function finish(t3lib_TCEmain $dataHandler) {
 		/** @var $parentReference t3lib_utility_Dependency_Reference */
-		foreach ($this->parentsToBeFinished as $parent) {
-			$parentItems = $parent['parentItems'];
+		foreach ($this->finishParents as $parent) {
 			$parentReference = $parent['parentReference'];
+			$parentElementIdentifier = $parentReference->getElement()->__toString();
+
+			// No processing if parent element was flushed
+			if (!empty($this->flushedParents[$parentElementIdentifier])) {
+				continue;
+			}
+
+			$parentItems = $parent['parentItems'];
 			$parentConfiguration = $parent['parentConfiguration'];
 
 			$parentTable = $parentReference->getElement()->getTable();
