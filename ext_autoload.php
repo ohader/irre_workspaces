@@ -5,6 +5,7 @@
 $extensionPath = t3lib_extMgm::extPath('irre_workspaces');
 $extensionClassesPath = $extensionPath . 'Classes/';
 return array(
+	'tx_irreworkspaces_domain_model_dependency_incompletestructure' => $extensionClassesPath . 'Domain/Model/Dependency/IncompleteStructure.php',
 	'tx_irreworkspaces_domain_model_modification' => $extensionClassesPath . 'Domain/Model/Modification.php',
 	'tx_irreworkspaces_domain_model_modificationcollection' => $extensionClassesPath . 'Domain/Model/ModificationCollection.php',
 	'tx_irreworkspaces_domain_model_node_abstractchildrennode' => $extensionClassesPath . 'Domain/Model/Node/AbstractChildrenNode.php',
@@ -38,6 +39,7 @@ return array(
 	'tx_irreworkspaces_service_action_abstractactionservice' => $extensionClassesPath . 'Service/Action/AbstractActionService.php',
 	'tx_irreworkspaces_service_action_changestageactionservice' => $extensionClassesPath . 'Service/Action/ChangeStageActionService.php',
 	'tx_irreworkspaces_service_action_flushworkspaceactionservice' => $extensionClassesPath . 'Service/Action/FlushWorkspaceActionService.php',
+	'tx_irreworkspaces_service_action_publishworkspaceactionservice' => $extensionClassesPath . 'Service/Action/PublishWorkspaceActionService.php',
 	'tx_irreworkspaces_service_dependency_abstractdependencyservice' => $extensionClassesPath . 'Service/Dependency/AbstractDependencyService.php',
 	'tx_irreworkspaces_service_dependency_collectiondependencyservice' => $extensionClassesPath . 'Service/Dependency/CollectionDependencyService.php',
 	'tx_irreworkspaces_service_difference_alternativecoreservice' => $extensionClassesPath . 'Service/Difference/AlternativeCoreService.php',

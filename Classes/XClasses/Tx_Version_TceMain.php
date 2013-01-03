@@ -38,6 +38,15 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	 */
 	public function processCmdmap_afterFinish(t3lib_TCEmain $tcemainObj) {
 		$this->getFlushWorkspaceActionService()->finish($tcemainObj);
+		$this->getPublishWorkspaceActionService()->finish($tcemainObj);
+
+		/**
+		 * Call remapping actions again, since they have been processed prior to this hook
+		 * @todo Introduce new new processCmdmap_beforeFinish hook in TCEmain
+		 */
+		$tcemainObj->remapListedDBRecords();
+		$tcemainObj->processRemapStack();
+
 		parent::processCmdmap_afterFinish($tcemainObj);
 	}
 
@@ -118,6 +127,13 @@ class ux_tx_version_tcemain extends tx_version_tcemain {
 	 */
 	protected function getFlushWorkspaceActionService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService');
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService
+	 */
+	protected function getPublishWorkspaceActionService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService');
 	}
 }
 
