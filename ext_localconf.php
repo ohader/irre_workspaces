@@ -78,7 +78,7 @@ there is no need to manipulate data structures (without changes) on editing
 // @todo: Might use processDatamap_beforeStart for TYPO3 4.7, see http://forge.typo3.org/issues/35161
 
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/class.t3lib_tcemain.php'] =
-	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/TceMain.php';
+	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/T3lib_TceMain.php';
 */
 
 ?>
