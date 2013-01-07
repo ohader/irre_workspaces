@@ -40,9 +40,16 @@ class Tx_IrreWorkspaces_Hooks_PreviewHook implements t3lib_Singleton {
 	 */
 	public function getSingleRecordLink(array $parameters) {
 		$singleRecordLink = '';
-		$record = $this->getRecord($parameters);
 
-		if (NULL !== $previewPageId = $this->getPreviewPageId($record['pid'], $parameters['table'])) {
+		$uid = $parameters['uid'];
+		$table = $parameters['table'];
+		$liveRecord = $parameters['liveRecord'];
+
+		if (empty($liveRecord)) {
+			$liveRecord = t3lib_BEfunc::getLiveVersionOfRecord($table, $uid);
+		}
+
+		if (NULL !== $previewPageId = $this->getPreviewPageId($liveRecord['pid'], $table, $liveRecord)) {
 			$singleRecordLink = t3lib_BEfunc::viewOnClick($previewPageId);
 		}
 
@@ -50,32 +57,27 @@ class Tx_IrreWorkspaces_Hooks_PreviewHook implements t3lib_Singleton {
 	}
 
 	/**
-	 * @param array $parameters
-	 * @return array
-	 */
-	protected function getRecord(array $parameters) {
-		$record = $parameters['record'];
-
-		if (!is_array($record)) {
-			$record = t3lib_BEfunc::getLiveVersionOfRecord($parameters['table'], $parameters['uid']);
-		}
-
-		return $record;
-	}
-
-	/**
 	 * @param integer $pageId
 	 * @param string $table
+	 * @param array $record
 	 * @return integer|NULL
 	 */
-	protected function getPreviewPageId($pageId, $table) {
+	protected function getPreviewPageId($pageId, $table, array $record) {
 		$previewPageId = NULL;
 
 		if ($pageTsConfig = $this->getPageTsConfig($pageId)) {
 			if (NULL !== $result = $this->getPath($pageTsConfig, 'previewPageId.' . $table)) {
-				$previewPageId = (int) $result;
+				$previewPageId = $result;
 			} elseif (NULL !== $result = $this->getPath($pageTsConfig, 'previewPageId')) {
-				$previewPageId = (int) $result;
+				$previewPageId = $result;
+			}
+
+			list($key, $value) = t3lib_div::trimExplode(':', $previewPageId, FALSE, 2);
+
+			if ($key === 'field') {
+				$previewPageId = (int) $record[$value];
+			} else {
+				$previewPageId = (int) $previewPageId;
 			}
 		}
 
