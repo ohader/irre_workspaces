@@ -46,6 +46,23 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 	}
 
 	/**
+	 * @param integer $pageId
+	 * @return array
+	 */
+	public function getRootLine($pageId) {
+		$pageIds = array();
+
+		foreach (array_reverse(t3lib_BEfunc::BEgetRootLine($pageId)) as $page) {
+			$pageId = (int) $page['uid'];
+			if ($pageId) {
+				$pageIds[] = $pageId;
+			}
+		}
+
+		return $pageIds;
+	}
+
+	/**
 	 * Publishes the current workspace.
 	 *
 	 * @param stdclass $parameters

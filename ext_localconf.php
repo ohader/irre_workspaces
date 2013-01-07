@@ -61,9 +61,11 @@ $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/ActionH
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/workspaces/Classes/ExtDirect/Server.php'] =
 	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/Tx_Workspaces_ExtDirect_Server.php';
 
-// XClass to fetch all nodes of the page-tree at once
-$TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['t3lib/tree/pagetree/extdirect/class.t3lib_tree_pagetree_extdirect_tree.php'] =
-	t3lib_extMgm::extPath($_EXTKEY) . 'Classes/XClasses/T3lib_Tree_PageTree_ExtDirect_Tree.php';
+// Hooks to add additional JavaScript to backend.php to modify PageTree behaviour:
+$TYPO3_CONF_VARS['SC_OPTIONS']['typo3/backend.php']['constructPostProcess'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/BackendControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_BackendControllerResourcesHook->setActiveBackendControllerRequest';
+$TYPO3_CONF_VARS['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess'][] =
+	'EXT:' . $_EXTKEY . '/Classes/Hooks/BackendControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_BackendControllerResourcesHook->renderPreProcess';
 
 // XClasses for handling workspaces actions
 $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/version/class.tx_version_tcemain.php'] =

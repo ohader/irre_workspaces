@@ -115,35 +115,9 @@ TYPO3.TxIrreWorkspaces.Controller = {
 	},
 
 	pageTreeSelect: function(pageId) {
-		var node, result = false;
-
-		if (Ext.isDefined(pageId) && top && top.TYPO3.Backend.NavigationContainer.PageTree) {
-			node = TYPO3.TxIrreWorkspaces.Controller.expandParentsInPageTree(pageId);
-			result = top.TYPO3.Backend.NavigationContainer.PageTree.select(pageId);
+		if (Ext.isDefined(pageId) && top && top.TYPO3.TxIrreWorkspaces.PageTree) {
+			top.TYPO3.TxIrreWorkspaces.PageTree.select(pageId);
 		}
-
-		return result;
-	},
-
-	expandParentsInPageTree: function(pageId) {
-		var tree = top.TYPO3.Backend.NavigationContainer.PageTree.getTree();
-		var node = tree.getRootNode().findChild('realId', pageId, true);
-		var parentNode;
-
-		if (!node) {
-			parentNode = TYPO3.TxIrreWorkspaces.PagesStore.getById(pageId);
-
-			if (parentNode && parentNode.data.pid) {
-				TYPO3.TxIrreWorkspaces.Controller.expandParentsInPageTree(parentNode.data.pid);
-				node = tree.getRootNode().findChild('realId', pageId, true);
-			}
-		}
-
-		if(node && !node.leaf) {
-			node.expand(false, false);
-		}
-
-		return node;
 	},
 
 	/**

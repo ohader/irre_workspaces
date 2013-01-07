@@ -28,32 +28,37 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class ux_t3lib_tree_pagetree_extdirect_Tree extends t3lib_tree_pagetree_extdirect_Tree {
+class Tx_IrreWorkspaces_Hooks_BackendControllerResourcesHook implements t3lib_Singleton {
 	/**
-	 * Fetches the next tree level - but overrides node-limit.
-	 *
-	 * @param integer $nodeId
-	 * @param stdClass $nodeData
-	 * @return array
+	 * @var boolean
 	 */
-	public function getNextTreeLevel($nodeId, $nodeData) {
-		$this->initDataProvider(FALSE, 999999);
-		return parent::getNextTreeLevel($nodeId, $nodeData);
+	protected $backendControllerRequest = FALSE;
+
+	/**
+	 * Pre-processes the render action and adds individual resources.
+	 *
+	 * @param array $parameters
+	 * @param t3lib_PageRenderer $pageRenderer
+	 */
+	public function renderPreProcess(array $parameters, t3lib_PageRenderer $pageRenderer) {
+		if ($this->isBackendControllerRequest()) {
+			$publicResourcesPath = t3lib_extMgm::extRelPath('irre_workspaces') . 'Resources/Public/';
+			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Backend/Tree.js');
+		}
 	}
 
 	/**
-	 * Sets the data provider
-	 *
-	 * @param boolean $override
-	 * @param integer $nodeLimit
 	 * @return void
 	 */
-	protected function initDataProvider($override = FALSE, $nodeLimit = NULL) {
-		if ($override || !isset($this->dataProvider)) {
-			/** @var $dataProvider t3lib_tree_pagetree_DataProvider */
-			$dataProvider = t3lib_div::makeInstance('t3lib_tree_pagetree_DataProvider', $nodeLimit);
-			$this->setDataProvider($dataProvider);
-		}
+	public function setActiveBackendControllerRequest() {
+		$this->backendControllerRequest = TRUE;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	protected function isBackendControllerRequest() {
+		return $this->backendControllerRequest;
 	}
 }
 
