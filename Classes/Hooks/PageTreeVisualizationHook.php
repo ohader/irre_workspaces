@@ -54,8 +54,8 @@ class Tx_IrreWorkspaces_Hooks_PageTreeVisualizationHook {
 
 		if (t3lib_div::testInt($pageId)) {
 			$parameters['JScode'] = '
-				if (top && top.TYPO3.Backend.NavigationContainer.PageTree) {
-					top.TYPO3.Backend.NavigationContainer.PageTree.select(' . $pageId . ');
+				if (top && top.TYPO3.TxIrreWorkspaces.PageTree) {
+					top.TYPO3.TxIrreWorkspaces.PageTree.select(' . $pageId . ');
 				}
 			';
 		}
