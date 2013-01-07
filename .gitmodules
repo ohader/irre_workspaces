@@ -1,3 +1,0 @@
-[submodule "External/XMLdiff"]
-	path = External/XMLdiff
-	url = git://github.com/ohader/XMLdiff.git
