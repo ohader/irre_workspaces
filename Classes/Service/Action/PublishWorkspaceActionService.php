@@ -56,10 +56,12 @@ class Tx_IrreWorkspaces_Service_Action_PublishWorkspaceActionService extends Tx_
 	 * @param t3lib_TCEmain $dataHandler
 	 */
 	public function finish(t3lib_TCEmain $dataHandler) {
-		$this->dataHandler = $dataHandler;
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSinglePublish()) {
+			$this->dataHandler = $dataHandler;
 
-		foreach ($this->incompleteStructures as $incompleteStructure) {
-			$this->processParent($incompleteStructure->getOuterMostParent(), $incompleteStructure, $dataHandler);
+			foreach ($this->incompleteStructures as $incompleteStructure) {
+				$this->processParent($incompleteStructure->getOuterMostParent(), $incompleteStructure, $dataHandler);
+			}
 		}
 	}
 

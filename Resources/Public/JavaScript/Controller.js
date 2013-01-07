@@ -2,6 +2,7 @@ Ext.namespace('TYPO3.TxIrreWorkspaces');
 
 TYPO3.TxIrreWorkspaces.Controller = {
 	isHandlerActive: false,
+	headerClassName: 'x-grid3-hd-checker-on',
 
 	handleSelectionStoreLoadEvent: function(store, records) {
 		if (records.length == 0) {
@@ -46,13 +47,25 @@ TYPO3.TxIrreWorkspaces.Controller = {
 	},
 
 	setCollectionElementsByCurrentRow: function(selection, currentIndex, currentRow, isSelect) {
+		var headerElement;
 		var currentValue = currentRow.json.Tx_IrreWorkspaces_Collection;
-		TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentValue(
-			selection,
-			currentIndex,
-			currentValue,
-			isSelect
-		);
+
+		if (currentValue) {
+			headerElement = Ext.select('#' + selection.grid.getGridEl().id + '-gp-Tx_IrreWorkspaces_Collection-' + currentValue + ' .x-grid-group-hd');
+
+			if (isSelect) {
+				headerElement.addClass(TYPO3.TxIrreWorkspaces.Controller.headerClassName);
+			} else {
+				headerElement.removeClass(TYPO3.TxIrreWorkspaces.Controller.headerClassName);
+			}
+
+			TYPO3.TxIrreWorkspaces.Controller.setCollectionElementsByCurrentValue(
+				selection,
+				currentIndex,
+				currentValue,
+				isSelect
+			);
+		}
 	},
 
 	setCollectionElementsByCurrentValue: function(selection, currentIndex, currentValue, isSelect) {
@@ -152,8 +165,8 @@ TYPO3.TxIrreWorkspaces.Controller = {
 		if (checker) {
 			// Toggles view and assigns data
 			parent = checker.findParent('.x-grid-group-hd', mainBody, true);
-			parent.toggleClass('x-grid3-hd-checker-on');
-			selected = parent.hasClass('x-grid3-hd-checker-on');
+			parent.toggleClass(TYPO3.TxIrreWorkspaces.Controller.headerClassName);
+			selected = parent.hasClass(TYPO3.TxIrreWorkspaces.Controller.headerClassName);
 			collectionId = parent.getAttribute('data-collection-id');
 
 			// Selects all related IRRE elements of this collection

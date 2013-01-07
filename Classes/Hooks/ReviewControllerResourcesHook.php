@@ -57,6 +57,12 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/MultiGrouping.js');
 
+			$pageRenderer->addInlineSetting(
+				'TxIrreWorkspaces',
+				'enableRecordSinglePublish',
+				Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSinglePublish()
+			);
+
 			foreach ($jsFiles as $filePath => $fileConfiguration) {
 				$parameters['jsFiles'][$filePath] = $fileConfiguration;
 

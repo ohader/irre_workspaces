@@ -38,13 +38,19 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 	 * @return void
 	 */
 	protected function applyWorkspacesDependencies(t3lib_utility_Dependency $dependency, $scope) {
-		if ($scope === self::SCOPE_WorkspacesSwap) {
+		$configurationService = Tx_IrreWorkspaces_Service_ConfigurationService::getInstance();
+
+		if ($scope === self::SCOPE_WorkspacesSwap && $configurationService->getEnableRecordSinglePublish()) {
 			$this->applyWorkspacesSwapDependencies($dependency, $scope);
 		} else {
 			parent::applyWorkspacesDependencies($dependency, $scope);
 		}
 	}
 
+	/**
+	 * @param t3lib_utility_Dependency $dependency
+	 * @param string $scope
+	 */
 	protected function applyWorkspacesSwapDependencies(t3lib_utility_Dependency $dependency, $scope) {
 		$transformDependentElementsToUseLiveId = $this->getScopeData($scope, self::KEY_TransformDependentElementsToUseLiveId);
 
@@ -84,6 +90,10 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 		}
 	}
 
+	/**
+	 * @param t3lib_utility_Dependency $dependency
+	 * @param string $scope
+	 */
 	protected function applyWorkspacesClearDependencies(t3lib_utility_Dependency $dependency, $scope) {
 
 	}

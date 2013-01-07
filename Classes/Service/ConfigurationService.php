@@ -36,6 +36,7 @@ class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton 
 	const KEY_EnableRecordDetailReduction = 'enableRecordDetailReduction';
 	const KEY_EnableAlternativeNotification = 'enableAlternativeNotification';
 	const KEY_EnablePageTreeUpdateOnEditing = 'enablePageTreeUpdateOnEditing';
+	const KEY_EnableRecordSinglePublish = 'enableRecordSinglePublish';
 	const KEY_EnableCache = 'enableCache';
 
 	/**
@@ -106,6 +107,13 @@ class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton 
 	 */
 	public function getEnablePageTreeUpdateOnEditing() {
 		return (bool) $this->get(self::KEY_EnablePageTreeUpdateOnEditing);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEnableRecordSinglePublish() {
+		return (bool) $this->get(self::KEY_EnableRecordSinglePublish);
 	}
 
 	/**

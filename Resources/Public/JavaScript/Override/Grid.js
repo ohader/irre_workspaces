@@ -5,7 +5,8 @@
  * @disabled in favour of handling (de-)select all using a header checkbox
  * @see TYPO3.TxIrreWorkspaces.Controller.handleGridViewGroupSelectEvent
  */
-/*
+
+if (!TYPO3.settings.TxIrreWorkspaces.enableRecordSinglePublish) {
 	TYPO3.Workspaces.SelectionModel.addListener(
 		'rowselect',
 		TYPO3.TxIrreWorkspaces.Controller.handleGridRowSelectEvent,
@@ -17,7 +18,7 @@
 		TYPO3.TxIrreWorkspaces.Controller.handleGridRowDeselectEvent,
 		TYPO3.Workspaces.SelectionModel
 	);
-*/
+}
 
 TYPO3.Workspaces.SelectionModel.addListener(
 	'selectionchange',
