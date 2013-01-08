@@ -42,6 +42,8 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 
 		if ($scope === self::SCOPE_WorkspacesSwap && $configurationService->getEnableRecordSinglePublish()) {
 			$this->applyWorkspacesSwapDependencies($dependency, $scope);
+		} elseif ($scope === self::SCOPE_WorkspacesClear && $configurationService->getEnableRecordSingleFlush()) {
+			$this->applyWorkspacesClearDependencies($dependency, $scope);
 		} else {
 			parent::applyWorkspacesDependencies($dependency, $scope);
 		}
@@ -52,6 +54,116 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 	 * @param string $scope
 	 */
 	protected function applyWorkspacesSwapDependencies(t3lib_utility_Dependency $dependency, $scope) {
+		$incompleteStructures = $this->applyWorkspacesDependenciesWithIncompleteStrategy(
+			$dependency,
+			$scope,
+			$this->getPublishWorkspaceActionService()
+		);
+	}
+
+	/**
+	 * @param t3lib_utility_Dependency $dependency
+	 * @param string $scope
+	 */
+	protected function applyWorkspacesClearDependencies(t3lib_utility_Dependency $dependency, $scope) {
+		$incompleteStructures = $this->applyWorkspacesDependenciesWithIncompleteStrategy(
+			$dependency,
+			$scope,
+			$this->getFlushWorkspaceActionService()
+		);
+
+		foreach ($incompleteStructures as $incompleteStructure) {
+			$this->fetchParentReferenceCollection(
+				$this->getFlushWorkspaceActionService(),
+				$incompleteStructure->getOuterMostParent()
+			);
+
+			if ($this->workspacesConsiderReferences) {
+				$this->applyWorkspacesClearDeletedDependencies(
+					$this->getFlushWorkspaceActionService(),
+					$incompleteStructure->getOuterMostParent(),
+					$incompleteStructure
+				);
+			}
+		}
+	}
+
+	/**
+	 * @param Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler
+	 * @param t3lib_utility_Dependency_Element $parentElement
+	 */
+	protected function fetchParentReferenceCollection(Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler, t3lib_utility_Dependency_Element $parentElement) {
+		$referenceCollections = array();
+
+		if (count($parentElement->getChildren()) > 0) {
+			$parentTable = $parentElement->getTable();
+			$parentId = $parentElement->getId();
+			t3lib_div::loadTCA($parentTable);
+
+			$childrenPerParentField = $handler->getChildrenPerParentField(
+				$parentElement->getChildren()
+			);
+
+			foreach ($childrenPerParentField as $parentField => $children) {
+				foreach ($children as $child) {
+					$this->fetchParentReferenceCollection($handler, $child);
+				}
+
+				$parentConfiguration = $GLOBALS['TCA'][$parentTable]['columns'][$parentField]['config'];
+				$referenceCollection = $handler->getReferenceCollection($parentTable, $parentId, $parentConfiguration);
+				$referenceCollections[$parentField] = $referenceCollection;
+			}
+		}
+
+		$parentElement->setDataValue('referenceCollections', $referenceCollections);
+	}
+
+	/**
+	 * @param Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler
+	 * @param t3lib_utility_Dependency_Element $parentElement
+	 * @param Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure
+	 */
+	protected function applyWorkspacesClearDeletedDependencies(Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler, t3lib_utility_Dependency_Element $parentElement, Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure) {
+		if (count($parentElement->getChildren())) {
+			$parentRecord = $parentElement->getRecord();
+			$parentIdentifier = $parentElement->__toString();
+			$missingElements = array();
+
+			// Only if current parent is considered to be cleared and parent uses deleted placeholder
+			if ($incompleteStructure->hasIntersectingElement($parentIdentifier) && $parentRecord['t3ver_state'] == 2) {
+				/** @var $childReference t3lib_utility_Dependency_Reference */
+				foreach ($parentElement->getChildren() as $childReference) {
+					$childRecord = $childReference->getElement()->getRecord();
+					$childIdentifier = $childReference->getElement()->__toString();
+
+					if ($incompleteStructure->hasDifferentElement($childIdentifier) && $childRecord['t3ver_state'] == 2) {
+						$missingElements[] = $childReference->getElement();
+					}
+
+					$this->applyWorkspacesClearDeletedDependencies(
+						$handler,
+						$childReference->getElement(),
+						$incompleteStructure
+					);
+				}
+
+				// Add to command map
+				if (count($missingElements)) {
+					$this->update($parentElement, $missingElements, self::SCOPE_WorkspacesClear);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param t3lib_utility_Dependency $dependency
+	 * @param string $scope
+	 * @param Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler
+	 * @return array|Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure[]
+	 */
+	protected function applyWorkspacesDependenciesWithIncompleteStrategy(t3lib_utility_Dependency $dependency, $scope, Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler) {
+		$incompleteStructures = array();
+
 		$transformDependentElementsToUseLiveId = $this->getScopeData($scope, self::KEY_TransformDependentElementsToUseLiveId);
 
 		$elementsToBeVersionized = $dependency->getElements();
@@ -80,7 +192,7 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 
 				// If at least one element intersects but not all, remember for later processing
 				if (count($intersectingElements) !== count($dependentElements)) {
-					$this->getPublishWorkspaceActionService()->addIncompleteStructure(
+					$incompleteStructures[] = $handler->addIncompleteStructure(
 						$outerMostParent,
 						$intersectingElements,
 						$differentElements
@@ -88,14 +200,31 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 				}
 			}
 		}
+
+		return $incompleteStructures;
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency $dependency
-	 * @param string $scope
+	 * Constructs the scope settings.
+	 * Currently the scopes for swapping/publishing and staging are available.
+	 *
+	 * @return void
 	 */
-	protected function applyWorkspacesClearDependencies(t3lib_utility_Dependency $dependency, $scope) {
+	protected function constructScopes() {
+		parent::constructScopes();
 
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSingleFlush()) {
+			$this->scopes[self::SCOPE_WorkspacesClear][self::KEY_ElementCreateChildReferenceCallback] = 'createNewDependentElementChildReferenceCallback';
+			$this->scopes[self::SCOPE_WorkspacesClear][self::KEY_ElementCreateParentReferenceCallback] = 'createNewDependentElementParentReferenceCallback';
+		}
+	}
+
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService
+	 */
+	protected function getFlushWorkspaceActionService() {
+		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService');
 	}
 
 	/**

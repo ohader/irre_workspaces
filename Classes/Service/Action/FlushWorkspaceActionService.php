@@ -30,72 +30,83 @@
  */
 class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_IrreWorkspaces_Service_Action_AbstractActionService {
 	/**
-	 * @var array
-	 */
-	protected $finishParents = array();
-
-	/**
-	 * @var array
-	 */
-	protected $flushedParents = array();
-
-	/**
-	 * @var array
-	 */
-	protected $clonedChildren = array();
-
-	/**
-	 * @param string $table
-	 * @param integer $versionId
-	 * @param boolean $flushElement
 	 * @param t3lib_TCEmain $dataHandler
-	 * @param ux_tx_version_tcemain $versionDataHandler
 	 */
-	public function clearElement($table, $versionId, $flushElement, t3lib_TCEmain $dataHandler, ux_tx_version_tcemain $versionDataHandler) {
-		/** @var $flushChildren t3lib_utility_Dependency_Element[] */
-		$flushChildren = array();
-		$hasParents = FALSE;
+	public function finish(t3lib_TCEmain $dataHandler) {
+		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSingleFlush()) {
+			$this->dataHandler = $dataHandler;
 
-		$liveRecord = t3lib_BEfunc::getLiveVersionOfRecord($table, $versionId, 'uid,t3ver_state');
-		$versionRecord = t3lib_BEfunc::getRecord($table, $versionId);
-		$liveId = $liveRecord['uid'];
-
-		// If version record has been modified
-		if ($liveRecord && $versionRecord && $versionRecord['t3ver_state'] == 0) {
-			$element = $this->getCollectionDependencyService()->getDependency()->addElement($table, $versionId);
-
-			if (count($element->getChildren()) > 0) {
-				$this->addFlushedParent($element);
-				/** @var $childReference t3lib_utility_Dependency_Reference */
-				foreach ($element->getChildren() as $childReference) {
-					$flushChildren[] = $childReference->getElement();
-				}
+			foreach ($this->incompleteStructures as $incompleteStructure) {
+				$this->processParent($incompleteStructure->getOuterMostParent(), $incompleteStructure, $dataHandler);
 			}
+		}
+	}
 
-			// Re-add clone of live version later on to parent
-			if (count($element->getParents()) > 0) {
-				$hasParents = TRUE;
-				/** @var $parentReference t3lib_utility_Dependency_Reference */
-				foreach ($element->getParents() as $parentReference) {
-					$this->addFinishParent($parentReference);
+	/**
+	 * @param t3lib_utility_Dependency_Element $parentElement
+	 * @param Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure
+	 */
+	protected function processParent(t3lib_utility_Dependency_Element $parentElement, Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure) {
+		$clonedParentId = NULL;
+		$flushedChildren = array();
+		$unflushedChildren = array();
+
+		$isElementFlushed = $incompleteStructure->hasIntersectingElement($parentElement->__toString());
+
+		/** @var $childReference t3lib_utility_Dependency_Reference */
+		foreach ($parentElement->getChildren() as $childReference) {
+			$this->processParent($childReference->getElement(), $incompleteStructure);
+
+			$isChildFlushed = $incompleteStructure->hasIntersectingElement($childReference->getElement()->__toString());
+			$childRecord = $childReference->getElement()->getRecord();
+
+			if ($isChildFlushed) {
+				// Only if child is modified (and thus has pendant in live version)
+				if ($childRecord['t3ver_state'] == 0) {
+					$flushedChildren[] = $childReference;
+				} else {
+					$childReference->getElement()->setDataValue('skipReference', TRUE);
 				}
+			} else {
+				$unflushedChildren[] = $childReference;
 			}
 		}
 
-		// Clear current record
-		$versionDataHandler->invokeParentClearWSID($table, $versionId, $flushElement, $dataHandler);
+		if ($isElementFlushed === TRUE && count($unflushedChildren) > 0) {
+			// Clone flushed modified children
+			foreach ($flushedChildren as $childReference) {
+				$this->cloneLiveVersion($childReference->getElement(), 'Auto-created for WS #' . $this->getBackendUser()->workspace);
+			}
 
-		// Clear all child elements as well, no matter what state they have
-		foreach ($flushChildren as $child) {
-			$versionDataHandler->invokeParentClearWSID($child->getTable(), $child->getId(), $flushElement, $dataHandler);
+			$this->cloneLiveVersion($parentElement, 'Auto-created for WS #' . $this->getBackendUser()->workspace);
+
+			$this->updateVersionReferences($parentElement);
+
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$parentElement->getId()
+			);
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$this->getFallbackId($parentElement)
+			);
 		}
 
-		// We need remapping at the end of all processes
-		if ($hasParents) {
-			$dataHandler->addRemapAction(
-				$table, $versionId,
-				array($this, 'cloneClearedChildRemapAction'),
-				array($table, $versionId, $liveId, $dataHandler)
+		if ($isElementFlushed === FALSE && count($flushedChildren) > 0) {
+			// Clone published children, otherwise the not published parent would be incomplete
+			foreach ($flushedChildren as $childReference) {
+				$this->cloneLiveVersion($childReference->getElement(), 'Auto-created for WS #' . $this->getBackendUser()->workspace);
+			}
+
+			$this->updateVersionReferences($parentElement);
+
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$parentElement->getId()
+			);
+			$this->dataHandler->addRemapStackRefIndex(
+				$parentElement->getTable(),
+				$this->getFallbackId($parentElement)
 			);
 		}
 	}
@@ -103,120 +114,48 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 	/**
 	 * @param t3lib_utility_Dependency_Element $parentElement
 	 */
-	protected function addFlushedParent(t3lib_utility_Dependency_Element $parentElement) {
-		$identifier = $parentElement->__toString();
+	protected function updateVersionReferences(t3lib_utility_Dependency_Element $parentElement) {
+		$childrenPerParentField = $this->getChildrenPerParentField($parentElement->getChildren());
 
-		if (!isset($this->flushedParents[$identifier])) {
-			$this->flushedParents[$identifier] = $parentElement;
-		}
-	}
+		$parentId = $this->getFallbackId($parentElement);
+		$parentTable = $parentElement->getTable();
+		t3lib_div::loadTCA($parentTable);
 
-	/**
-	 * @param t3lib_utility_Dependency_Reference $parentReference
-	 */
-	protected function addFinishParent(t3lib_utility_Dependency_Reference $parentReference) {
-		$identifier = $parentReference->__toString();
-
-		if (!isset($this->finishParents[$identifier])) {
-			$parentTable = $parentReference->getElement()->getTable();
-			$parentField = $parentReference->getField();
-			$parentId = $parentReference->getElement()->getId();
-
-			// @todo: This won't work on using IRRE in FlexForms - which does not at all in TYPO3 4.5, but in 6.0
-			t3lib_div::loadTCA($parentTable);
+		/** @var $children t3lib_utility_Dependency_Element[] */
+		foreach ($childrenPerParentField as $parentField => $children) {
 			$parentConfiguration = $GLOBALS['TCA'][$parentTable]['columns'][$parentField]['config'];
+			$referenceCollection = $this->getReferenceCollection($parentTable, $parentId, $parentConfiguration);
+			$referenceCollection->itemArray = array();
+			$referenceCollection->tableArray = array();
 
-			$this->finishParents[$identifier] = array(
-				'parentItems' => $this->getReferenceCollection($parentTable, $parentId, $parentConfiguration)->itemArray,
-				'parentReference' => $parentReference,
-				'parentConfiguration' => $parentConfiguration,
-			);
-		}
-	}
+			$parentReferenceCollections = $parentElement->getDataValue('referenceCollections');
 
-	/**
-	 * Clones child element and adds it to parent structures.
-	 *
-	 * @param string $childTable
-	 * @param integer $childVersionId
-	 * @param integer $childLiveId
-	 * @param t3lib_TCEmain $dataHandler
-	 */
-	public function cloneClearedChildRemapAction($childTable, $childVersionId, $childLiveId, t3lib_TCEmain $dataHandler) {
-		$childCloneId = $dataHandler->versionizeRecord($childTable, $childLiveId, 'Automatically re-added child');
-		$this->clonedChildren[$childTable][$childVersionId] = $childCloneId;
-	}
+			/** @var $parentReferenceCollection t3lib_loadDBGroup */
+			$parentReferenceCollection = $parentReferenceCollections[$parentField];
 
-	/**
-	 * @param t3lib_TCEmain $dataHandler
-	 */
-	public function finish(t3lib_TCEmain $dataHandler) {
-		/** @var $parentReference t3lib_utility_Dependency_Reference */
-		foreach ($this->finishParents as $parent) {
-			$parentReference = $parent['parentReference'];
-			$parentElementIdentifier = $parentReference->getElement()->__toString();
+			foreach ($parentReferenceCollection->itemArray as $item) {
+				$childElement = $this->findElement($children, $item['table'], $item['id']);
 
-			// No processing if parent element was flushed
-			if (!empty($this->flushedParents[$parentElementIdentifier])) {
-				continue;
+				if ($childElement !== NULL && $childElement->getDataValue('skipReference') !== TRUE) {
+					$referenceCollection->itemArray[] = array(
+						'table' => $childElement->getTable(),
+						'id' => $this->getFallbackId($childElement),
+					);
+					$referenceCollection->tableArray[$childElement->getTable()][] = $this->getFallbackId($childElement);
+				} else {
+					$referenceCollection->itemArray[] = $item;
+					$referenceCollection->tableArray[$item['table']][] = $item['id'];
+				}
 			}
 
-			$parentItems = $parent['parentItems'];
-			$parentConfiguration = $parent['parentConfiguration'];
-
-			$parentTable = $parentReference->getElement()->getTable();
-			$parentId = $parentReference->getElement()->getId();
-
-			$this->persistClonedClearedChildReferences($parentTable, $parentId, $parentConfiguration, $parentItems);
-		}
-	}
-
-	/**
-	 * Adds cloned child element to parent structure.
-	 *
-	 * @param string $parentTable
-	 * @param integer $parentId
-	 * @param array $parentConfiguration
-	 * @param array $parentItems
-	 */
-	protected function persistClonedClearedChildReferences($parentTable, $parentId, array $parentConfiguration, array $parentItems) {
-		$isDirty = FALSE;
-
-		$referenceCollection = $this->getReferenceCollection($parentTable, $parentId, $parentConfiguration);
-		$remappedItems = array();
-		$remappedTables = array();
-
-		foreach ($parentItems as $parentItem) {
-			$childTable = $parentItem['table'];
-			$childId = $parentItem['id'];
-
-			if (!empty($referenceCollection->tableArray[$childTable]) && in_array($childId, $referenceCollection->tableArray[$childTable])) {
-				$remappedItems[] = $parentItem;
-				$remappedTables[$childTable][] = $childId;
-			} elseif (!empty($this->clonedChildren[$childTable][$childId])) {
-				$isDirty = TRUE;
-				$remappedItems[] = array(
-					'table' => $childTable,
-					'id' => $this->clonedChildren[$childTable][$childId],
-				);
-				$remappedTables[$childTable][] = $this->clonedChildren[$childTable][$childId];
+			// Persist changes
+			if (NULL !== $remapStackIndex = $this->findRemapStackIndex($parentTable, $parentId, $parentField)) {
+				$this->updateRemapStack($remapStackIndex, 'valueArray', $referenceCollection->getValueArray());
 			} else {
-				$isDirty = TRUE;
+				$referenceCollection->writeForeignField($parentConfiguration, $parentId);
+				$this->updateRecord($parentTable, $parentId, array($parentField => count($referenceCollection->itemArray)));
 			}
 		}
-
-		if ($isDirty) {
-			$referenceCollection->itemArray = $remappedItems;
-			$referenceCollection->tableArray = $remappedTables;
-			$referenceCollection->writeForeignField($parentConfiguration, $parentId);
-		}
-	}
-
-	/**
-	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
-	 */
-	protected function getCollectionDependencyService() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService');
 	}
 }
 
