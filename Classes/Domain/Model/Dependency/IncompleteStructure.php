@@ -127,6 +127,23 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
+	 * @param t3lib_utility_Dependency_Element $element
+	 * @return NULL|t3lib_utility_Dependency_Element
+	 */
+	public function findIntersectingElement(t3lib_utility_Dependency_Element $element) {
+		$result = NULL;
+
+		foreach ($this->intersectingElements as $intersectingElement) {
+			if ($intersectingElement->getTable() === $element->getTable() && $intersectingElement->getId() == $element->getId()) {
+				$result = $intersectingElement;
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * @param string $identifier
 	 * @return boolean
 	 */
@@ -163,6 +180,23 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 		}
 
 		return $element;
+	}
+
+	/**
+	 * @param t3lib_utility_Dependency_Element $element
+	 * @return NULL|t3lib_utility_Dependency_Element
+	 */
+	public function findDifferentElement(t3lib_utility_Dependency_Element $element) {
+		$result = NULL;
+
+		foreach ($this->differentElements as $differentElement) {
+			if ($differentElement->getTable() === $element->getTable() && $differentElement->getId() == $element->getId()) {
+				$result = $differentElement;
+				break;
+			}
+		}
+
+		return $result;
 	}
 
 	/**

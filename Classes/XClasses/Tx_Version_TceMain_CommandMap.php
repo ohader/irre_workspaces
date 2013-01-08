@@ -124,42 +124,47 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 	 * @param Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure
 	 */
 	protected function applyWorkspacesClearDeletedDependencies(Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler, t3lib_utility_Dependency_Element $parentElement, Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure) {
-		if (count($parentElement->getChildren())) {
-			$transformDependentElementsToUseLiveId = $this->getScopeData(
-				self::SCOPE_WorkspacesClear,
-				self::KEY_TransformDependentElementsToUseLiveId
-			);
+		$parentRecord = $parentElement->getRecord();
 
-			$parentRecord = $parentElement->getRecord();
-			$parentIdentifier = $parentElement->__toString();
-			$missingElements = array();
+		// Consider only elements with deleted flag
+		if ($parentRecord['t3ver_state'] == 2) {
+			$isMissing = FALSE;
 
-			// Only if current parent is considered to be cleared and parent uses deleted placeholder
-			if ($incompleteStructure->hasIntersectingElement($parentIdentifier) && $parentRecord['t3ver_state'] == 2) {
-				// @todo Invoke parents as well
+			/** @var $children t3lib_utility_Dependency_Element[] */
+			$nestedChildren = $parentElement->getNestedChildren();
+			foreach ($nestedChildren as $child) {
+				if ($incompleteStructure->findIntersectingElement($child) !== NULL) {
+					$isMissing = TRUE;
+					break;
+				}
+			}
 
-				/** @var $childReference t3lib_utility_Dependency_Reference */
-				foreach ($parentElement->getChildren() as $childReference) {
-					$childRecord = $childReference->getElement()->getRecord();
-					$childIdentifier = $childReference->getElement()->__toString();
+			// It's assumed that all nested children have the deleted state as well
+			if ($isMissing && count($nestedChildren)) {
+				$transformDependentElementsToUseLiveId = $this->getScopeData(
+					self::SCOPE_WorkspacesClear,
+					self::KEY_TransformDependentElementsToUseLiveId
+				);
 
-					if ($incompleteStructure->hasDifferentElement($childIdentifier) && $childRecord['t3ver_state'] == 2) {
-						$missingElements[$childIdentifier] = $childReference->getElement();
-					}
+				// Possible elements including parent
+				$possibleElements = array_merge(
+					array($parentElement->__toString() => $parentElement),
+					$nestedChildren
+				);
 
-					$this->applyWorkspacesClearDeletedDependencies(
-						$handler,
-						$childReference->getElement(),
-						$incompleteStructure
-					);
+				// Ensure identical array keys are used
+				if ($transformDependentElementsToUseLiveId) {
+					$possibleElements = $this->transformDependentElementsToUseLiveId($possibleElements);
 				}
 
-				// Add to command map
-				if (count($missingElements)) {
-					if ($transformDependentElementsToUseLiveId) {
-						$missingElements = $this->transformDependentElementsToUseLiveId($missingElements);
-					}
+				// Get elements that are not registered yet, thus missing
+				$missingElements = array_diff_key(
+					$possibleElements,
+					$incompleteStructure->getIntersectingElements()
+				);
 
+				// Update command map and incomplete structure
+				if (count($missingElements)) {
 					$this->update($parentElement, $missingElements, self::SCOPE_WorkspacesClear);
 
 					// Update information in incomplete structure
@@ -175,6 +180,17 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 					$incompleteStructure->setIntersectingElements($intersectingElements);
 					$incompleteStructure->setDifferentElements($differentElements);
 				}
+			}
+
+		// Continue with children
+		} else {
+			/** @var $childReference t3lib_utility_Dependency_Reference */
+			foreach ($parentElement->getChildren() as $childReference) {
+				$this->applyWorkspacesClearDeletedDependencies(
+					$handler,
+					$childReference->getElement(),
+					$incompleteStructure
+				);
 			}
 		}
 	}
