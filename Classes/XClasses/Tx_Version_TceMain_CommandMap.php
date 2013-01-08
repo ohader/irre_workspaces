@@ -136,6 +136,8 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 
 			// Only if current parent is considered to be cleared and parent uses deleted placeholder
 			if ($incompleteStructure->hasIntersectingElement($parentIdentifier) && $parentRecord['t3ver_state'] == 2) {
+				// @todo Invoke parents as well
+
 				/** @var $childReference t3lib_utility_Dependency_Reference */
 				foreach ($parentElement->getChildren() as $childReference) {
 					$childRecord = $childReference->getElement()->getRecord();
