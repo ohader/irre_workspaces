@@ -36,6 +36,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 
 	/**
 	 * @var array|t3lib_utility_Dependency_Element[]
+	 * @deprecated Unused
 	 */
 	protected $dependentElements;
 
@@ -80,6 +81,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 
 	/**
 	 * @param array|t3lib_utility_Dependency_Element[] $dependentElements
+	 * @deprecated Unused
 	 */
 	public function setDependentElements(array $dependentElements) {
 		$this->dependentElements = $dependentElements;
@@ -87,6 +89,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 
 	/**
 	 * @return array|t3lib_utility_Dependency_Element[]
+	 * @deprecated Unused
 	 */
 	public function getDependentElements() {
 		return $this->dependentElements;

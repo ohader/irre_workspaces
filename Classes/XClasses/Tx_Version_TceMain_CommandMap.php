@@ -125,6 +125,11 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 	 */
 	protected function applyWorkspacesClearDeletedDependencies(Tx_IrreWorkspaces_Service_Action_AbstractActionService $handler, t3lib_utility_Dependency_Element $parentElement, Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure $incompleteStructure) {
 		if (count($parentElement->getChildren())) {
+			$transformDependentElementsToUseLiveId = $this->getScopeData(
+				self::SCOPE_WorkspacesClear,
+				self::KEY_TransformDependentElementsToUseLiveId
+			);
+
 			$parentRecord = $parentElement->getRecord();
 			$parentIdentifier = $parentElement->__toString();
 			$missingElements = array();
@@ -137,7 +142,7 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 					$childIdentifier = $childReference->getElement()->__toString();
 
 					if ($incompleteStructure->hasDifferentElement($childIdentifier) && $childRecord['t3ver_state'] == 2) {
-						$missingElements[] = $childReference->getElement();
+						$missingElements[$childIdentifier] = $childReference->getElement();
 					}
 
 					$this->applyWorkspacesClearDeletedDependencies(
@@ -149,7 +154,24 @@ class ux_tx_version_tcemain_CommandMap extends tx_version_tcemain_CommandMap {
 
 				// Add to command map
 				if (count($missingElements)) {
+					if ($transformDependentElementsToUseLiveId) {
+						$missingElements = $this->transformDependentElementsToUseLiveId($missingElements);
+					}
+
 					$this->update($parentElement, $missingElements, self::SCOPE_WorkspacesClear);
+
+					// Update information in incomplete structure
+					$intersectingElements = array_merge(
+						$incompleteStructure->getIntersectingElements(),
+						$missingElements
+					);
+					$differentElements = array_diff_key(
+						$incompleteStructure->getDifferentElements(),
+						$missingElements
+					);
+
+					$incompleteStructure->setIntersectingElements($intersectingElements);
+					$incompleteStructure->setDifferentElements($differentElements);
 				}
 			}
 		}
