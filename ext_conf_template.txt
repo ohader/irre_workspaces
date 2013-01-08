@@ -22,5 +22,8 @@ enablePageTreeUpdateOnEditing = 1
 	# cat=basic//10; type=boolean; label=enableRecordSinglePublish: EXPERIMENTAL: Enables publishing single dependent record structures
 enableRecordSinglePublish = 0
 
+	# cat=basic//10; type=boolean; label=enableRecordSingleFlush: Enables flushing/discarding single dependent record structures
+enableRecordSingleFlush = 1
+
 	# cat=basic//10; type=boolean; label=enableCache: Enables caching of the workspace elements
 enableCache = 1
