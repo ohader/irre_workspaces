@@ -44,16 +44,40 @@ class Tx_IrreWorkspaces_Hooks_PreviewHook implements t3lib_Singleton {
 		$uid = $parameters['uid'];
 		$table = $parameters['table'];
 		$liveRecord = $parameters['liveRecord'];
+		$versionRecord = $parameters['versionRecord'];
 
 		if (empty($liveRecord)) {
 			$liveRecord = t3lib_BEfunc::getLiveVersionOfRecord($table, $uid);
 		}
 
+		if (empty($versionRecord)) {
+			$versionRecord = t3lib_BEfunc::getRecord($table, $uid);
+		}
+
+		
+
 		if (NULL !== $previewPageId = $this->getPreviewPageId($liveRecord['pid'], $table, $liveRecord)) {
-			$singleRecordLink = t3lib_BEfunc::viewOnClick($previewPageId);
+			$additionalParameters = $this->getLanguageParameter($table, $versionRecord);
+			$singleRecordLink = t3lib_BEfunc::viewOnClick($previewPageId, '', '', '', '', $additionalParameters);
 		}
 
 		return $singleRecordLink;
+	}
+
+	/**
+	 * @param string $table
+	 * @param array $record
+	 * @return string
+	 */
+	protected function getLanguageParameter($table, array $record) {
+		$parameter = '';
+
+		$languageField = $GLOBALS['TCA'][$table]['ctrl']['languageField'];
+		if ($record[$languageField] > 0) {
+			$parameter .= '&L=' . $record[$languageField];
+		}
+
+		return $parameter;
 	}
 
 	/**
