@@ -54,8 +54,6 @@ class Tx_IrreWorkspaces_Hooks_PreviewHook implements t3lib_Singleton {
 			$versionRecord = t3lib_BEfunc::getRecord($table, $uid);
 		}
 
-		
-
 		if (NULL !== $previewPageId = $this->getPreviewPageId($liveRecord['pid'], $table, $liveRecord)) {
 			$additionalParameters = $this->getLanguageParameter($table, $versionRecord);
 			$singleRecordLink = t3lib_BEfunc::viewOnClick($previewPageId, '', '', '', '', $additionalParameters);
