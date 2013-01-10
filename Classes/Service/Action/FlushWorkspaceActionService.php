@@ -80,7 +80,7 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 
 			$this->cloneLiveVersion($parentElement, 'Auto-created for WS #' . $this->getBackendUser()->workspace);
 
-			$this->updateVersionReferences($parentElement);
+			$this->updateVersionReferences($parentElement, $flushedChildren, $unflushedChildren);
 
 			$this->dataHandler->addRemapStackRefIndex(
 				$parentElement->getTable(),
@@ -98,7 +98,7 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 				$this->cloneLiveVersion($childReference->getElement(), 'Auto-created for WS #' . $this->getBackendUser()->workspace);
 			}
 
-			$this->updateVersionReferences($parentElement);
+			$this->updateVersionReferences($parentElement, $flushedChildren, $unflushedChildren);
 
 			$this->dataHandler->addRemapStackRefIndex(
 				$parentElement->getTable(),
@@ -113,8 +113,10 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 
 	/**
 	 * @param t3lib_utility_Dependency_Element $parentElement
+	 * @param array $flushedChildren
+	 * @param array $unflushedChildren
 	 */
-	protected function updateVersionReferences(t3lib_utility_Dependency_Element $parentElement) {
+	protected function updateVersionReferences(t3lib_utility_Dependency_Element $parentElement, array $flushedChildren, array $unflushedChildren) {
 		$childrenPerParentField = $this->getChildrenPerParentField($parentElement->getChildren());
 
 		$parentId = $this->getFallbackId($parentElement);
@@ -128,23 +130,42 @@ class Tx_IrreWorkspaces_Service_Action_FlushWorkspaceActionService extends Tx_Ir
 			$referenceCollection->itemArray = array();
 			$referenceCollection->tableArray = array();
 
-			$parentReferenceCollections = $parentElement->getDataValue('referenceCollections');
+			// If there are unflushed children, use previous version reference collection
+			if (count($unflushedChildren) > 0) {
+				$childDataValueKey = NULL;
+				$parentReferenceCollections = $parentElement->getDataValue('referenceCollections');
+				/** @var $parentReferenceCollection t3lib_loadDBGroup */
+				$parentReferenceCollection = $parentReferenceCollections[$parentField];
 
-			/** @var $parentReferenceCollection t3lib_loadDBGroup */
-			$parentReferenceCollection = $parentReferenceCollections[$parentField];
+			// Otherwise (there are no unflushed children), use the live reference collection
+			} else {
+				$childDataValueKey = 'liveId';
+				$parentReferenceCollection = $this->getReferenceCollection(
+					$parentTable,
+					$this->getLiveId($parentElement),
+					$parentConfiguration
+				);
+			}
 
 			foreach ($parentReferenceCollection->itemArray as $item) {
-				$childElement = $this->findElement($children, $item['table'], $item['id']);
+				$childElement = $this->findElement($children, $item['table'], $item['id'], $childDataValueKey);
 
+				// Child element is found in current processed collection
 				if ($childElement !== NULL && $childElement->getDataValue('skipReference') !== TRUE) {
 					$referenceCollection->itemArray[] = array(
 						'table' => $childElement->getTable(),
 						'id' => $this->getFallbackId($childElement),
 					);
 					$referenceCollection->tableArray[$childElement->getTable()][] = $this->getFallbackId($childElement);
+
+				// If child element was not found, guess(!) the version id and add the element
 				} else {
-					$referenceCollection->itemArray[] = $item;
-					$referenceCollection->tableArray[$item['table']][] = $item['id'];
+					$possibleVersionId = t3lib_BEfunc::wsMapId($item['table'], $item['id']);
+					$referenceCollection->itemArray[] = array(
+						'table' => $item['table'],
+						'id' => $possibleVersionId,
+					);
+					$referenceCollection->tableArray[$item['table']][] = $possibleVersionId;
 				}
 			}
 

@@ -212,17 +212,23 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	 * @param integer $id
 	 * @return NULL|t3lib_utility_Dependency_Element
 	 */
-	public function findElement(array $elements, $table, $id) {
+	public function findElement(array $elements, $table, $id, $dataValueKey = NULL) {
 		$result = NULL;
 
 		foreach ($elements as $element) {
-			if ($element->getTable() === $table && $element->getId() == $id) {
+			$elementId = $element->getId();
+
+			if ($dataValueKey !== NULL) {
+				$elementId = $element->getDataValue($dataValueKey);
+			}
+
+			if ($element->getTable() === $table && $elementId == $id) {
 				$result = $element;
 				break;
 			}
 		}
 
-		return $element;
+		return $result;
 	}
 
 	/**
