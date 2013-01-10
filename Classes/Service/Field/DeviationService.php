@@ -140,6 +140,10 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	/**
 	 * Determines whether a field is not editable in the back-end form view.
 	 *
+	 * This might happen on different types of a plugin which results in fields
+	 * being copied but not modified during saving - which results in different
+	 * values, but are false-positives in that case.
+	 *
 	 * @param string $table
 	 * @param string $field
 	 * @param array $liveRecord
