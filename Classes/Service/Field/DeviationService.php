@@ -74,6 +74,8 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 
 		if ($this->isSystemField($table, $field)) {
 			$result = FALSE;
+		} elseif ($this->isSortingField($table, $field) && $this->isEqual($field, $liveRecord, $versionRecord) === FALSE) {
+			$result = TRUE;
 		} elseif ($this->isUndefinedField($table, $field)) {
 			$result = FALSE;
 		} elseif ($this->isEqual($field, $liveRecord, $versionRecord)) {
@@ -94,6 +96,16 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	 */
 	public function isSystemField($table, $field) {
 		return in_array($field, $this->getSystemFields($table));
+	}
+
+	/**
+	 * @param string $table
+	 * @param string $field
+	 * @return boolean
+	 */
+	public function isSortingField($table, $field) {
+		$sortingField = $this->getTcaControlField($table, 'sortby');
+		return ($field === $sortingField);
 	}
 
 	/**
