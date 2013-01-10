@@ -152,16 +152,44 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 
 		if ($typeField !== NULL && $this->isEqual($typeField, $liveRecord, $versionRecord)) {
 			$typeValue = $versionRecord[$typeField];
-			$pattern = '#(^|,)\s*' . preg_quote($field, '#') . '\s*(;|,|$)#';
 
 			if (!empty($GLOBALS['TCA'][$table]['types'][$typeValue]['showitem'])) {
-				if (!preg_match($pattern, $GLOBALS['TCA'][$table]['types'][$typeValue]['showitem'])) {
-					$isNotEditable = TRUE;
-				}
+				$typeItemList = $GLOBALS['TCA'][$table]['types'][$typeValue]['showitem'];
+				$isNotEditable = ($this->isDefinedInTypeOrPalette($table, $field, $typeItemList, FALSE) === FALSE);
 			}
 		}
 
 		return $isNotEditable;
+	}
+
+	/**
+	 * @param string $table
+	 * @param string $field
+	 * @param string $itemList
+	 * @param boolean $isPalette
+	 * @return boolean
+	 */
+	protected function isDefinedInTypeOrPalette($table, $field, $itemList, $isPalette = FALSE) {
+		$isDefined = FALSE;
+
+		foreach ($this->explodeItemList($itemList) as $item) {
+			$itemField = $item['details']['field'];
+			$itemPalette = $item['details']['palette'];
+
+			if ($itemField === $field) {
+				$isDefined = TRUE;
+				break;
+			} elseif (!$isPalette && !empty($GLOBALS['TCA'][$table]['palettes'][$itemPalette]['showitem'])) {
+				$paletteItemList = $GLOBALS['TCA'][$table]['palettes'][$itemPalette]['showitem'];
+
+				if ($this->isDefinedInTypeOrPalette($table, $field, $paletteItemList, TRUE)) {
+					$isDefined = TRUE;
+					break;
+				}
+			}
+		}
+
+		return $isDefined;
 	}
 
 	/**
@@ -270,6 +298,42 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 		}
 
 		return $versionState;
+	}
+
+	/**
+	 * Generates an array of fields/items with additional information such as e.g. the name of the palette.
+	 *
+	 * @param	string		$itemList: List of fields/items to be splitted up
+	 *						 (this mostly reflects the data in $TCA[<table>]['types'][<type>]['showitem'])
+	 * @return	array		An array with the names of the fields/items as keys and additional information
+	 */
+	protected function explodeItemList($itemList) {
+		$items = array();
+		$itemParts = t3lib_div::trimExplode(',', $itemList, TRUE);
+
+		foreach ($itemParts as $itemPart) {
+			$itemDetails = t3lib_div::trimExplode(';', $itemPart, FALSE, 5);
+			$key = $itemDetails[0];
+			if (strstr($key, '--')) {
+					// If $key is a separator (--div--) or palette (--palette--) then it will be appended by a unique number. This must be removed again when using this value!
+				$key .= count($items);
+			}
+
+			if (!isset($items[$key])) {
+				$items[$key] = array(
+					'rawData' => $itemPart,
+					'details' => array(
+						'field' => $itemDetails[0],
+						'label' => $itemDetails[1],
+						'palette' => $itemDetails[2],
+						'special' => $itemDetails[3],
+						'styles' => $itemDetails[4],
+					),
+				);
+			}
+		}
+
+		return $items;
 	}
 }
 
