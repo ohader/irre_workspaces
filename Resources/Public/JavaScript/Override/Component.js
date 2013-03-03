@@ -15,6 +15,7 @@ TYPO3.Workspaces.MainStore = new Ext.ux.MultiGroupingStore({
 	baseParams: {
 		depth : 990,
 		id: TYPO3.settings.Workspaces.id,
+		language: TYPO3.settings.Workspaces.language,
 		query: '',
 		start: 0,
 		limit: 30
