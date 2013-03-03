@@ -75,6 +75,54 @@ TYPO3.Workspaces.Toolbar.selectionActionCombo = new Ext.form.ComboBox({
 	}
 });
 
+TYPO3.Workspaces.Toolbar.StageSelector = new Ext.form.ComboBox({
+	width: 150,
+	listWidth: 350,
+	lazyRender: true,
+	valueField: 'uid',
+	displayField: 'title',
+	mode: 'local',
+	emptyText: 'all stages',
+	selectOnFocus: true,
+	triggerAction: 'all',
+	editable: false,
+	forceSelection: true,
+	tpl: '<tpl for="."><div class="x-combo-list-item"><span class="{cls}">&nbsp;</span> {title}</div></tpl>',
+	store: new Ext.data.DirectStore({
+		storeId: 'languages',
+		root: 'data',
+		totalProperty: 'total',
+		idProperty: 'uid',
+		fields: [
+			{name : 'uid'},
+			{name : 'title'},
+			{name : 'cls'}
+		],
+		listeners: {
+			load: function() {
+				TYPO3.Workspaces.Toolbar.StageSelector.setValue(TYPO3.settings.TxIrreWorkspaces.valueStageSelector);
+			}
+		}
+	}),
+	listeners: {
+		select: function (comboBox, record, index) {
+			TYPO3.Workspaces.ExtDirectTxIrreWorkspacesActions.saveStageSelection(this.getValue());
+			TYPO3.Workspaces.MainStore.setBaseParam('stage', this.getValue());
+			TYPO3.Workspaces.MainStore.load();
+		}
+	}
+});
+
+TYPO3.Workspaces.Toolbar.FullTopToolbar = [
+	TYPO3.Workspaces.Toolbar.depthFilter,
+	'-',
+	TYPO3.Workspaces.Toolbar.LanguageSelector,
+	'-',
+	TYPO3.Workspaces.Toolbar.StageSelector,
+	{xtype: 'tbfill'},
+	TYPO3.Workspaces.Toolbar.search
+];
+
 TYPO3.Workspaces.Toolbar.FullBottomBar = [
 	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : TYPO3.Workspaces.Toolbar.selectStateActionCombo,
 	(TYPO3.settings.Workspaces.isLiveWorkspace == true) ? {hidden: true} : '-',

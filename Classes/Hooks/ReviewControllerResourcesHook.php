@@ -62,6 +62,13 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 				Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSinglePublish()
 			);
 
+			$pageRenderer->addInlineSetting(
+				'TxIrreWorkspaces',
+				'valueStageSelector',
+				Tx_IrreWorkspaces_Service_SessionService::getInstance()->getStage()
+			);
+
+			// Adds override files after(!) the original files
 			foreach ($jsFiles as $filePath => $fileConfiguration) {
 				$parameters['jsFiles'][$filePath] = $fileConfiguration;
 
@@ -79,6 +86,9 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 
 				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/toolbar.js')) {
 					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Toolbar.js');
+
+				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/workspaces.js')) {
+					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Application.js');
 				}
 			}
 		}

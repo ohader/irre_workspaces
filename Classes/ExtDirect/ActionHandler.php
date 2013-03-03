@@ -28,7 +28,7 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_AbstractHandler {
+class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_AbstractHandler implements t3lib_Singleton {
 	const Permission_Publish = 'publish_access';
 
 	/**
@@ -60,6 +60,28 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		}
 
 		return $pageIds;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getAllowedStages() {
+		$defaultElement = array(
+			'uid' => 'all',
+			'title' => 'all stages',
+		);
+
+		$stages = $this->getStageService()->getAllowedStages();
+		array_unshift($stages, $defaultElement);
+
+		return array(
+			'data' => $stages,
+			'count' => count($stages),
+		);
+	}
+
+	public function saveStageSelection($stage) {
+		Tx_IrreWorkspaces_Service_SessionService::getInstance()->setStage($stage);
 	}
 
 	/**
@@ -205,6 +227,15 @@ class Tx_IrreWorkspaces_ExtDirect_ActionHandler extends tx_Workspaces_ExtDirect_
 		}
 
 		return $result;
+	}
+
+	/**
+	 * @return Tx_IrreWorkspaces_Service_StageService
+	 */
+	protected function getStageService() {
+		return t3lib_div::makeInstance(
+			'Tx_IrreWorkspaces_Service_StageService'
+		);
 	}
 
 	/**

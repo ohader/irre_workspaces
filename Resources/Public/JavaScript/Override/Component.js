@@ -16,6 +16,7 @@ TYPO3.Workspaces.MainStore = new Ext.ux.MultiGroupingStore({
 		depth : 990,
 		id: TYPO3.settings.Workspaces.id,
 		language: TYPO3.settings.Workspaces.language,
+		stage: TYPO3.settings.TxIrreWorkspaces.valueStageSelector,
 		query: '',
 		start: 0,
 		limit: 30

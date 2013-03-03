@@ -29,6 +29,24 @@
  * @package EXT:irre_workspaces
  */
 class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
+
+	/**
+	 * Get List of workspace changes
+	 *
+	 * @param stdClass $parameters
+	 * @return array $data
+	 */
+	public function getWorkspaceInfos($parameters) {
+		if (isset($parameters->stage) && t3lib_div::testInt($parameters->stage)) {
+			$this->getWorkspaceService()->setStage($parameters->stage);
+		}
+
+		$data = parent::getWorkspaceInfos($parameters);
+		$this->getWorkspaceService()->reset();
+
+		return $data;
+	}
+
 	/**
 	 * Fetches further information to current selected worspace record.
 	 *
@@ -78,11 +96,41 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 	}
 
 	/**
+	 * Gets affected elements on publishing/swapping actions.
+	 * Affected elements have a dependency, e.g. translation overlay
+	 * and the default origin record - thus, the default record would be
+	 * affected if the translation overlay shall be published.
+	 *
+	 * @param stdClass $parameters
+	 * @return array
+	 */
+	protected function getAffectedElements(stdClass $parameters) {
+		if (isset($parameters->stage) && t3lib_div::testInt($parameters->stage)) {
+			$this->getWorkspaceService()->setStage($parameters->stage);
+		}
+
+		$affectedElements = parent::getAffectedElements($parameters);
+		$this->getWorkspaceService()->reset();
+
+		return $affectedElements;
+	}
+
+	/**
 	 * @return Tx_IrreWorkspaces_Service_Field_DeviationService
 	 */
 	protected function getFieldDeviationService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
 	}
+
+	/**
+	 * Gets an instance of the workspaces service.
+	 *
+	 * @return Tx_IrreWorkspaces_Service_Alternative_WorkspaceService
+	 */
+	protected function getWorkspaceService() {
+		return Tx_IrreWorkspaces_Service_Alternative_WorkspaceService::getInstance();
+	}
+
 }
 
 ?>

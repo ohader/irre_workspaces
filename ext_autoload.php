@@ -40,6 +40,7 @@ return array(
 	'tx_irreworkspaces_service_action_changestageactionservice' => $extensionClassesPath . 'Service/Action/ChangeStageActionService.php',
 	'tx_irreworkspaces_service_action_flushworkspaceactionservice' => $extensionClassesPath . 'Service/Action/FlushWorkspaceActionService.php',
 	'tx_irreworkspaces_service_action_publishworkspaceactionservice' => $extensionClassesPath . 'Service/Action/PublishWorkspaceActionService.php',
+	'tx_irreworkspaces_service_alternative_workspaceservice' => $extensionClassesPath . 'Service/Alternative/WorkspaceService.php',
 	'tx_irreworkspaces_service_dependency_abstractdependencyservice' => $extensionClassesPath . 'Service/Dependency/AbstractDependencyService.php',
 	'tx_irreworkspaces_service_dependency_collectiondependencyservice' => $extensionClassesPath . 'Service/Dependency/CollectionDependencyService.php',
 	'tx_irreworkspaces_service_difference_alternativecoreservice' => $extensionClassesPath . 'Service/Difference/AlternativeCoreService.php',
@@ -53,6 +54,8 @@ return array(
 	'tx_irreworkspaces_service_record_deviationservice' => $extensionClassesPath . 'Service/Record/DeviationService.php',
 	'tx_irreworkspaces_service_redirectservice' => $extensionClassesPath . 'Service/RedirectService.php',
 	'tx_irreworkspaces_service_sanitazionservice' => $extensionClassesPath . 'Service/SanitazionService.php',
+	'tx_irreworkspaces_service_sessionservice' => $extensionClassesPath . 'Service/SessionService.php',
+	'tx_irreworkspaces_service_stageservice' => $extensionClassesPath . 'Service/StageService.php',
 	'tx_irreworkspaces_service_tcemainservice' => $extensionClassesPath . 'Service/TceMainService.php',
 );
 ?>
