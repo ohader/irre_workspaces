@@ -55,6 +55,8 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 	 */
 	public function getRowDetails($parameter) {
 		$isTcaModified = FALSE;
+		$isShowRecordFieldListModified = FALSE;
+
 		$table = $parameter->table;
 
 		/**
@@ -68,25 +70,28 @@ class Ux_Tx_Workspaces_ExtDirect_Server extends tx_Workspaces_ExtDirect_Server {
 		// Add sorting field to list of fields to be processed:
 		t3lib_div::loadTCA($table);
 		$sortingField = $this->getFieldDeviationService()->getTcaControlField($table, 'sortby');
-		if ($sortingField !== NULL && !empty($GLOBALS['TCA'][$table]['interface']['showRecordFieldList'])) {
-			$processFields = t3lib_div::trimExplode(',', $GLOBALS['TCA'][$table]['interface']['showRecordFieldList'], TRUE);
-			if (!in_array($sortingField, $processFields)) {
-				$processFields[] = $sortingField;
-				$GLOBALS['TCA'][$table]['interface']['showRecordFieldList'] = implode(',', $processFields);
-			}
-			if (empty($GLOBALS['TCA'][$table]['columns'][$sortingField])) {
-				$GLOBALS['TCA'][$table]['columns'][$sortingField] = array(
-					'label' => 'LLL:EXT:lang/locallang_core.xml:show_item.php.sorting',
-					'config' => array(
-						'type' => 'input',
-						'eval' => 'int',
-					),
-				);
-				$isTcaModified = TRUE;
-			}
+
+		if (!empty($GLOBALS['TCA'][$table]['interface']['showRecordFieldList'])) {
+			$showRecordFieldList = $GLOBALS['TCA'][$table]['interface']['showRecordFieldList'];
+			unset($GLOBALS['TCA'][$table]['interface']['showRecordFieldList']);
+		}
+
+		if (empty($GLOBALS['TCA'][$table]['columns'][$sortingField])) {
+			$GLOBALS['TCA'][$table]['columns'][$sortingField] = array(
+				'label' => 'LLL:EXT:lang/locallang_core.xml:show_item.php.sorting',
+				'config' => array(
+					'type' => 'input',
+					'eval' => 'int',
+				),
+			);
+			$isTcaModified = TRUE;
 		}
 
 		$result = parent::getRowDetails($parameter);
+
+		if ($isShowRecordFieldListModified) {
+			$GLOBALS['TCA'][$table]['interface']['showRecordFieldList'] = $showRecordFieldList;
+		}
 
 		if ($isTcaModified) {
 			unset($GLOBALS['TCA'][$table]['columns'][$sortingField]);
