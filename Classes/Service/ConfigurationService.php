@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Service;
+
 /***************************************************************
  * Copyright notice
  *
@@ -28,7 +30,8 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton {
+class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
+
 	const KEY_NotificationSubject = 'notificationSubject';
 	const KEY_NotificationMessageTemplate = 'notificationMessageTemplate';
 	const KEY_EnableFlexFormRendering = 'enableFlexFormRendering';
@@ -46,10 +49,12 @@ class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton 
 	protected $configuration = array();
 
 	/**
-	 * @return Tx_IrreWorkspaces_Service_ConfigurationService
+	 * @return ConfigurationService
 	 */
 	static public function getInstance() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_ConfigurationService');
+		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			'Tx_IrreWorkspaces_Service_ConfigurationService'
+		);
 	}
 
 	/**
@@ -144,6 +149,5 @@ class Tx_IrreWorkspaces_Service_ConfigurationService implements t3lib_Singleton 
 
 		return $value;
 	}
-}
 
-?>
+}
