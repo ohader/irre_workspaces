@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Domain\Model\Dependency;
+
 /***************************************************************
  * Copyright notice
  *
@@ -24,41 +26,43 @@
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Version\Dependency\ElementEntity;
+
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
+class IncompleteStructure {
 	/**
-	 * @var t3lib_utility_Dependency_Element
+	 * @var ElementEntity
 	 */
 	protected $outerMostParent;
 
 	/**
-	 * @var array|t3lib_utility_Dependency_Element[]
+	 * @var array|ElementEntity[]
 	 * @deprecated Unused
 	 */
 	protected $dependentElements;
 
 	/**
-	 * @var array|t3lib_utility_Dependency_Element[]
+	 * @var array|ElementEntity[]
 	 */
 	protected $intersectingElements;
 
 	/**
-	 * @var array|t3lib_utility_Dependency_Element[]
+	 * @var array|ElementEntity[]
 	 */
 	protected $differentElements;
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $outerMostParent
+	 * @param ElementEntity $outerMostParent
 	 * @param array $intersectingElements
 	 * @param array $differentElements
-	 * @return Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure
+	 * @return IncompleteStructure
 	 */
-	static public function create(t3lib_utility_Dependency_Element $outerMostParent, array $intersectingElements, array $differentElements) {
-		/** @var $incompleteStructure Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure */
-		$incompleteStructure = t3lib_div::makeInstance('Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure');
+	static public function create(ElementEntity $outerMostParent, array $intersectingElements, array $differentElements) {
+		/** @var $incompleteStructure IncompleteStructure */
+		$incompleteStructure = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure');
 		$incompleteStructure->setOuterMostParent($outerMostParent);
 		$incompleteStructure->setIntersectingElements($intersectingElements);
 		$incompleteStructure->setDifferentElements($differentElements);
@@ -66,21 +70,21 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $outerMostParent
+	 * @param ElementEntity $outerMostParent
 	 */
-	public function setOuterMostParent(t3lib_utility_Dependency_Element $outerMostParent) {
+	public function setOuterMostParent(ElementEntity $outerMostParent) {
 		$this->outerMostParent = $outerMostParent;
 	}
 
 	/**
-	 * @return t3lib_utility_Dependency_Element
+	 * @return ElementEntity
 	 */
 	public function getOuterMostParent() {
 		return $this->outerMostParent;
 	}
 
 	/**
-	 * @param array|t3lib_utility_Dependency_Element[] $dependentElements
+	 * @param array|ElementEntity[] $dependentElements
 	 * @deprecated Unused
 	 */
 	public function setDependentElements(array $dependentElements) {
@@ -88,7 +92,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @return array|t3lib_utility_Dependency_Element[]
+	 * @return array|ElementEntity[]
 	 * @deprecated Unused
 	 */
 	public function getDependentElements() {
@@ -96,14 +100,14 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @param array|t3lib_utility_Dependency_Element[] $intersectingElements
+	 * @param array|ElementEntity[] $intersectingElements
 	 */
 	public function setIntersectingElements(array $intersectingElements) {
 		$this->intersectingElements = $intersectingElements;
 	}
 
 	/**
-	 * @return array|t3lib_utility_Dependency_Element[]
+	 * @return array|ElementEntity[]
 	 */
 	public function getIntersectingElements() {
 		return $this->intersectingElements;
@@ -111,7 +115,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 
 	/**
 	 * @param string $identifier
-	 * @return NULL|t3lib_utility_Dependency_Element
+	 * @return NULL|ElementEntity
 	 */
 	public function getIntersectingElement($identifier) {
 		$element = NULL;
@@ -127,10 +131,10 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
-	 * @return NULL|t3lib_utility_Dependency_Element
+	 * @param ElementEntity $element
+	 * @return NULL|ElementEntity
 	 */
-	public function findIntersectingElement(t3lib_utility_Dependency_Element $element) {
+	public function findIntersectingElement(ElementEntity $element) {
 		$result = NULL;
 
 		foreach ($this->intersectingElements as $intersectingElement) {
@@ -152,14 +156,14 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @param array|t3lib_utility_Dependency_Element[] $differentElements
+	 * @param array|ElementEntity[] $differentElements
 	 */
 	public function setDifferentElements(array $differentElements) {
 		$this->differentElements = $differentElements;
 	}
 
 	/**
-	 * @return array|t3lib_utility_Dependency_Element[]
+	 * @return array|ElementEntity[]
 	 */
 	public function getDifferentElements() {
 		return $this->differentElements;
@@ -167,7 +171,7 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 
 	/**
 	 * @param string $identifier
-	 * @return NULL|t3lib_utility_Dependency_Element
+	 * @return NULL|ElementEntity
 	 */
 	public function getDifferentElement($identifier) {
 		$element = NULL;
@@ -183,10 +187,10 @@ class Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure {
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
-	 * @return NULL|t3lib_utility_Dependency_Element
+	 * @param ElementEntity $element
+	 * @return NULL|ElementEntity
 	 */
-	public function findDifferentElement(t3lib_utility_Dependency_Element $element) {
+	public function findDifferentElement(ElementEntity $element) {
 		$result = NULL;
 
 		foreach ($this->differentElements as $differentElement) {

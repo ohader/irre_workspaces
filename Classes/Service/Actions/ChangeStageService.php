@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Service\Action;
+
 /***************************************************************
  * Copyright notice
  *
@@ -24,13 +26,16 @@
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreWorkspaces_Service_Action_AbstractActionService implements t3lib_Singleton {
+class ChangeStageService extends AbstractService {
 	/**
-	 * @var Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer
+	 * @var \OliverHader\IrreWorkspaces\Service\MessageRenderingService
 	 */
 	protected $messageRenderer;
 
@@ -61,7 +66,7 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 		$data = $this->getElementData($elements, $linkData);
 
 		$system = array(
-			'httpHost' => t3lib_div::getIndpEnv('TYPO3_REQUEST_HOST'),
+			'httpHost' => GeneralUtility::getIndpEnv('TYPO3_REQUEST_HOST'),
 			'siteName' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'],
 		);
 
@@ -124,11 +129,12 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 	 */
 	protected function deliverMail(array $recipients, $subject, $message) {
 		foreach ($recipients as $recipient) {
-			t3lib_div::plainMailEncoded(
-				$recipient,
-				$subject,
-				$message
-			);
+			$mailMessage = $this->getMailMessage();
+			$mailMessage->setTo($recipient);
+			$mailMessage->setFrom(\TYPO3\CMS\Core\Utility\MailUtility::getSystemFrom());
+			$mailMessage->setSubject($subject);
+			$mailMessage->setBody($message);
+			$mailMessage->send();
 		}
 	}
 
@@ -145,7 +151,7 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 		foreach ($this->getElementIdsPerTable($elements) as $table => $ids) {
 			// @todo Possibly check whether elements have been modified on workspace at all
 			foreach ($this->getElementRecords($table, $ids) as $id => $record) {
-				t3lib_BEfunc::fixVersioningPid($table, $record, TRUE);
+				BackendUtility::fixVersioningPid($table, $record, TRUE);
 				$pid = $record['pid'];
 
 				if (!isset($data['paths'][$pid])) {
@@ -168,8 +174,8 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 				$data['paths'][$pid]['tables'][$table]['elements'][$id] = array(
 					'uid' => $record['uid'],
 					'pid' => $record['pid'],
-					'title' => t3lib_div::fixed_lgd_cs(
-						t3lib_BEfunc::getRecordTitle($table, $record, FALSE),
+					'title' => GeneralUtility::fixed_lgd_cs(
+						BackendUtility::getRecordTitle($table, $record, FALSE),
 						50
 					),
 				);
@@ -177,7 +183,7 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 		}
 
 		foreach ($data['paths'] as $pid => &$path) {
-			$path['title'] = t3lib_BEfunc::getRecordPath($pid, '', 20);
+			$path['title'] = BackendUtility::getRecordPath($pid, '', 20);
 			$path['url'] = $this->generateLink($pid, $linkData);
 		}
 
@@ -190,13 +196,13 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 	 * @return string
 	 */
 	protected function generateLink($pageId, array $linkData = array()) {
-		$domain = t3lib_BEfunc::getViewDomain($pageId);
+		$domain = BackendUtility::getViewDomain($pageId);
 		$path = '/typo3/mod.php?M=web_WorkspacesWorkspaces&id=' . $pageId .
-			t3lib_div::implodeArrayForUrl('data', $linkData) .
-			t3lib_div::implodeArrayForUrl('tx_workspaces_web_workspacesworkspaces', array('controller' => 'Preview'));
+			GeneralUtility::implodeArrayForUrl('data', $linkData) .
+			GeneralUtility::implodeArrayForUrl('tx_workspaces_web_workspacesworkspaces', array('controller' => 'Preview'));
 		$url = $domain . $path;
 
-		return $domain . '/typo3/index.php?' . Tx_IrreWorkspaces_Service_RedirectService::getInstance()->getValueForUrl($url);
+		return $domain . '/typo3/index.php?' . \OliverHader\IrreWorkspaces\Service\RedirectService::getInstance()->getValueForUrl($url);
 	}
 
 	/**
@@ -250,16 +256,16 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 		$elements = array();
 
 		if (strpos($table, ',') !== FALSE) {
-			$items = t3lib_div::trimExplode(',', $table, TRUE);
+			$items = GeneralUtility::trimExplode(',', $table, TRUE);
 			foreach ($items as $item) {
-				$parts = t3lib_div::trimExplode(':', $item);
+				$parts = GeneralUtility::trimExplode(':', $item);
 				$elements[] = array(
 					'table' => $parts[0],
 					'uid' => $parts[1],
 				);
 			}
 		} elseif (strpos($table, ':') !== FALSE) {
-			$parts = t3lib_div::trimExplode(':', $table);
+			$parts = GeneralUtility::trimExplode(':', $table);
 			$elements[] = array(
 				'table' => $parts[0],
 				'uid' => $parts[1],
@@ -308,7 +314,7 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 	 * @return NULL|string
 	 */
 	protected function getNotificationSubject() {
-		return Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getNotificationSubject();
+		return \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationSubject();
 	}
 
 	/**
@@ -316,9 +322,9 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 	 */
 	protected function getNotificationMessageTemplate() {
 		if (!isset($this->messageTemplate)) {
-			$this->messageTemplate = t3lib_div::getURL(
-				t3lib_div::getFileAbsFileName(
-					Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getNotificationMessageTemplate()
+			$this->messageTemplate = GeneralUtility::getURL(
+				GeneralUtility::getFileAbsFileName(
+					\OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationMessageTemplate()
 				)
 			);
 		}
@@ -326,14 +332,24 @@ class Tx_IrreWorkspaces_Service_Action_ChangeStageActionService extends Tx_IrreW
 	}
 
 	/**
-	 * @return Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer
+	 * @return \OliverHader\IrreWorkspaces\Service\MessageRenderingService
 	 */
 	protected function getMessageRenderer() {
 		if (!isset($this->messageRenderer)) {
-			$this->messageRenderer = t3lib_div::makeInstance('Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer');
+			$this->messageRenderer = GeneralUtility::makeInstance(
+				'OliverHader\\IrreWorkspaces\\Service\\MessageRenderingService'
+			);
 		}
 		return $this->messageRenderer;
 	}
-}
 
-?>
+	/**
+	 * @return \TYPO3\CMS\Core\Mail\MailMessage
+	 */
+	protected function getMailMessage() {
+		return GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Core\\Mail\\MailMessage'
+		);
+	}
+
+}

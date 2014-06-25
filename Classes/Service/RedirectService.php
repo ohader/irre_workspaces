@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Service;
+
 /***************************************************************
  * Copyright notice
  *
@@ -24,11 +26,14 @@
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
+class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
+
 	const NAME = 'Tx_IrreWorkspaces';
 	const LIFETIME = 600;
 
@@ -38,10 +43,10 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 	protected $url;
 
 	/**
-	 * @return Tx_IrreWorkspaces_Service_RedirectService
+	 * @return RedirectService
 	 */
 	static public function getInstance() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_RedirectService');
+		return GeneralUtility::makeInstance('Tx_IrreWorkspaces_Service_RedirectService');
 	}
 
 	/**
@@ -57,30 +62,37 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 				);
 			}
 		} elseif ($this->getCookie(self::NAME)) {
-			list($hmac, $url) = t3lib_div::trimExplode('::', $this->getCookie(self::NAME), TRUE, 2);
+			list($hmac, $url) = GeneralUtility::trimExplode('::', $this->getCookie(self::NAME), TRUE, 2);
 			$this->setUrl($url, $hmac);
 		}
 	}
 
-	public function handle(array $parameters, t3lib_userAuth $parent) {
+	/**
+	 * @param array $parameters
+	 * @param \TYPO3\CMS\Core\Authentication\AbstractUserAuthentication $parent
+	 * @return bool
+	 */
+	public function handle(array $parameters, \TYPO3\CMS\Core\Authentication\AbstractUserAuthentication $parent) {
 		$this->fetch();
 
-		if (!$parent instanceof t3lib_beUserAuth) {
+		if (!$parent instanceof \TYPO3\CMS\Core\Authentication\BackendUserAuthentication) {
 			return FALSE;
 		}
 
 		if (is_array($parent->user) && !empty($parent->user['uid'])) {
 			if ($this->getUrl()) {
 				$this->setCookie('', TRUE);
-				t3lib_utility_Http::redirect($this->getUrl());
+				\TYPO3\CMS\Core\Utility\HttpUtility::redirect($this->getUrl());
 			}
 		}
+
+		return TRUE;
 	}
 
 	public function setUrl($url, $hmac) {
 		$result = FALSE;
 
-		if (t3lib_div::hmac($url) === $hmac) {
+		if (GeneralUtility::hmac($url) === $hmac) {
 			$this->url = $url;
 			$result = TRUE;
 		}
@@ -93,16 +105,16 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 	}
 
 	public function getValueForCookie($url) {
-		return t3lib_div::hmac($url) . '::' . $url;
+		return GeneralUtility::hmac($url) . '::' . $url;
 	}
 
 	public function getValueForUrl($url) {
 		$arguments = array(
 			'url' => $url,
-			'hmac' => t3lib_div::hmac($url),
+			'hmac' => GeneralUtility::hmac($url),
 		);
 
-		return t3lib_div::implodeArrayForUrl(self::NAME, $arguments);
+		return GeneralUtility::implodeArrayForUrl(self::NAME, $arguments);
 	}
 
 	/**
@@ -115,11 +127,11 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 			// Get the domain to be used for the cookie (if any):
 		$cookieDomain = $this->getCookieDomain();
 			// If no cookie domain is set, use the base path:
-		$cookiePath = ($cookieDomain ? '/' : t3lib_div::getIndpEnv('TYPO3_SITE_PATH'));
+		$cookiePath = ($cookieDomain ? '/' : GeneralUtility::getIndpEnv('TYPO3_SITE_PATH'));
 			// If the cookie lifetime is set, use it:
 		$cookieExpire = ($revoke ? $GLOBALS['EXEC_TIME'] - self::LIFETIME : $GLOBALS['EXEC_TIME'] + self::LIFETIME);
 			// Use the secure option when the current request is served by a secure connection:
-		$cookieSecure = (bool) $settings['cookieSecure'] && t3lib_div::getIndpEnv('TYPO3_SSL');
+		$cookieSecure = (bool) $settings['cookieSecure'] && GeneralUtility::getIndpEnv('TYPO3_SSL');
 			// Deliver cookies only via HTTP and prevent possible XSS by JavaScript:
 		$cookieHttpOnly = (bool) $settings['cookieHttpOnly'];
 
@@ -152,9 +164,9 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 		if ($cookieDomain) {
 			if ($cookieDomain{0} == '/') {
 				$match = array();
-				$matchCnt = @preg_match($cookieDomain, t3lib_div::getIndpEnv('TYPO3_HOST_ONLY'), $match);
+				$matchCnt = @preg_match($cookieDomain, GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY'), $match);
 				if ($matchCnt === FALSE) {
-					t3lib_div::sysLog('The regular expression for the cookie domain (' . $cookieDomain . ') contains errors. The session is not shared across sub-domains.', 'Core', 3);
+					GeneralUtility::sysLog('The regular expression for the cookie domain (' . $cookieDomain . ') contains errors. The session is not shared across sub-domains.', 'Core', 3);
 				} elseif ($matchCnt) {
 					$result = $match[0];
 				}
@@ -183,9 +195,9 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 		$cookieValue = NULL;
 
 		if (isset($_SERVER['HTTP_COOKIE'])) {
-			$cookies = t3lib_div::trimExplode(';', $_SERVER['HTTP_COOKIE']);
+			$cookies = GeneralUtility::trimExplode(';', $_SERVER['HTTP_COOKIE']);
 			foreach ($cookies as $cookie) {
-				list ($name, $value) = t3lib_div::trimExplode('=', $cookie);
+				list ($name, $value) = GeneralUtility::trimExplode('=', $cookie);
 				if (trim($name) === $cookieName) {
 						// Use the last one
 					$cookieValue = urldecode($value);
@@ -203,7 +215,7 @@ class Tx_IrreWorkspaces_Service_RedirectService implements t3lib_Singleton {
 	 * @return array
 	 */
 	protected function getArguments() {
-		return (array) t3lib_div::_GP(self::NAME);
+		return (array) GeneralUtility::_GP(self::NAME);
 	}
 }
 

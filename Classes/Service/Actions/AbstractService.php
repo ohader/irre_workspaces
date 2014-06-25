@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Service\Action;
+
 /***************************************************************
  * Copyright notice
  *
@@ -24,34 +26,37 @@
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Version\Dependency\ElementEntity;
+use TYPO3\CMS\Version\Dependency\ReferenceEntity;
+
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements t3lib_Singleton {
+abstract class AbstractService implements \TYPO3\CMS\Core\SingletonInterface {
 	/**
-	 * @var Tx_Workspaces_Service_Stages
+	 * @var \TYPO3\CMS\Workspaces\Service\StagesService
 	 */
 	protected $workspacesStagesService;
 
 	/**
-	 * @var array|Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure[]
+	 * @var array|\OliverHader\IrreWorkspaces\Domain\Model\Dependency\IncompleteStructure[]
 	 */
 	protected $incompleteStructures = array();
 
 	/**
-	 * @var t3lib_TCEmain
+	 * @var \TYPO3\CMS\Core\DataHandling\DataHandler
 	 */
 	protected $dataHandler;
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $outerMostParent
-	 * @param array|t3lib_utility_Dependency_Element[] $intersectingElements
-	 * @param array|t3lib_utility_Dependency_Element[] $differentElements
-	 * @return Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure
+	 * @param ElementEntity $outerMostParent
+	 * @param array|ElementEntity[] $intersectingElements
+	 * @param array|ElementEntity[] $differentElements
+	 * @return \OliverHader\IrreWorkspaces\Domain\Model\Dependency\IncompleteStructure
 	 */
-	public function addIncompleteStructure(t3lib_utility_Dependency_Element $outerMostParent, array $intersectingElements, array $differentElements) {
-		$incompleteStructure = Tx_IrreWorkspaces_Domain_Model_Dependency_IncompleteStructure::create(
+	public function addIncompleteStructure(ElementEntity $outerMostParent, array $intersectingElements, array $differentElements) {
+		$incompleteStructure = \OliverHader\IrreWorkspaces\Domain\Model\Dependency\IncompleteStructure::create(
 			$outerMostParent,
 			$intersectingElements,
 			$differentElements
@@ -61,17 +66,17 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
+	 * @param ElementEntity $element
 	 * @param string $comment
 	 * @return NULL|integer
 	 */
-	protected function cloneLiveVersion(t3lib_utility_Dependency_Element $element, $comment) {
+	protected function cloneLiveVersion(ElementEntity $element, $comment) {
 		$clonedId = $this->getClonedId($element);
 
 		// See, whether a clone has been created already
 		// e.g. during cloning a parent thus all children
 		if (empty($clonedId)) {
-			$versionRecord = t3lib_BEfunc::getWorkspaceVersionOfRecord(
+			$versionRecord = \TYPO3\CMS\Backend\Utility\BackendUtility::getWorkspaceVersionOfRecord(
 				$this->getBackendUser()->workspace,
 				$element->getTable(),
 				$this->getLiveId($element),
@@ -99,33 +104,33 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
+	 * @param ElementEntity $element
 	 * @return NULL|integer
 	 */
-	protected function getLiveId(t3lib_utility_Dependency_Element $element) {
+	protected function getLiveId(ElementEntity $element) {
 		$liveId = $element->getDataValue('liveId');
 
 		if (empty($liveId)) {
-			$liveId = t3lib_BEfunc::getLiveVersionIdOfRecord($element->getTable(), $element->getId());
+			$liveId = \TYPO3\CMS\Backend\Utility\BackendUtility::getLiveVersionIdOfRecord($element->getTable(), $element->getId());
 		}
 
 		return $liveId;
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
+	 * @param ElementEntity $element
 	 * @return NULL|integer
 	 */
-	protected function getClonedId(t3lib_utility_Dependency_Element $element) {
+	protected function getClonedId(ElementEntity $element) {
 		$clonedId = $element->getDataValue('clonedId');
 		return $clonedId;
 	}
 
 	/**
-	 * @param t3lib_utility_Dependency_Element $element
+	 * @param ElementEntity $element
 	 * @return NULL|integer
 	 */
-	protected function getFallbackId(t3lib_utility_Dependency_Element $element) {
+	protected function getFallbackId(ElementEntity $element) {
 		$id = $this->getClonedId($element);
 
 		if (empty($id)) {
@@ -173,8 +178,8 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
-	 * @param array|t3lib_utility_Dependency_Reference[] $childReferences
-	 * @return array|t3lib_utility_Dependency_Element[]
+	 * @param array|ReferenceEntity[] $childReferences
+	 * @return array|ElementEntity[]
 	 */
 	public function getChildrenPerParentField(array $childReferences) {
 		$childrenPerParentField = array();
@@ -190,11 +195,11 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	 * @param string $parentTable
 	 * @param integer $parentId
 	 * @param array $parentConfiguration
-	 * @return t3lib_loadDBGroup
+	 * @return \TYPO3\CMS\Core\Database\RelationHandler
 	 */
 	public function getReferenceCollection($parentTable, $parentId, array $parentConfiguration) {
-		/** @var $referenceCollection t3lib_loadDBGroup */
-		$referenceCollection = t3lib_div::makeInstance('t3lib_loadDBGroup');
+		/** @var $referenceCollection \TYPO3\CMS\Core\Database\RelationHandler */
+		$referenceCollection = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('t3lib_loadDBGroup');
 		$referenceCollection->start(
 			'',
 			$parentConfiguration['foreign_table'],
@@ -207,10 +212,11 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
-	 * @param array|t3lib_utility_Dependency_Element[] $elements
+	 * @param array|ElementEntity[] $elements
 	 * @param string $table
 	 * @param integer $id
-	 * @return NULL|t3lib_utility_Dependency_Element
+	 * @param string $dataValueKey
+	 * @return NULL|ElementEntity
 	 */
 	public function findElement(array $elements, $table, $id, $dataValueKey = NULL) {
 		$result = NULL;
@@ -241,31 +247,33 @@ abstract class Tx_IrreWorkspaces_Service_Action_AbstractActionService implements
 	}
 
 	/**
-	 * @return Tx_Workspaces_Service_Stages
+	 * @return \TYPO3\CMS\Workspaces\Service\StagesService
 	 */
 	protected function getWorkspacesStagesService() {
 		if (!isset($this->workspacesStagesService)) {
-			$this->workspacesStagesService = t3lib_div::makeInstance('Tx_Workspaces_Service_Stages');
+			$this->workspacesStagesService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+				'TYPO3\\CMS\\Workspaces\\Service\\StagesService'
+			);
 		}
 		return $this->workspacesStagesService;
 	}
 
 	/**
-	 * @return language
+	 * @return \TYPO3\CMS\Lang\LanguageService
 	 */
 	protected function getLanguage() {
 		return $GLOBALS['LANG'];
 	}
 
 	/**
-	 * @return t3lib_DB
+	 * @return \TYPO3\CMS\Core\Database\DatabaseConnection
 	 */
 	protected function getDatabase() {
 		return $GLOBALS['TYPO3_DB'];
 	}
 
 	/**
-	 * @return t3lib_beUserAuth
+	 * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
 	 */
 	protected function getBackendUser() {
 		return $GLOBALS['BE_USER'];

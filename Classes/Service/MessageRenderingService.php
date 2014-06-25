@@ -1,4 +1,6 @@
 <?php
+namespace OliverHader\IrreWorkspaces\Service;
+
 /***************************************************************
  * Copyright notice
  *
@@ -28,7 +30,7 @@
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
+class MessageRenderingService {
 	/**
 	 * @var array
 	 */
@@ -56,7 +58,7 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 	/**
 	 * @param string $key
 	 * @param array|object $value
-	 * @return Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer
+	 * @return MessageRenderingService
 	 */
 	public function assign($key, $value) {
 		$key = strtolower($key);
@@ -99,7 +101,7 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 
 				$result = '';
 
-				if (is_array($iterator) || $iterator instanceof Traversable) {
+				if (is_array($iterator) || $iterator instanceof \Traversable) {
 					foreach ($iterator as $value) {
 						$iteratorVariables = array_merge(
 							(array) $this->variables['iterator'],
@@ -155,7 +157,7 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 	 */
 	protected function resolveVariable($path, $toString = TRUE) {
 		$data = NULL;
-		$segments = t3lib_div::trimExplode('.', $path);
+		$segments = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode('.', $path);
 		$lastSegment = $segments[count($segments) - 1];
 
 		foreach ($segments as $index => $segment) {
@@ -175,8 +177,8 @@ class Tx_IrreWorkspaces_Renderer_Notification_MessageRenderer {
 			}
 		}
 
-		if ($data instanceof DateTime) {
-			/** @var $dateTime DateTime */
+		if ($data instanceof \DateTime) {
+			/** @var $dateTime \DateTime */
 			$dateTime = $data;
 			if (strpos($lastSegment, 'time') !== FALSE) {
 				$data = $dateTime->format('H:i');
