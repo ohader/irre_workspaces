@@ -27,4 +27,14 @@ if (!t3lib_div::inList($GLOBALS['TCA']['tt_content']['interface']['showRecordFie
 require_once t3lib_extMgm::extPath($_EXTKEY) . 'Configuration/TCA/SysWorkspace.php';
 require_once t3lib_extMgm::extPath($_EXTKEY) . 'Configuration/TCA/SysWorkspaceStage.php';
 */
+
+\TYPO3\CMS\Workspaces\Service\AdditionalColumnService::getInstance()->register(
+	'IrreWorkspaces_LastEditor',
+	'OliverHader\\IrreWorkspaces\\Service\\Grid\\ColumnDataProvider'
+);
+
+\TYPO3\CMS\Workspaces\Service\AdditionalResourceService::getInstance()->addJavaScriptResource(
+	'IrreWorkspaces.Grid.LastEditor',
+	'EXT:irre_workspaces/Resources/Public/JavaScript/Grid/LastEditor.js'
+);
 ?>
