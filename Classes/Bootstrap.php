@@ -75,10 +75,6 @@ class Bootstrap {
 			'EXT:irre_workspaces/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->handle';
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing']['irre_workspaces'] =
 			'EXT:irre_workspaces/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->fetch';
-
-		// Hook to render preview URL for non page-related records (e.g. plugin records)
-		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['workspaces']['viewSingleRecord'] =
-			'EXT:irre_workspaces/Classes/Hooks/PreviewHook.php:Tx_IrreWorkspaces_Hooks_PreviewHook->getSingleRecordLink';
 	}
 
 	/**
