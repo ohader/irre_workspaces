@@ -38,44 +38,6 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 	public function renderPreProcess(array $parameters, t3lib_PageRenderer $pageRenderer) {
 		if ($this->isReviewControllerCall($parameters)) {
 			$this->updatePageTreeVisualization();
-
-			$publicResourcesPath = t3lib_extMgm::extRelPath('irre_workspaces') . 'Resources/Public/';
-
-			$jsFiles = $parameters['jsFiles'];
-			$parameters['jsFiles'] = array();
-
-			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Actions.js');
-			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
-
-			$pageRenderer->addInlineSetting(
-				'TxIrreWorkspaces',
-				'enableRecordSinglePublish',
-				Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordSinglePublish()
-			);
-
-			$pageRenderer->addInlineSetting(
-				'TxIrreWorkspaces',
-				'valueStageSelector',
-				Tx_IrreWorkspaces_Service_SessionService::getInstance()->getStage()
-			);
-
-			// Adds override files after(!) the original files
-			foreach ($jsFiles as $filePath => $fileConfiguration) {
-				$parameters['jsFiles'][$filePath] = $fileConfiguration;
-
-				if (strpos($filePath, '/workspaces/Resources/Public/JavaScript/actions.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Actions.js');
-
-				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/grid.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Grid.js');
-
-				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/toolbar.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Toolbar.js');
-
-				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/workspaces.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Application.js');
-				}
-			}
 		}
 	}
 
