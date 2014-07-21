@@ -3,8 +3,8 @@ if (!defined('TYPO3_MODE')) {
 	die ('Access denied.');
 }
 
-#\OliverHader\IrreWorkspaces\Bootstrap::registerHooks();
-#\OliverHader\IrreWorkspaces\Bootstrap::registerAlternatives();
+\OliverHader\IrreWorkspaces\Bootstrap::registerHooks();
+\OliverHader\IrreWorkspaces\Bootstrap::registerAlternatives();
 
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
 

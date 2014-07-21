@@ -36,6 +36,17 @@ class Bootstrap {
 	 * Registers hooks
 	 */
 	public static function registerHooks() {
+		// Hook to store original request URL during login
+		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp']['irre_workspaces'] =
+			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->handle';
+		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing']['irre_workspaces'] =
+			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->fetch';
+	}
+
+	/**
+	 * Registers hooks
+	 */
+	public static function registerLegacyHooks() {
 		return;
 
 		// Modify the bahaviour of the workspace module

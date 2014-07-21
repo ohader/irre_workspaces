@@ -89,6 +89,11 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 		return TRUE;
 	}
 
+	/**
+	 * @param string $url
+	 * @param string $hmac
+	 * @return bool
+	 */
 	public function setUrl($url, $hmac) {
 		$result = FALSE;
 
@@ -100,14 +105,25 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 		return $result;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getUrl() {
 		return $this->url;
 	}
 
+	/**
+	 * @param string $url
+	 * @return string
+	 */
 	public function getValueForCookie($url) {
 		return GeneralUtility::hmac($url) . '::' . $url;
 	}
 
+	/**
+	 * @param string $url
+	 * @return string
+	 */
 	public function getValueForUrl($url) {
 		$arguments = array(
 			'url' => $url,
