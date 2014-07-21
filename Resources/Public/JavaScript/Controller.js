@@ -18,11 +18,5 @@ TYPO3.TxIrreWorkspaces.Controller = {
 		} else {
 			TYPO3.Workspaces.Toolbar.selectionActionCombo.setDisabled(true);
 		}
-	},
-
-	pageTreeSelect: function(pageId) {
-		if (Ext.isDefined(pageId) && top && top.TYPO3.TxIrreWorkspaces.PageTree) {
-			top.TYPO3.TxIrreWorkspaces.PageTree.select(pageId);
-		}
 	}
 };

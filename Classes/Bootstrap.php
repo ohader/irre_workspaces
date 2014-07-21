@@ -79,12 +79,6 @@ class Bootstrap {
 		// Hook to render preview URL for non page-related records (e.g. plugin records)
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['workspaces']['viewSingleRecord'] =
 			'EXT:irre_workspaces/Classes/Hooks/PreviewHook.php:Tx_IrreWorkspaces_Hooks_PreviewHook->getSingleRecordLink';
-
-		// Hooks to add additional JavaScript to backend.php to modify PageTree behaviour:
-		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/backend.php']['constructPostProcess']['irre_workspaces'] =
-			'EXT:irre_workspaces/Classes/Hooks/BackendControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_BackendControllerResourcesHook->setActiveBackendControllerRequest';
-		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['irre_workspaces'] =
-			'EXT:irre_workspaces/Classes/Hooks/BackendControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_BackendControllerResourcesHook->renderPreProcess';
 	}
 
 	/**
