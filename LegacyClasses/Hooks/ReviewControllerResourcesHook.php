@@ -44,17 +44,8 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 			$jsFiles = $parameters['jsFiles'];
 			$parameters['jsFiles'] = array();
 
-			$pageRenderer->addJsFile(
-				$publicResourcesPath . 'JavaScript/Helper.js',
-				'text/javascript',
-				TRUE,
-				TRUE
-			);
-
-			$pageRenderer->addCssFile($publicResourcesPath . 'Stylesheet/Module.css');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Actions.js');
 			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Controller.js');
-			$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Plugin/MultiGrouping.js');
 
 			$pageRenderer->addInlineSetting(
 				'TxIrreWorkspaces',
@@ -74,12 +65,6 @@ class Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook {
 
 				if (strpos($filePath, '/workspaces/Resources/Public/JavaScript/actions.js')) {
 					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Actions.js');
-
-				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/component.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Component.js');
-
-				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/configuration.js')) {
-					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Configuration.js');
 
 				} elseif (strpos($filePath, '/workspaces/Resources/Public/JavaScript/grid.js')) {
 					$pageRenderer->addJsFile($publicResourcesPath . 'JavaScript/Override/Grid.js');

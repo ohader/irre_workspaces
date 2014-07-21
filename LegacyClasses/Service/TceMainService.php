@@ -82,13 +82,6 @@ class Tx_IrreWorkspaces_Service_TceMainService implements t3lib_Singleton {
 	}
 
 	/**
-	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
-	 */
-	protected function getCollectionDependencyService() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService');
-	}
-
-	/**
 	 * @param t3lib_TCEmain $parent
 	 * @param t3lib_utility_Dependency_Element $outerMostParent
 	 * @return Tx_IrreWorkspaces_Service_SanitazionService

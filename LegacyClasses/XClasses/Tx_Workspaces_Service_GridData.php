@@ -29,14 +29,7 @@
  * @package EXT:irre_workspaces
  */
 class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
-	const GridColumn_Title = 'Tx_IrreWorkspaces_Title';
-	const GridColumn_Collection = 'Tx_IrreWorkspaces_Collection';
 	const GridColumn_Modification = 'Tx_IrreWorkspaces_Modification';
-
-	/**
-	 * @var t3lib_TCEmain
-	 */
-	protected $tceMainHelper;
 
 	/**
 	 * @var Tx_IrreWorkspaces_Service_ComparisonService
@@ -60,33 +53,8 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	protected function generateDataArray(array $versions, $filterTxt) {
 		parent::generateDataArray($versions, $filterTxt);
 
-		$this->extendDataArray();
-		$this->resolveDataDependencies();
 		$this->reduceDataArray();
 		$this->purgeDataArray();
-	}
-
-	/**
-	 * Gets the data array by considering the page to be shown in the grid view.
-	 *
-	 * @param integer $start
-	 * @param integer $limit
-	 * @return array
-	 */
-	protected function getDataArray($start, $limit) {
-		$dataArrayPart = parent::getDataArray($start, $limit);
-
-		$lastIndex = $start + count($dataArrayPart) - 1;
-		$collectionIdentifier = $this->getDependentCollectionIdentifier($lastIndex);
-		$dataCount = count($this->dataArray);
-
-		if ($collectionIdentifier !== NULL) {
-			for ($i = $lastIndex + 1; $i < $dataCount && $collectionIdentifier === $this->getDependentCollectionIdentifier($i); $i++) {
-				$dataArrayPart[] = $this->dataArray[$i];
-			}
-		}
-
-		return $dataArrayPart;
 	}
 
 	/**
@@ -104,104 +72,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Resolves dependencies of nested structures
-	 * and sort data elements considering these dependencies.
-	 *
-	 * @return void
-	 */
-	protected function resolveDataDependencies() {
-		$dependency = $this->getCollectionDependencyService()->getDependency();
-
-		foreach ($this->dataArray as $dataElement) {
-			$dependency->addElement($dataElement['table'], $dataElement['uid']);
-		}
-
-		/** @var $outerMostParents t3lib_utility_Dependency_Element[] */
-		$outerMostParents = $dependency->getOuterMostParents();
-
-		if ($outerMostParents) {
-			$dataArray = $this->getDataArrayWithIdentifier();
-			$nestedDataArray = array();
-			$collectionIdentifier = 0;
-
-			// For each outer most parent, get all nested child elements:
-			foreach ($outerMostParents as $outerMostParent) {
-				$nestedElements = array();
-				$collectionIdentifier++;
-
-				$parentIdentifier = $outerMostParent->__toString();
-				$parentTitle = t3lib_BEfunc::getRecordTitle(
-					$outerMostParent->getTable(),
-					$outerMostParent->getRecord()
-				);
-
-				$isParentOnWorkspace = isset($dataArray[$parentIdentifier]);
-
-				/** @var $child t3lib_utility_Dependency_Element */
-				foreach ($outerMostParent->getNestedChildren() as $child) {
-					$childIdentifier = $child->__toString();
-
-					if (isset($dataArray[$childIdentifier])) {
-						$this->setElementProperties(
-							$dataArray[$childIdentifier],
-							array(
-								self::GridColumn_Title => $parentTitle,
-								self::GridColumn_Collection => $collectionIdentifier,
-								self::GridColumn_Modification => $this->isElementModified($child),
-							)
-						);
-
-						if ($isParentOnWorkspace) {
-							$nestedElements[] = $dataArray[$childIdentifier];
-							unset($dataArray[$childIdentifier]);
-						}
-					}
-				}
-
-				if ($isParentOnWorkspace) {
-					$this->setElementProperties(
-						$dataArray[$parentIdentifier],
-						array(
-							self::GridColumn_Title => $parentTitle,
-							self::GridColumn_Collection => $collectionIdentifier,
-							self::GridColumn_Modification => $this->isElementModified($outerMostParent),
-						)
-					);
-
-					$nestedDataArray[$parentIdentifier] = $nestedElements;
-				}
-			}
-
-			// Apply structures to instance data array:
-			$this->dataArray = array();
-			foreach ($dataArray as $dataElementIdentifier => $dataElement) {
-				$this->dataArray[] = $dataElement;
-
-				if (!empty($nestedDataArray[$dataElementIdentifier])) {
-					$this->dataArray = array_merge(
-						$this->dataArray,
-						$nestedDataArray[$dataElementIdentifier]
-					);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @return array
-	 */
-	protected function getDataArrayWithIdentifier() {
-		$dataArray = array();
-
-		foreach ($this->dataArray as $dataElement) {
-			$dataIdentifier = $dataElement['table'] . ':' . $dataElement['uid'];
-			$dataArray[$dataIdentifier] = $dataElement;
-		}
-
-		return $dataArray;
 	}
 
 	/**
@@ -234,15 +104,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	/**
 	 * @return void
 	 */
-	protected function extendDataArray() {
-		foreach ($this->dataArray as &$dataElement) {
-			$dataElement = $this->setCollectionIdentifier($dataElement);
-		}
-	}
-
-	/**
-	 * @return void
-	 */
 	protected function purgeDataArray() {
 		// @todo Combine modification with deviation service, $this->reduceDataArray()
 		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordReduction()) {
@@ -259,44 +120,12 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 
 	/**
 	 * @param array $element
-	 * @param integer $value
-	 * @return array
-	 */
-	protected function setCollectionIdentifier(array $element, $value = 0) {
-		$element[self::GridColumn_Collection] = $value;
-		return $element;
-	}
-
-	/**
-	 * @param array $element
 	 * @param array $properties
 	 */
 	protected function setElementProperties(array &$element, array $properties) {
 		foreach ($properties as $identifier => $value) {
 			$element[$identifier] = $value;
 		}
-	}
-
-	/**
-	 * @param integer $index
-	 * @return boolean
-	 */
-	protected function hasDependentCollectionIdentifier($index) {
-		return !empty($this->dataArray[$index][self::GridColumn_Collection]);
-	}
-
-	/**
-	 * @param integer $index
-	 * @return integer|NULL
-	 */
-	protected function getDependentCollectionIdentifier($index) {
-		$result = NULL;
-
-		if (!empty($this->dataArray[$index][self::GridColumn_Collection])) {
-			$result = $this->dataArray[$index][self::GridColumn_Collection];
-		}
-
-		return $result;
 	}
 
 	/**
@@ -335,19 +164,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
-	 * Calculates the percentage of changes between two records.
-	 *
-	 * @param string $table
-	 * @param array $diffRecordOne
-	 * @param array $diffRecordTwo
-	 * @return integer
-	 * @scope performance
-	 */
-	public function calculateChangePercentage($table, array $diffRecordOne, array $diffRecordTwo) {
-		return 0;
-	}
-
-	/**
 	 * @return Tx_IrreWorkspaces_Service_Record_DeviationService
 	 */
 	protected function getRecordDeviationService() {
@@ -359,13 +175,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	 */
 	protected function getFieldDeviationService() {
 		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Field_DeviationService');
-	}
-
-	/**
-	 * @return Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService
-	 */
-	protected function getCollectionDependencyService() {
-		return t3lib_div::makeInstance('Tx_IrreWorkspaces_Service_Dependency_CollectionDependencyService');
 	}
 
 	/**
