@@ -1,34 +1,27 @@
 <?php
-/***************************************************************
- * Copyright notice
+namespace OliverHader\IrreWorkspaces\Service\Deviation;
+
+/**
+ * This file is part of the TYPO3 CMS project.
  *
- * (c) 2012 Oliver Hader <oliver.hader@typo3.org>
- * All rights reserved
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
  *
- * This script is part of the TYPO3 project. The TYPO3 project is
- * free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
  *
- * The GNU General Public License can be found at
- * http://www.gnu.org/copyleft/gpl.html.
- * A copy is found in the textfile GPL.txt and important notices to the license
- * from the author is found in LICENSE.txt distributed with these scripts.
- *
- * This script is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+ * The TYPO3 project - inspiring people to share!
+ */
+
+use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
- * @package EXT:irre_workspaces
  */
-class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleton {
+class FieldService implements SingletonInterface {
+
 	const STATE_New = 'new';
 	const STATE_Deleted = 'deleted';
 	const STATE_Moved = 'moved';
@@ -217,7 +210,7 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 		$result = FALSE;
 		$fieldDefinition = $this->getFieldDefinition($table, $field);
 
-		if (t3lib_div::inList('passthrough,none', $fieldDefinition['type'])) {
+		if (GeneralUtility::inList('passthrough,none', $fieldDefinition['type'])) {
 			$result = TRUE;
 		} elseif ($this->isInlineField($table, $field)) {
 			$result = TRUE;
@@ -325,10 +318,10 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 	 */
 	protected function explodeItemList($itemList) {
 		$items = array();
-		$itemParts = t3lib_div::trimExplode(',', $itemList, TRUE);
+		$itemParts = GeneralUtility::trimExplode(',', $itemList, TRUE);
 
 		foreach ($itemParts as $itemPart) {
-			$itemDetails = t3lib_div::trimExplode(';', $itemPart, FALSE, 5);
+			$itemDetails = GeneralUtility::trimExplode(';', $itemPart, FALSE, 5);
 			$key = $itemDetails[0];
 			if (strstr($key, '--')) {
 					// If $key is a separator (--div--) or palette (--palette--) then it will be appended by a unique number. This must be removed again when using this value!
@@ -351,6 +344,7 @@ class Tx_IrreWorkspaces_Service_Field_DeviationService implements t3lib_Singleto
 
 		return $items;
 	}
+
 }
 
 ?>

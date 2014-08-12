@@ -44,20 +44,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 	}
 
 	/**
-	 * Generates grid list array from given versions.
-	 *
-	 * @param array $versions
-	 * @param string $filterTxt
-	 * @return void
-	 */
-	protected function generateDataArray(array $versions, $filterTxt) {
-		parent::generateDataArray($versions, $filterTxt);
-
-		$this->reduceDataArray();
-		$this->purgeDataArray();
-	}
-
-	/**
 	 * Checks if a cache entry is given for given versions and filter text and tries to load the data array from cache.
 	 *
 	 * @param array $versions All records uids etc. First key is table name, second key incremental integer. Records are associative arrays with uid, t3ver_oid and t3ver_swapmode fields. The pid of the online record is found as "livepid" the pid of the offline record is found in "wspid"
@@ -72,50 +58,6 @@ class Ux_Tx_Workspaces_Service_GridData extends Tx_Workspaces_Service_GridData {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * @return void
-	 */
-	protected function reduceDataArray() {
-		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordReduction()) {
-			foreach ($this->dataArray as $index => $dataElement) {
-				$combinedRecord = Tx_Workspaces_Domain_Model_CombinedRecord::create(
-					$dataElement['table'],
-					$dataElement['t3ver_oid'],
-					$dataElement['uid']
-				);
-
-				$reduceElement = (
-					$this->getRecordDeviationService()->isModified($combinedRecord) &&
-					$this->getRecordDeviationService()->hasDeviation($combinedRecord) === FALSE
-				);
-
-				if ($reduceElement) {
-					unset($this->dataArray[$index]);
-				}
-			}
-
-			// Update array index
-			$this->dataArray = array_merge($this->dataArray, array());
-		}
-	}
-
-	/**
-	 * @return void
-	 */
-	protected function purgeDataArray() {
-		// @todo Combine modification with deviation service, $this->reduceDataArray()
-		if (Tx_IrreWorkspaces_Service_ConfigurationService::getInstance()->getEnableRecordReduction()) {
-			foreach ($this->dataArray as $key => $dataElement) {
-				if (isset($dataElement[self::GridColumn_Modification]) && $dataElement[self::GridColumn_Modification] === FALSE) {
-					unset($this->dataArray[$key]);
-				}
-			}
-		}
-
-		// Update array index
-		$this->dataArray = array_merge($this->dataArray, array());
 	}
 
 	/**

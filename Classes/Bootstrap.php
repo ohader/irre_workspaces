@@ -92,7 +92,14 @@ class Bootstrap {
 	 * Registers slots (signal-slot-dispatcher)
 	 */
 	public static function registerSlots() {
-
+		if (self::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
+			self::getSignalSlotDispatcher()->connect(
+				'TYPO3\\CMS\\Workspaces\\Service\\GridDataService',
+				\TYPO3\CMS\Workspaces\Service\GridDataService::SIGNAL_GenerateDataArray_PostProcesss,
+				'OliverHader\\IrreWorkspaces\\Slot\\GridDataSlot',
+				'postProcess'
+			);
+		}
 	}
 
 	/**
