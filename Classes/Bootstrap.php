@@ -105,6 +105,15 @@ class Bootstrap {
 	}
 
 	/**
+	 * @return \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
+	 */
+	protected static function getSignalSlotDispatcher() {
+		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Extbase\\SignalSlot\\Dispatcher'
+		);
+	}
+
+	/**
 	 * @return Service\ConfigurationService
 	 */
 	protected static function getConfigurationService() {

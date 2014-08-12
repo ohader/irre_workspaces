@@ -4,6 +4,7 @@ if (!defined('TYPO3_MODE')) {
 }
 
 \OliverHader\IrreWorkspaces\Bootstrap::registerHooks();
+\OliverHader\IrreWorkspaces\Bootstrap::registerSlots();
 \OliverHader\IrreWorkspaces\Bootstrap::registerAlternatives();
 
 // Basically the XLCASSes are required to inject behaviour and JavaScript code
