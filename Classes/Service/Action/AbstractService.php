@@ -34,6 +34,7 @@ use TYPO3\CMS\Version\Dependency\ReferenceEntity;
  * @package EXT:irre_workspaces
  */
 abstract class AbstractService implements \TYPO3\CMS\Core\SingletonInterface {
+
 	/**
 	 * @var \TYPO3\CMS\Workspaces\Service\StagesService
 	 */

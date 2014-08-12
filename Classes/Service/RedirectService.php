@@ -46,7 +46,7 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @return RedirectService
 	 */
 	static public function getInstance() {
-		return GeneralUtility::makeInstance('Tx_IrreWorkspaces_Service_RedirectService');
+		return GeneralUtility::makeInstance('OliverHader\\IrreWorkspaces\\Service\\RedirectService');
 	}
 
 	/**
