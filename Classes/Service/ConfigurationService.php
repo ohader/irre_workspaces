@@ -53,7 +53,7 @@ class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 	 */
 	static public function getInstance() {
 		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-			'Tx_IrreWorkspaces_Service_ConfigurationService'
+			'OliverHader\\IrreWorkspaces\\Service\\ConfigurationService'
 		);
 	}
 
