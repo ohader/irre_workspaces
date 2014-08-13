@@ -49,13 +49,9 @@ class Bootstrap {
 	public static function registerLegacyHooks() {
 		return;
 
-		// Modify the bahaviour of the workspace module
-
 		// Hook to add additional stylesheet and JavaScript resources to Workspaces Module:
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['irre_workspaces'] =
 			'EXT:irre_workspaces/Classes/Hooks/ReviewControllerResourcesHook.php:Tx_IrreWorkspaces_Hooks_ReviewControllerResourcesHook->renderPreProcess';
-
-		// Modify the bahaviour of the workspace module
 
 		// Hook to modify the differences view and exclude e.g. l10n_diffsource fields:
 		if (self::getConfigurationService()->getEnableRecordDetailReduction()) {
@@ -80,12 +76,6 @@ class Bootstrap {
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['tx_irreworkspaces::updateEditing'] =
 				'EXT:irre_workspaces/Classes/Hooks/PageTreeVisualizationHook.php:Tx_IrreWorkspaces_Hooks_PageTreeVisualizationHook->updateEditing';
 		}
-
-		// Hook to store original request URL during login
-		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp']['irre_workspaces'] =
-			'EXT:irre_workspaces/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->handle';
-		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing']['irre_workspaces'] =
-			'EXT:irre_workspaces/Classes/Service/RedirectService.php:Tx_IrreWorkspaces_Service_RedirectService->fetch';
 	}
 
 	/**
