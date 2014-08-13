@@ -128,10 +128,11 @@ class ChangeStageService extends AbstractService {
 	 * @param string $message
 	 */
 	protected function deliverMail(array $recipients, $subject, $message) {
+		$systemFrom = \TYPO3\CMS\Core\Utility\MailUtility::getSystemFrom();
 		foreach ($recipients as $recipient) {
 			$mailMessage = $this->getMailMessage();
 			$mailMessage->setTo($recipient);
-			$mailMessage->setFrom(\TYPO3\CMS\Core\Utility\MailUtility::getSystemFrom());
+			$mailMessage->setFrom($systemFrom);
 			$mailMessage->setSubject($subject);
 			$mailMessage->setBody($message);
 			$mailMessage->send();
@@ -198,8 +199,8 @@ class ChangeStageService extends AbstractService {
 	protected function generateLink($pageId, array $linkData = array()) {
 		$domain = BackendUtility::getViewDomain($pageId);
 		$path = '/typo3/mod.php?M=web_WorkspacesWorkspaces&id=' . $pageId .
-			GeneralUtility::implodeArrayForUrl('data', $linkData) .
-			GeneralUtility::implodeArrayForUrl('tx_workspaces_web_workspacesworkspaces', array('controller' => 'Preview'));
+		//	GeneralUtility::implodeArrayForUrl('tx_irreworkspaces', $linkData) .
+			GeneralUtility::implodeArrayForUrl('tx_workspaces_web_workspacesworkspaces', array('controller' => 'Preview', 'previewWS' => $linkData['workspaceId']));
 		$url = $domain . $path;
 
 		return $domain . '/typo3/index.php?' . \OliverHader\IrreWorkspaces\Service\RedirectService::getInstance()->getValueForUrl($url);

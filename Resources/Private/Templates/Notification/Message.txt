@@ -9,7 +9,7 @@ Kommentar:
 
 ###iterator:data.paths(path)###
 - Pfad: ###iterator.path.title###
-  URL: ###iterator.path.url###
+  URL: "###iterator.path.url###"
 ###iterator:iterator.path.tables(table)###
   + Tabelle: ###iterator.table.title###
 ###iterator:iterator.table.elements(element)###

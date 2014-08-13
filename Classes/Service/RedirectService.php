@@ -82,7 +82,9 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 		if (is_array($parent->user) && !empty($parent->user['uid'])) {
 			if ($this->getUrl()) {
 				$this->setCookie('', TRUE);
-				\TYPO3\CMS\Core\Utility\HttpUtility::redirect($this->getUrl());
+				\TYPO3\CMS\Core\Utility\HttpUtility::redirect(
+					$this->injectModuleToken($this->getUrl())
+				);
 			}
 		}
 
@@ -131,6 +133,21 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 		);
 
 		return GeneralUtility::implodeArrayForUrl(self::NAME, $arguments);
+	}
+
+	/**
+	 * Injects the CSRF moduleToken for backend URIs.
+	 *
+	 * @param string $url
+	 * @return string
+	 */
+	protected function injectModuleToken($url) {
+		$urlParts = parse_url($url);
+		parse_str($urlParts['query'], $queryParts);
+		if (!empty($queryParts['M']) && empty($queryParts['moduleToken'])) {
+			$url .= '&moduleToken=' . \TYPO3\CMS\Core\FormProtection\FormProtectionFactory::get()->generateToken('moduleCall', $queryParts['M']);
+		}
+		return $url;
 	}
 
 	/**
