@@ -34,6 +34,7 @@ class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 
 	const KEY_NotificationSubject = 'notificationSubject';
 	const KEY_NotificationMessageTemplate = 'notificationMessageTemplate';
+	const KEY_NotificationMessageTemplateHtml = 'notificationMessageTemplateHtml';
 	const KEY_EnableFlexFormRendering = 'enableFlexFormRendering';
 	const KEY_EnableRecordReduction = 'enableRecordReduction';
 	const KEY_EnableRecordDetailReduction = 'enableRecordDetailReduction';
@@ -78,6 +79,13 @@ class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 	 */
 	public function getNotificationMessageTemplate() {
 		return $this->get(self::KEY_NotificationMessageTemplate);
+	}
+
+	/**
+	 * @return NULL|string
+	 */
+	public function getNotificationMessageTemplateHtml() {
+		return $this->get(self::KEY_NotificationMessageTemplateHtml);
 	}
 
 	/**

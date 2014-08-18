@@ -45,6 +45,11 @@ class ChangeStageService extends AbstractService {
 	protected $messageTemplate;
 
 	/**
+	 * @var string
+	 */
+	protected $messageTemplateHtml;
+
+	/**
 	 * @var array
 	 */
 	protected $elementRecords = array();
@@ -61,6 +66,7 @@ class ChangeStageService extends AbstractService {
 	 * @return void
 	 */
 	public function notify(array $stat, $stageId, $table, $id, $comment, array $notificationAlternativeRecipients = array()) {
+		$notificationMessageHtml = null;
 		$elements = $this->extractElements($table, $id);
 		$linkData = array('workspaceId' => $stat['uid'], 'stageId' => $stageId);
 		$data = $this->getElementData($elements, $linkData);
@@ -95,6 +101,15 @@ class ChangeStageService extends AbstractService {
 			->assign('data', $data)
 			->render($this->getNotificationMessageTemplate());
 
+		$notificationMessageHtml = $this->getMessageRenderer()
+            ->assign('system', $system)
+            ->assign('workspace', $stat)
+            ->assign('comment', trim($comment))
+            ->assign('stage', $stage)
+            ->assign('user', $user)
+            ->assign('data', $data)
+            ->render($this->getNotificationMessageTemplateHtml());
+
 		$notificationSubject = $this->getNotificationSubject();
 		$notificationRecipients = array_map(
 			array($this, 'getRecipientAddress'),
@@ -104,7 +119,8 @@ class ChangeStageService extends AbstractService {
 		$this->deliverMail(
 			$notificationRecipients,
 			$notificationSubject,
-			$notificationMessage
+			$notificationMessage,
+			$notificationMessageHtml
 		);
 	}
 
@@ -127,14 +143,17 @@ class ChangeStageService extends AbstractService {
 	 * @param string $subject
 	 * @param string $message
 	 */
-	protected function deliverMail(array $recipients, $subject, $message) {
+	protected function deliverMail(array $recipients, $subject, $message, $messageHtml = NULL) {
 		$systemFrom = \TYPO3\CMS\Core\Utility\MailUtility::getSystemFrom();
 		foreach ($recipients as $recipient) {
 			$mailMessage = $this->getMailMessage();
 			$mailMessage->setTo($recipient);
 			$mailMessage->setFrom($systemFrom);
 			$mailMessage->setSubject($subject);
-			$mailMessage->setBody($message);
+			$mailMessage->setBody($message, "text/plain");
+			if ($messageHtml){
+				$mailMessage->addPart($messageHtml, "text/html");
+			}
 			$mailMessage->send();
 		}
 	}
@@ -330,6 +349,20 @@ class ChangeStageService extends AbstractService {
 			);
 		}
 		return $this->messageTemplate;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getNotificationMessageTemplateHtml() {
+		if (!isset($this->messageTemplateHtml)) {
+			$this->messageTemplateHtml = GeneralUtility::getURL(
+			                                       GeneralUtility::getFileAbsFileName(
+			                                                     \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationMessageTemplateHtml()
+			                                       )
+			);
+		}
+		return $this->messageTemplateHtml;
 	}
 
 	/**

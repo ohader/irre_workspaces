@@ -4,6 +4,9 @@ notificationSubject = TYPO3 Workspace Änderungen
 	# cat=basic//10; type=string; label=notificationMessageTemplate: Subject of notifications
 notificationMessageTemplate = EXT:irre_workspaces/Resources/Private/Templates/Notification/Message.txt
 
+# cat=basic//10; type=string; label=notificationMessageTemplateHtml: Subject of notifications (HTML format)
+notificationMessageTemplateHtml = EXT:irre_workspaces/Resources/Private/Templates/Notification/Message.html
+
 	# cat=basic//10; type=boolean; label=enableFlexFormRendering: Enables better FlexForm rendering in workspace module
 enableFlexFormRendering = 1
 
