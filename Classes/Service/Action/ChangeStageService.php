@@ -184,7 +184,7 @@ class ChangeStageService extends AbstractService {
 		}
 
 		foreach ($data['paths'] as $pid => &$path) {
-			$path['title'] = BackendUtility::getRecordPath($pid, '', 20);
+			$path['title'] = BackendUtility::getRecordPath($pid, '', 0);
 			$path['url'] = $this->generateLink($pid, $linkData);
 		}
 
