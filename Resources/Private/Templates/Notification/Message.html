@@ -1,0 +1,36 @@
+<hr/>
+Status:    ###stage.title###<br />
+Akteur:    "###user.title###" <###user.email###><br />
+<hr/>
+Kommentar:<br />
+###comment###<br />
+<hr/>
+
+###iterator:data.paths(path)###
+<p>
+<ul>
+	<li>
+		Seiten ID: ###iterator.path.pid###<br />
+		Pfad: ###iterator.path.title###<br />
+		URL: <a href="###iterator.path.url###">Vorschau aufrufen</a><br />
+		<ul>
+			###iterator:iterator.path.tables(table)###
+			<li>Tabelle: ###iterator.table.title###
+				<ul>
+					###iterator:iterator.table.elements(element)###
+						<li>###iterator.element.uid###: ###iterator.element.title###</li>
+					###/iterator:iterator.table.elements###
+				</ul>
+			</li>
+			###/iterator:iterator.path.tables###
+		</ul>
+	</li>
+</ul>
+</p>
+###/iterator:data.paths###
+
+<p>
+<hr/>
+###system.siteName### (###system.httpHost###)
+<hr/>
+</p>
