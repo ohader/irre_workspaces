@@ -41,6 +41,8 @@ class Bootstrap {
 			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->handle';
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing']['irre_workspaces'] =
 			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->fetch';
+		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['countVersionsOfRecordsOnPage']['irre_workspaces'] =
+			'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->countVersionsOfRecordsOnPage';
 	}
 
 	/**
