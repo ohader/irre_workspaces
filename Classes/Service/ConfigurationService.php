@@ -33,6 +33,7 @@ namespace OliverHader\IrreWorkspaces\Service;
 class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 
 	const KEY_NotificationSubject = 'notificationSubject';
+	const KEY_NotificationSubjectExcludedNodes = 'notificationSubjectExcludedNodes';
 	const KEY_NotificationMessageTemplate = 'notificationMessageTemplate';
 	const KEY_NotificationMessageTemplateHtml = 'notificationMessageTemplateHtml';
 	const KEY_EnableFlexFormRendering = 'enableFlexFormRendering';
@@ -72,6 +73,10 @@ class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 	 */
 	public function getNotificationSubject() {
 		return $this->get(self::KEY_NotificationSubject);
+	}
+
+	public function getNotificationSubjectExcludedNodes(){
+		return $this->get(self::KEY_NotificationSubjectExcludedNodes);
 	}
 
 	/**

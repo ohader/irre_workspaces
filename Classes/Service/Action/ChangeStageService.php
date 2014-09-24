@@ -26,6 +26,7 @@ namespace OliverHader\IrreWorkspaces\Service\Action;
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use OliverHader\IrreWorkspaces\Service\ConfigurationService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
@@ -110,7 +111,7 @@ class ChangeStageService extends AbstractService {
             ->assign('data', $data)
             ->render($this->getNotificationMessageTemplateHtml());
 
-		$notificationSubject = $this->getNotificationSubject();
+		$notificationSubject = $this->getNotificationSubject($data, $stage);
 		$notificationRecipients = array_map(
 			array($this, 'getRecipientAddress'),
 			$notificationAlternativeRecipients
@@ -151,6 +152,7 @@ class ChangeStageService extends AbstractService {
 			$mailMessage->setFrom($systemFrom);
 			$mailMessage->setSubject($subject);
 			$mailMessage->setBody($message, "text/plain");
+			$mailMessage->addReplyTo($this->getBackendUser()->user['email']);
 			if ($messageHtml){
 				$mailMessage->addPart($messageHtml, "text/html");
 			}
@@ -331,10 +333,38 @@ class ChangeStageService extends AbstractService {
 	}
 
 	/**
+	 * @param $data
+	 *
 	 * @return NULL|string
 	 */
-	protected function getNotificationSubject() {
-		return \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationSubject();
+	protected function getNotificationSubject($data, $stage) {
+		$allMainNodes = array();
+		//iterate through all changed path segments and add all allMainNodes (exclude disallowed nodes)
+		foreach ($data['paths'] as $path){
+			$tmpUrl = $path['title'];
+			$urlParts = explode("/", $tmpUrl);
+			//remove excluded nodes and return first node in rootline
+			$mainNodeForSubject = array_shift(array_diff($urlParts, $this->getExcludedNodesForSubject()));
+			$allMainNodes[$mainNodeForSubject] = $mainNodeForSubject;
+		}
+		$mainNodesString = implode(", ", $allMainNodes);
+		$subject = sprintf(ConfigurationService::getInstance()->getNotificationSubject(), $mainNodesString, $this->getBackendUser()->user['realName'], $stage['title']);
+		return $subject;
+	}
+
+	/**
+	 * Returns all excluded nodes
+	 * @return array
+	 */
+	protected function getExcludedNodesForSubject(){
+		$excludedNodes = array();
+		$configuredExcludedNodes = explode(",", ConfigurationService::getInstance()->getNotificationSubjectExcludedNodes());
+		if ($configuredExcludedNodes){
+			$excludedNodes = array_merge(array(""), $configuredExcludedNodes);
+		}else{
+			$excludedNodes = array("");
+		}
+		return $excludedNodes;
 	}
 
 	/**
@@ -344,7 +374,7 @@ class ChangeStageService extends AbstractService {
 		if (!isset($this->messageTemplate)) {
 			$this->messageTemplate = GeneralUtility::getURL(
 				GeneralUtility::getFileAbsFileName(
-					\OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationMessageTemplate()
+					ConfigurationService::getInstance()->getNotificationMessageTemplate()
 				)
 			);
 		}
@@ -358,7 +388,7 @@ class ChangeStageService extends AbstractService {
 		if (!isset($this->messageTemplateHtml)) {
 			$this->messageTemplateHtml = GeneralUtility::getURL(
 			                                       GeneralUtility::getFileAbsFileName(
-			                                                     \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance()->getNotificationMessageTemplateHtml()
+			                                                     ConfigurationService::getInstance()->getNotificationMessageTemplateHtml()
 			                                       )
 			);
 		}

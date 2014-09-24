@@ -1,5 +1,8 @@
-	# cat=basic//10; type=string; label=notificationMessageSubject: Subject of notifications
-notificationSubject = TYPO3 Workspace Änderungen
+	# cat=basic//10; type=string; label=notificationMessageSubject: Subject of notifications 1$=MainNode; 2$=User Realname; 3$= Stage Title
+notificationSubject = TYPO3 Workspace: '%1$s' von '%2$s' auf '%3$s'
+
+	# cat=basic//10; type=string; label=notificationSubjectExcludedNodes: Excluded page nodes for the notificationSubject (e.g. MyExcludedNode1,MyExcludedNode2)
+notificationSubjectExcludedNodes =
 
 	# cat=basic//10; type=string; label=notificationMessageTemplate: Subject of notifications
 notificationMessageTemplate = EXT:irre_workspaces/Resources/Private/Templates/Notification/Message.txt
