@@ -75,6 +75,9 @@ class ConfigurationService implements \TYPO3\CMS\Core\SingletonInterface {
 		return $this->get(self::KEY_NotificationSubject);
 	}
 
+	/**
+	 * @return NULL|string
+	 */
 	public function getNotificationSubjectExcludedNodes(){
 		return $this->get(self::KEY_NotificationSubjectExcludedNodes);
 	}

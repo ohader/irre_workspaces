@@ -333,27 +333,30 @@ class ChangeStageService extends AbstractService {
 	}
 
 	/**
-	 * @param $data
-	 *
+	 * @param array $data
+	 * @param array $stage
 	 * @return NULL|string
 	 */
-	protected function getNotificationSubject($data, $stage) {
+	protected function getNotificationSubject(array $data, array $stage) {
 		$allMainNodes = array();
-		//iterate through all changed path segments and add all allMainNodes (exclude disallowed nodes)
+
+		// iterate through all changed path segments and add all allMainNodes (exclude disallowed nodes)
 		foreach ($data['paths'] as $path){
 			$tmpUrl = $path['title'];
 			$urlParts = explode("/", $tmpUrl);
-			//remove excluded nodes and return first node in rootline
+			// remove excluded nodes and return first node in rootline
 			$mainNodeForSubject = array_shift(array_diff($urlParts, $this->getExcludedNodesForSubject()));
 			$allMainNodes[$mainNodeForSubject] = $mainNodeForSubject;
 		}
 		$mainNodesString = implode(", ", $allMainNodes);
 		$subject = sprintf(ConfigurationService::getInstance()->getNotificationSubject(), $mainNodesString, $this->getBackendUser()->user['realName'], $stage['title']);
+
 		return $subject;
 	}
 
 	/**
-	 * Returns all excluded nodes
+	 * Returns all excluded nodes.
+	 *
 	 * @return array
 	 */
 	protected function getExcludedNodesForSubject(){
