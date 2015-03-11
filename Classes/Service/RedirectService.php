@@ -53,6 +53,10 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @param boolean $setCookie
 	 */
 	public function fetch($setCookie = TRUE) {
+		if (!$this->hasGlobalBackendUser()) {
+			return;
+		}
+
 		$arguments = $this->getArguments();
 
 		if (!empty($arguments['url']) && !empty($arguments['hmac'])) {
@@ -73,11 +77,11 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @return bool
 	 */
 	public function handle(array $parameters, \TYPO3\CMS\Core\Authentication\AbstractUserAuthentication $parent) {
-		$this->fetch();
-
-		if (!$parent instanceof \TYPO3\CMS\Core\Authentication\BackendUserAuthentication) {
+		if (!$this->hasGlobalBackendUser() || !$parent instanceof \TYPO3\CMS\Core\Authentication\BackendUserAuthentication) {
 			return FALSE;
 		}
+
+		$this->fetch();
 
 		if (is_array($parent->user) && !empty($parent->user['uid'])) {
 			if ($this->getUrl()) {
@@ -242,6 +246,13 @@ class RedirectService implements \TYPO3\CMS\Core\SingletonInterface {
 		}
 
 		return $cookieValue;
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected function hasGlobalBackendUser() {
+		return (!empty($GLOBALS['BE_USER']));
 	}
 
 	/**
