@@ -103,13 +103,13 @@ class ChangeStageService extends AbstractService {
 			->render($this->getNotificationMessageTemplate());
 
 		$notificationMessageHtml = $this->getMessageRenderer()
-            ->assign('system', $system)
-            ->assign('workspace', $stat)
-            ->assign('comment', trim($comment))
-            ->assign('stage', $stage)
-            ->assign('user', $user)
-            ->assign('data', $data)
-            ->render($this->getNotificationMessageTemplateHtml());
+			->assign('system', $system)
+			->assign('workspace', $stat)
+			->assign('comment', trim($comment))
+			->assign('stage', $stage)
+			->assign('user', $user)
+			->assign('data', $data)
+			->render($this->getNotificationMessageTemplateHtml());
 
 		$notificationSubject = $this->getNotificationSubject($data, $stage);
 		$notificationRecipients = array_map(
