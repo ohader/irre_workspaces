@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2015-03-12T00:00:00Z" product-name="irre_workspaces">
+		<header/>
+		<body>
+			<trans-unit id="AdditionalColumn.IrreWorkspaces_LastEditor.header" xml:space="preserve">
+				<source>Last Editor</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

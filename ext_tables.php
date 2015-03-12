@@ -20,4 +20,7 @@ if (!t3lib_div::inList($GLOBALS['TCA']['tt_content']['interface']['showRecordFie
 	'IrreWorkspaces.Grid.LastEditor',
 	'EXT:irre_workspaces/Resources/Public/JavaScript/Grid/LastEditor.js'
 );
+\TYPO3\CMS\Workspaces\Service\AdditionalResourceService::getInstance()->addLocalizationResource(
+	'EXT:irre_workspaces/Resources/Private/Language/locallang.xlf'
+);
 ?>
