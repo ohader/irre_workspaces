@@ -46,7 +46,7 @@ class ColumnDataProvider implements SingletonInterface, ColumnDataProviderInterf
 		// Fetch last editor from record history
 		$lastEditor = $this->getLastEditorFromHistory(
 			$combinedRecord->getTable(),
-			$combinedRecord->getVersiondId()
+			$combinedRecord->getLiveId()
 		);
 
 		// Use creator field (if defined in TCA)
