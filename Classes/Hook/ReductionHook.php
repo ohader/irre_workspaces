@@ -27,6 +27,8 @@ namespace OliverHader\IrreWorkspaces\Hook;
  ***************************************************************/
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Versioning\VersionState;
 use TYPO3\CMS\Workspaces\Domain\Model\CombinedRecord;
 
 /**
@@ -77,6 +79,79 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 	}
 
 	/**
+	 * @param array $parameters
+	 */
+	public function hasPageVersions(array $parameters) {
+		if (empty($parameters['hasVersions'])) {
+			return;
+		}
+
+		$pageId = $parameters['pageId'];
+		$workspaceId = $parameters['workspaceId'];
+		$pagesWithVersions = $this->getWorkspaceUtility()->getPagesWithVersions($workspaceId);
+
+		foreach ($GLOBALS['TCA'] as $tableName => $tableConfiguration) {
+			if (empty($pagesWithVersions[$tableName])) {
+				continue;
+			}
+
+			$versions = $this->getVersions($workspaceId, $pageId, $tableName);
+
+			if (empty($versions)) {
+				continue;
+			}
+
+			foreach ($versions as $version) {
+				$combinedRecord = CombinedRecord::create(
+					$tableName,
+					$version['live_uid'],
+					$version['offline_uid']
+				);
+
+				$reduceElement = (
+					$this->getDeviationRecordService()->isModified($combinedRecord) &&
+					$this->getDeviationRecordService()->hasDeviation($combinedRecord) === FALSE
+				);
+
+				// If element cannot be reduced, there's at least one version on the page
+				if (!$reduceElement) {
+					return;
+				}
+			}
+		}
+
+		// If all elements could be reduced, there's no version on the page
+		$parameters['hasVersion'] = FALSE;
+	}
+
+	/**
+	 * @param int $workspaceId
+	 * @param int $pageId
+	 * @param string $tableName
+	 * @return array
+	 */
+	protected function getVersions($workspaceId, $pageId, $tableName) {
+		$joinStatement = 'A.t3ver_oid=B.uid';
+		// Consider records that are moved to a different page
+		if (BackendUtility::isTableMovePlaceholderAware($tableName)) {
+			$movePointer = new VersionState(VersionState::MOVE_POINTER);
+			$joinStatement = '(A.t3ver_oid=B.uid AND A.t3ver_state<>' . $movePointer
+				. ' OR A.t3ver_oid=B.t3ver_move_id AND A.t3ver_state=' . $movePointer . ')';
+		}
+		// Select all records from this table in the database from the workspace
+		// This joins the online version with the offline version as tables A and B
+		$rows = $this->getDatabaseConnection()->exec_SELECTgetRows(
+			'B.uid as live_uid, A.uid as offline_uid',
+			$tableName . ' A,' . $tableName . ' B',
+			'A.pid=-1' . ' AND B.pid=' . (int)$pageId
+				. ' AND A.t3ver_wsid=' . (int)$workspaceId . ' AND ' . $joinStatement
+				. BackendUtility::deleteClause($tableName, 'A') . BackendUtility::deleteClause($tableName, 'B')
+		);
+
+		return $rows;
+	}
+
+	/**
 	 * @return \OliverHader\IrreWorkspaces\Service\Deviation\RecordService
 	 */
 	protected function getDeviationRecordService() {
@@ -86,6 +161,22 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 			);
 		}
 		return $this->deviationRecordService;
+	}
+
+	/**
+	 * @return \TYPO3\CMS\Core\Database\DatabaseConnection
+	 */
+	protected function getDatabaseConnection() {
+		return $GLOBALS['TYPO3_DB'];
+	}
+
+	/**
+	 * @return \TYPO3\CMS\Version\Utility\WorkspacesUtility
+	 */
+	protected function getWorkspaceUtility() {
+		return GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Version\\Utility\\WorkspacesUtility'
+		);
 	}
 
 	/**

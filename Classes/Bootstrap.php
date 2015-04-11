@@ -45,6 +45,8 @@ class Bootstrap {
 		if (self::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['countVersionsOfRecordsOnPage']['irre_workspaces'] =
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->countVersionsOfRecordsOnPage';
+			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['hasPageVersions']['irre_workspaces'] =
+				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->hasPageVersions';
 		}
 	}
 
