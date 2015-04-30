@@ -121,7 +121,7 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 		}
 
 		// If all elements could be reduced, there's no version on the page
-		$parameters['hasVersion'] = FALSE;
+		$parameters['hasVersions'] = FALSE;
 	}
 
 	/**
