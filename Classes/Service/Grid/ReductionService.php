@@ -14,35 +14,20 @@ namespace OliverHader\IrreWorkspaces\Service\Grid;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Workspaces\Domain\Model\CombinedRecord;
-use OliverHader\IrreWorkspaces\Cache\ReductionCache;
+use OliverHader\IrreWorkspaces\Service\AbstractReductionService;
 
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  */
-class ReductionService implements SingletonInterface {
+class ReductionService extends AbstractReductionService {
 
 	/**
-	 * @var \OliverHader\IrreWorkspaces\Service\Deviation\RecordService
-	 * @inject
-	 */
-	protected $deviationRecordService;
-
-	/**
-	 * @param array $dataArray
+	 * @param array $data
 	 * @return array
 	 */
-	public function reIndex(array $dataArray) {
-		return array_merge($dataArray, array());
-	}
-
-	/**
-	 * @param array $dataArray
-	 * @return array
-	 */
-	public function reduce(array $dataArray) {
-		foreach ($dataArray as $index => $dataElement) {
+	public function reduce(array $data) {
+		foreach ($data as $index => $dataElement) {
 			$combinedRecord = CombinedRecord::create(
 				$dataElement['table'],
 				$dataElement['t3ver_oid'],
@@ -50,18 +35,18 @@ class ReductionService implements SingletonInterface {
 			);
 
 			if ($this->isReducible($combinedRecord)) {
-				unset($dataArray[$index]);
+				unset($data[$index]);
 			}
 		}
 
-		return $this->reIndex($dataArray);
+		return $this->reIndex($data);
 	}
 
 	/**
-	 * @param array $dataArray
+	 * @param array $data
 	 * @return array
 	 */
-	public function purge(array $dataArray) {
+	public function purge(array $data) {
 		// @todo Combine modification with deviation service, $this->reduceDataArray()
 		/*
 		foreach ($dataArray as $key => $dataElement) {
@@ -71,36 +56,7 @@ class ReductionService implements SingletonInterface {
 		}
 		*/
 
-		return $this->reIndex($dataArray);
-	}
-
-	/**
-	 * Determines whether a record is reducible by invoking a cache.
-	 * The cache stores integer values 0 or 1 - since the Caching Framework
-	 * returns FALSE, if a cache entry is not found...
-	 *
-	 * @param CombinedRecord $combinedRecord
-	 * @return bool
-	 */
-	protected function isReducible(CombinedRecord $combinedRecord) {
-		$identifier = md5($combinedRecord->getVersionRecord()->getIdentifier());
-		$cacheValue = ReductionCache::create()->get($identifier);
-
-		if ($cacheValue !== FALSE) {
-			$isReducible = ($cacheValue === 1);
-		} else {
-			$isReducible = (
-				$this->deviationRecordService->isModified($combinedRecord) &&
-				$this->deviationRecordService->hasDeviation($combinedRecord) === FALSE
-			);
-
-			$versionRow = $combinedRecord->getVersionRecord()->getRow();
-			$cacheValue = ($isReducible ? 1 : 0);
-			$cacheTags = array('workspace_' . $versionRow['t3ver_wsid']);
-			ReductionCache::create()->set($identifier, $cacheValue, $cacheTags);
-		}
-
-		return $isReducible;
+		return $this->reIndex($data);
 	}
 
 }
