@@ -16,6 +16,7 @@ namespace OliverHader\IrreWorkspaces\Service\Grid;
 
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Workspaces\Domain\Model\CombinedRecord;
+use OliverHader\IrreWorkspaces\Cache\ReductionCache;
 
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
@@ -48,12 +49,7 @@ class ReductionService implements SingletonInterface {
 				$dataElement['uid']
 			);
 
-			$reduceElement = (
-				$this->deviationRecordService->isModified($combinedRecord) &&
-				$this->deviationRecordService->hasDeviation($combinedRecord) === FALSE
-			);
-
-			if ($reduceElement) {
+			if ($this->isReducible($combinedRecord)) {
 				unset($dataArray[$index]);
 			}
 		}
@@ -76,6 +72,35 @@ class ReductionService implements SingletonInterface {
 		*/
 
 		return $this->reIndex($dataArray);
+	}
+
+	/**
+	 * Determines whether a record is reducible by invoking a cache.
+	 * The cache stores integer values 0 or 1 - since the Caching Framework
+	 * returns FALSE, if a cache entry is not found...
+	 *
+	 * @param CombinedRecord $combinedRecord
+	 * @return bool
+	 */
+	protected function isReducible(CombinedRecord $combinedRecord) {
+		$identifier = md5($combinedRecord->getVersionRecord()->getIdentifier());
+		$cacheValue = ReductionCache::create()->get($identifier);
+
+		if ($cacheValue !== FALSE) {
+			$isReducible = ($cacheValue === 1);
+		} else {
+			$isReducible = (
+				$this->deviationRecordService->isModified($combinedRecord) &&
+				$this->deviationRecordService->hasDeviation($combinedRecord) === FALSE
+			);
+
+			$versionRow = $combinedRecord->getVersionRecord()->getRow();
+			$cacheValue = ($isReducible ? 1 : 0);
+			$cacheTags = array('workspace_' . $versionRow['t3ver_wsid']);
+			ReductionCache::create()->set($identifier, $cacheValue, $cacheTags);
+		}
+
+		return $isReducible;
 	}
 
 }

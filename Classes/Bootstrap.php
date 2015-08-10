@@ -26,6 +26,8 @@ namespace OliverHader\IrreWorkspaces;
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use OliverHader\IrreWorkspaces\Cache\ReductionCache;
+
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
  * @package EXT:irre_workspaces
@@ -47,6 +49,10 @@ class Bootstrap {
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->countVersionsOfRecordsOnPage';
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['hasPageVersions']['irre_workspaces'] =
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->hasPageVersions';
+			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['buergerzins'] =
+				'OliverHader\\IrreWorkspaces\\Hook\\ReductionCacheHook';
+			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['buergerzins'] =
+				'OliverHader\\IrreWorkspaces\\Hook\\ReductionCacheHook';
 		}
 	}
 
@@ -105,6 +111,20 @@ class Bootstrap {
 	public static function registerAlternatives() {
 		$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Version\\Hook\\DataHandlerHook'] = array(
 			'className' => 'OliverHader\\IrreWorkspaces\\Alternative\\DataHandlerHook'
+		);
+	}
+
+	/**
+	 * Registers caches.
+	 */
+	public static function registerCaches() {
+		$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][ReductionCache::CACHE_Name] = array(
+			'frontend' => 'TYPO3\CMS\Core\Cache\Frontend\VariableFrontend',
+			'backend' => 'TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend',
+			'options' => array(
+				'defaultLifetime' => 0,
+			),
+			'groups' => array('system')
 		);
 	}
 
