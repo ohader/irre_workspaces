@@ -45,7 +45,7 @@ class PreviewController extends \TYPO3\CMS\Workspaces\Controller\PreviewControll
 	protected function initializeAction() {
 		parent::initializeAction();
 
-		if (Bootstrap::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
+		if (Bootstrap::getConfigurationService()->getEnableRecordReduction()) {
 			$this->workspaceService->setReduction('selectVersionsInWorkspace');
 		}
 	}

@@ -26,7 +26,10 @@ namespace OliverHader\IrreWorkspaces;
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Workspaces\Service\GridDataService;
 use OliverHader\IrreWorkspaces\Cache\ReductionCache;
+use OliverHader\IrreWorkspaces\Service\ConfigurationService;
 
 /**
  * @author Oliver Hader <oliver.hader@typo3.org>
@@ -37,14 +40,14 @@ class Bootstrap {
 	/**
 	 * Registers hooks
 	 */
-	public static function registerHooks() {
+	static public function registerHooks() {
 		// Hook to store original request URL during login
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['postUserLookUp']['irre_workspaces'] =
 			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->handle';
 		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_pre_processing']['irre_workspaces'] =
 			'OliverHader\\IrreWorkspaces\\Service\\RedirectService->fetch';
 
-		if (self::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
+		if (self::getConfigurationService()->getEnableRecordReduction()) {
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['countVersionsOfRecordsOnPage']['irre_workspaces'] =
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->countVersionsOfRecordsOnPage';
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['hasPageVersions']['irre_workspaces'] =
@@ -59,7 +62,7 @@ class Bootstrap {
 	/**
 	 * Registers hooks
 	 */
-	public static function registerLegacyHooks() {
+	static public function registerLegacyHooks() {
 		return;
 
 		// Hook to add additional stylesheet and JavaScript resources to Workspaces Module:
@@ -94,11 +97,11 @@ class Bootstrap {
 	/**
 	 * Registers slots (signal-slot-dispatcher)
 	 */
-	public static function registerSlots() {
-		if (self::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
+	static public function registerSlots() {
+		if (self::getConfigurationService()->getEnableRecordReduction()) {
 			self::getSignalSlotDispatcher()->connect(
 				'TYPO3\\CMS\\Workspaces\\Service\\GridDataService',
-				\TYPO3\CMS\Workspaces\Service\GridDataService::SIGNAL_GenerateDataArray_PostProcesss,
+				GridDataService::SIGNAL_GenerateDataArray_PostProcesss,
 				'OliverHader\\IrreWorkspaces\\Slot\\GridDataSlot',
 				'postProcess'
 			);
@@ -108,12 +111,12 @@ class Bootstrap {
 	/**
 	 * Registers alternative implementations (XCLASS)
 	 */
-	public static function registerAlternatives() {
+	static public function registerAlternatives() {
 		$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Version\\Hook\\DataHandlerHook'] = array(
 			'className' => 'OliverHader\\IrreWorkspaces\\Alternative\\DataHandlerHook'
 		);
 
-		if (self::getConfigurationService()->getInstance()->getEnableRecordReduction()) {
+		if (self::getConfigurationService()->getEnableRecordReduction()) {
 			$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Workspaces\\Controller\\PreviewController'] = array(
 					'className' => 'OliverHader\\IrreWorkspaces\\Alternative\\PreviewController'
 			);
@@ -126,7 +129,7 @@ class Bootstrap {
 	/**
 	 * Registers caches.
 	 */
-	public static function registerCaches() {
+	static public function registerCaches() {
 		$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][ReductionCache::CACHE_Name] = array(
 			'frontend' => 'TYPO3\CMS\Core\Cache\Frontend\VariableFrontend',
 			'backend' => 'TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend',
@@ -140,8 +143,8 @@ class Bootstrap {
 	/**
 	 * @return \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
 	 */
-	public static function getSignalSlotDispatcher() {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+	static public function getSignalSlotDispatcher() {
+		return GeneralUtility::makeInstance(
 			'TYPO3\\CMS\\Extbase\\SignalSlot\\Dispatcher'
 		);
 	}
@@ -149,15 +152,15 @@ class Bootstrap {
 	/**
 	 * @return Service\ConfigurationService
 	 */
-	public static function getConfigurationService() {
-		return \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance();
+	static public function getConfigurationService() {
+		return ConfigurationService::getInstance();
 	}
 
 	/**
 	 * @return \TYPO3\CMS\Extbase\Object\ObjectManager
 	 */
-	public static function getObjectManager() {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+	static public function getObjectManager() {
+		return GeneralUtility::makeInstance(
 			'TYPO3\\CMS\\Extbase\\Object\\ObjectManager'
 		);
 	}
