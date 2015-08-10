@@ -131,7 +131,7 @@ class Bootstrap {
 	/**
 	 * @return \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
 	 */
-	protected static function getSignalSlotDispatcher() {
+	public static function getSignalSlotDispatcher() {
 		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
 			'TYPO3\\CMS\\Extbase\\SignalSlot\\Dispatcher'
 		);
@@ -140,8 +140,17 @@ class Bootstrap {
 	/**
 	 * @return Service\ConfigurationService
 	 */
-	protected static function getConfigurationService() {
+	public static function getConfigurationService() {
 		return \OliverHader\IrreWorkspaces\Service\ConfigurationService::getInstance();
+	}
+
+	/**
+	 * @return \TYPO3\CMS\Extbase\Object\ObjectManager
+	 */
+	public static function getObjectManager() {
+		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Extbase\\Object\\ObjectManager'
+		);
 	}
 
 }
