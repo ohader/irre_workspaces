@@ -50,8 +50,8 @@ class Bootstrap {
 		if (self::getConfigurationService()->getEnableRecordReduction()) {
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['countVersionsOfRecordsOnPage']['irre_workspaces'] =
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->countVersionsOfRecordsOnPage';
-			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Backend\\Utility\\BackendUtitlity']['hasPageVersions']['irre_workspaces'] =
-				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->hasPageVersions';
+			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\\CMS\\Workspaces\\Service\\WorkspaceService']['hasPageRecordVersions']['irre_workspaces'] =
+				'OliverHader\\IrreWorkspaces\\Hook\\ReductionHook->hasPageRecordVersions';
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['buergerzins'] =
 				'OliverHader\\IrreWorkspaces\\Hook\\ReductionCacheHook';
 			$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['buergerzins'] =

@@ -81,17 +81,18 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 	/**
 	 * @param array $parameters
 	 */
-	public function hasPageVersions(array $parameters) {
-		if (empty($parameters['hasVersions'])) {
+	public function hasPageRecordVersions(array $parameters) {
+		$workspaceId = $parameters['workspaceId'];
+		$pageId = $parameters['pageId'];
+
+		if (empty($parameters['versionsOnPageCache'][$workspaceId][$pageId])) {
 			return;
 		}
 
-		$pageId = $parameters['pageId'];
-		$workspaceId = $parameters['workspaceId'];
-		$pagesWithVersions = $this->getWorkspaceUtility()->getPagesWithVersions($workspaceId);
+		$pagesWithVersionsInTable = $this->getWorkspaceService()->getPagesWithVersionsInTable($workspaceId);
 
 		foreach ($GLOBALS['TCA'] as $tableName => $tableConfiguration) {
-			if (empty($pagesWithVersions[$tableName])) {
+			if (empty($pagesWithVersionsInTable[$tableName])) {
 				continue;
 			}
 
@@ -121,7 +122,7 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 		}
 
 		// If all elements could be reduced, there's no version on the page
-		$parameters['hasVersions'] = FALSE;
+		$parameters['versionsOnPageCache'][$workspaceId][$pageId] = FALSE;
 	}
 
 	/**
@@ -171,11 +172,11 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 	}
 
 	/**
-	 * @return \TYPO3\CMS\Version\Utility\WorkspacesUtility
+	 * @return \TYPO3\CMS\Workspaces\Service\WorkspaceService
 	 */
-	protected function getWorkspaceUtility() {
+	protected function getWorkspaceService() {
 		return GeneralUtility::makeInstance(
-			'TYPO3\\CMS\\Version\\Utility\\WorkspacesUtility'
+			'TYPO3\\CMS\\Workspaces\\Service\\WorkspaceService'
 		);
 	}
 
