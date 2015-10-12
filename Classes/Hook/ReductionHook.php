@@ -132,6 +132,13 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 		$parameters['versionsOnPageCache'][$workspaceId][$pageId] = FALSE;
 	}
 
+	/**
+	 * Determines whether a page ID can be considered as real version.
+	 *
+	 * @param int $pageId
+	 * @param int $workspaceId
+	 * @return bool
+	 */
 	public function isPageVersion($pageId, $workspaceId) {
 		$version = BackendUtility::getWorkspaceVersionOfRecord($workspaceId, 'pages', $pageId, 'uid,t3ver_oid,t3ver_wsid');
 		if ($version === FALSE) {
