@@ -88,6 +88,9 @@ class Bootstrap {
 			$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Workspaces\\Service\\WorkspaceService'] = array(
 					'className' => 'OliverHader\\IrreWorkspaces\\Alternative\\WorkspaceService'
 			);
+			$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects']['TYPO3\\CMS\\Workspaces\\ExtDirect\\PagetreeCollectionsProcessor'] = array(
+					'className' => 'OliverHader\\IrreWorkspaces\\Alternative\\PagetreeCollectionsProcessor'
+			);
 		}
 	}
 

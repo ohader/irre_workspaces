@@ -38,6 +38,13 @@ use TYPO3\CMS\Workspaces\Domain\Model\CombinedRecord;
 class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
+	 * @return ReductionHook
+	 */
+	static public function create() {
+		return GeneralUtility::makeInstance(__CLASS__);
+	}
+
+	/**
 	 * @var \OliverHader\IrreWorkspaces\Service\Deviation\RecordService
 	 */
 	protected $deviationRecordService;
@@ -123,6 +130,22 @@ class ReductionHook implements \TYPO3\CMS\Core\SingletonInterface {
 
 		// If all elements could be reduced, there's no version on the page
 		$parameters['versionsOnPageCache'][$workspaceId][$pageId] = FALSE;
+	}
+
+	public function isPageVersion($pageId, $workspaceId) {
+		$version = BackendUtility::getWorkspaceVersionOfRecord($workspaceId, 'pages', $pageId, 'uid,t3ver_oid,t3ver_wsid');
+		if ($version === FALSE) {
+			return FALSE;
+		}
+
+		$combinedRecord = CombinedRecord::create('pages', $pageId, $version['uid']);
+
+		$reduceElement = (
+			$this->getDeviationRecordService()->isModified($combinedRecord) &&
+			$this->getDeviationRecordService()->hasDeviation($combinedRecord) === FALSE
+		);
+
+		return (!$reduceElement);
 	}
 
 	/**
